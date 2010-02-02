@@ -1,0 +1,8 @@
+"C:\Program Files\LispWorks\lispworks-4450.exe" -init deliver.lisp
+
+/Applications/LispWorks\ 4.4.5/LispWorks.app/Contents/MacOS/lispworks-4-4-5-darwin -init deliver.lisp
+
+
+
+
+/Applications/LispWorks/LispWorks.app/Contents/MacOS/lispworks-4-3-0-darwin -init deliver-image.lisp

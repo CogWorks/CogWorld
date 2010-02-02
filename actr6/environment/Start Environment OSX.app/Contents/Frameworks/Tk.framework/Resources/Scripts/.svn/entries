@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="84"
+   name=""
+   committed-date="2005-05-12T18:58:00.464626Z"
+   url="svn://jordan.psy.cmu.edu/usr/local/svnroot/actr6/environment/Start%20Environment%20OSX.app/Contents/Frameworks/Tk.framework/Versions/8.4/Resources/Scripts"
+   last-author="db30"
+   kind="dir"
+   uuid="138765e7-a0e9-0310-87f6-9ca992f4eb68"
+   revision="766"/>
+<entry
+   committed-rev="84"
+   name="palette.tcl"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="e6c49d6c3afde0fe003b720feb398e91"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="dialog.tcl"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="bf106bc1e64b76737cfc96d00ab4ba3a"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="msgbox.tcl"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="0a648603b4dc177a03e594d60085afa0"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="mkpsenc.tcl"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="10e7726e3b44900359c0ae31302df2b5"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="entry.tcl"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="01c9e0e0052a943896af2a9d32c7862a"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="prolog.ps"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="263e705a041ea4da1157bd9d1dd53641"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="bgerror.tcl"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="169ea8c45a82d3cd78d7f1deb401468a"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="console.tcl"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="08ee1341db0d370b45735e35e8d52342"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="xmfbox.tcl"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="4a999695443bb638c13911f256604e19"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="menu.tcl"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="234ad8e534709d2c9dfe83991a8db532"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="comdlg.tcl"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="d570daa7d74a1a596ad8da167bcb810d"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="button.tcl"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="e5f75cdfa2b53234979b98d8630f4554"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="obsolete.tcl"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="7e57e7b6b7d3ac2a926058b745c27011"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="safetk.tcl"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="492aeccf7d71b67796eb17dc10540680"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="tk.tcl"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="7dfc7d57a485a730b4f27a9b29f44c72"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="focus.tcl"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="c45ae7ca03ff512231f2062baaa99219"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="choosedir.tcl"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="57bf537c220b37c63e94e8a4f4e4d24f"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="panedwindow.tcl"
+   text-time="2009-07-16T20:20:55.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="cf6cac88771b638db3e0685de93d6352"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="spinbox.tcl"
+   text-time="2009-07-16T20:20:55.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="a2ea167de3bc9c158c650d6b0789e1e5"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="listbox.tcl"
+   text-time="2009-07-16T20:20:55.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="c524272d5c108dd6103f932a1f55f183"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="text.tcl"
+   text-time="2009-07-16T20:20:55.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="fac14faa7821afcdb7a269ac53ed72d9"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="tearoff.tcl"
+   text-time="2009-07-16T20:20:55.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="5c4b1602a6ab60fa628d5316f347019b"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:53.000000Z"/>
+<entry
+   committed-rev="84"
+   name="optMenu.tcl"
+   text-time="2009-07-16T20:20:55.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="6fa0cc7998287b8ec295ee1b2a518df2"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   committed-rev="84"
+   name="clrpick.tcl"
+   text-time="2009-07-16T20:20:55.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="ad0258b53e027585faf216c730307d9c"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   committed-rev="84"
+   name="scale.tcl"
+   text-time="2009-07-16T20:20:55.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="129e4694ecae0a3d426ed74bf8fca8c5"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   name="msgs"
+   kind="dir"/>
+<entry
+   committed-rev="84"
+   name="scrlbar.tcl"
+   text-time="2009-07-16T20:20:55.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="dc83f7550efacb4c8d01710182aa924b"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   committed-rev="84"
+   name="unsupported.tcl"
+   text-time="2009-07-16T20:20:55.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="23cc2a0c87a57307d1e12498aa1fdb86"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   committed-rev="84"
+   name="tclIndex"
+   text-time="2009-07-16T20:20:55.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="312640c5340af7d1e87f9df4b816a974"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   committed-rev="84"
+   name="tkfbox.tcl"
+   text-time="2009-07-16T20:20:55.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="ce5e047f8ec114f989de4d16ac4e3969"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+</wc-entries>

@@ -1,0 +1,23 @@
+(in-package "CL-USER")
+(load-all-patches)
+(push ':DELIVERED *features*)
+
+(load (current-pathname "+ MultiWorld.lisp"))
+
+;; Load the example code which creates an Application Bundle
+#+:cocoa
+(compile-file-if-needed
+(sys:example-file "configuration/macos-application-bundle")
+:load t)
+;; Now deliver the application itself and create the 
+;; application
+
+(deliver 'build-world
+         #+:cocoa 
+         (CL-USER::write-macos-application-bundle
+          "/Applications/MultiWorld\ 3.1/MultiWorld.app"
+          :DOCUMENT-TYPES NIL)
+         #-:cocoa "MultiWorld"
+         0 :interface :capi)
+
+(quit)

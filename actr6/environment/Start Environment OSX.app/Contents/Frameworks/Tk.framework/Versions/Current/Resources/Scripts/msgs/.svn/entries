@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="84"
+   name=""
+   committed-date="2005-05-12T18:58:00.464626Z"
+   url="svn://jordan.psy.cmu.edu/usr/local/svnroot/actr6/environment/Start%20Environment%20OSX.app/Contents/Frameworks/Tk.framework/Versions/8.4/Resources/Scripts/msgs"
+   last-author="db30"
+   kind="dir"
+   uuid="138765e7-a0e9-0310-87f6-9ca992f4eb68"
+   revision="766"/>
+<entry
+   committed-rev="84"
+   name="en_gb.msg"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="ec6a7e69ab0b8b767367db54cc0499a8"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   committed-rev="84"
+   name="pl.msg"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="c8765fd5b3de548cb04f3befdb7d849e"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   committed-rev="84"
+   name="it.msg"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="3437181df822bac34b97020734f7a6b3"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   committed-rev="84"
+   name="el.msg"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="990aa0d307b857d63f13fc9481057ffd"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   committed-rev="84"
+   name="en.msg"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="55d4f2ef3074501f88c5e51d0a38a074"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   committed-rev="84"
+   name="eo.msg"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="ad6c8299d63c606f46b91e55e923020a"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   committed-rev="84"
+   name="cs.msg"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="f61737b0830e5a8da250bc1f6b14b925"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   committed-rev="84"
+   name="ru.msg"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="202dc42c5da0f0aca88b1b4c30e5381b"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   committed-rev="84"
+   name="es.msg"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="32e3d3cc3287eb64b8894eb6ae20005c"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   committed-rev="84"
+   name="fr.msg"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="2c904d110ba900583a86838ae264438c"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   committed-rev="84"
+   name="de.msg"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="6cf95be7dfdb204b5edba90bcbc62145"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+<entry
+   committed-rev="84"
+   name="nl.msg"
+   text-time="2009-07-16T20:20:54.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="072e12f026647b15649adb045847a5c2"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:54.000000Z"/>
+</wc-entries>

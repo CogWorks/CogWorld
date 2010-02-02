@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="84"
+   name=""
+   committed-date="2005-05-12T18:58:00.464626Z"
+   url="svn://jordan.psy.cmu.edu/usr/local/svnroot/actr6/environment/Start%20Environment%20OSX.app/Contents/Frameworks/Tcl.framework"
+   last-author="db30"
+   kind="dir"
+   uuid="138765e7-a0e9-0310-87f6-9ca992f4eb68"
+   revision="766"/>
+<entry
+   committed-rev="84"
+   name="Tcl"
+   text-time="2009-07-16T20:21:01.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="484dd4e65c7b956a0347f4b0bbd4ea7a"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:20:55.000000Z"/>
+<entry
+   name="Versions"
+   kind="dir"/>
+<entry
+   committed-rev="84"
+   name="Resources"
+   text-time="2009-07-16T20:21:01.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="8a6539acc25a583ce7a88f6573bf4687"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:21:00.000000Z"/>
+</wc-entries>

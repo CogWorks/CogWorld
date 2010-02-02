@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="84"
+   name=""
+   committed-date="2005-05-12T18:58:00.464626Z"
+   url="svn://jordan.psy.cmu.edu/usr/local/svnroot/actr6/environment/Start%20Environment%20OSX.app/Contents/MacOS"
+   last-author="db30"
+   kind="dir"
+   uuid="138765e7-a0e9-0310-87f6-9ca992f4eb68"
+   revision="766"/>
+<entry
+   committed-rev="84"
+   name="Wish Shell"
+   text-time="2009-07-16T20:21:01.000000Z"
+   committed-date="2005-05-12T18:58:00.464626Z"
+   checksum="2ba058bc8e8069eda772ef94c8aa7b9b"
+   last-author="db30"
+   kind="file"
+   prop-time="2009-07-16T20:21:01.000000Z"/>
+</wc-entries>

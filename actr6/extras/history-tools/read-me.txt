@@ -1,0 +1,120 @@
+
+Production history tool:
+
+Put the production-history.lisp file into the other-files directory before
+loading ACT-R and put the 76-ptrace-button.tcl file into the
+environment/GUI/dialogs directory before starting the environment.
+
+Doing so will add a button called "Production History" to the tracing
+section of the Control Panel dialog.
+
+To use the tool you need to either open the production history window before 
+running the model or set the :save-p-history parameter to t in the model 
+to enable the recording of the data.  Then run the model as you normally would.
+
+Once the model has finished running click the "Get history" button in the bottom 
+left corner of the production history window.  It will draw a grid with the
+rows being the productions in the model and the columns being the times at
+which a conflict-resolution event occurred.
+
+If the :draw-blank-columns parameter in the model was set to t (the default)
+then all conflict resolution events will have a column in the grid.  If that
+parameter is set to nil when the graph is drawn then conflict resolution 
+events which had an empty conflict set will not have a column in the grid.
+
+The cells in the grid are color coded based on what happened during the 
+conflict resolution event at the time indicated for the column.
+
+- If the production was the one selected the cell will be green.
+
+- If the production was in the conflict set, but not selected then the cell
+  will be orange.
+
+- If the production was not in the conflict set then the cell will be red.
+
+- If the production did not exist at that time the cell will be white.
+
+Placing the cursor over a cell will cause some details for that production
+during that conflict resolution event to be printed at the bottom of the
+window.
+
+For the green and orange cells it will print the utility value for the
+production at that time.  For the red cells it will print the whynot 
+information indicating the condition that caused the production to not be
+in the conflict set.  There is no extra information to print for a white
+cell.
+
+Clicking on the name of a production in the grid will open a new procedural
+viewer dialog with that production selected.
+
+The + and - buttons at the bottom of the window will zoom in or out grid.
+
+The "Grid" button will cycle through three display options of the black
+grid lines: both on, only horizontal on, both off.
+
+
+Retrieval history tool:
+
+Put the retrieval-history.lisp file into the other-files directory before
+loading ACT-R and put the 77-retrieval-history.tcl file into the
+environment/GUI/dialogs directory before starting the environment.
+
+Doing so will add a button called "Retrieval History" to the tracing
+section of the Control Panel dialog.
+
+To use the tool you need to either open the retrieval history window before 
+running the model or set the :save-dm-history parameter to t in the model 
+to enable the recording of the data.  Then run the model as you normally would.
+
+Once the model has finished running click the "Get history" button in the upper 
+left corner of the retrieval history window.  That will fill in the list on the
+left with all of the times that a retrieval request was made by the model.
+
+Selecting a time on the list will cause the request that was made to be 
+displayed in the Request section of the window (lower right) and fill in
+the Matching chunks section with the list of chunks that were in DM and
+matched the request at that time.  The top name on the list is either
+the chunk which was retrieved by that request or :retrieval-failure if
+there was no chunk successfully retrieved.  The rest of the chunks listed
+are in no particular order.  
+
+Selecting a a chunk name from the matching chunks list will cause the chunk 
+and the parameters which it had at the selected time to be displayed in the 
+Details section of the window.  One note on the operation of the the tool: 
+it assumes that the chunks in DM are never modified and the display shows the 
+chunk as it exists at the end of the run not as it was when it was retrieved.  
+Since the normal operation of the system does not modify chunks once they 
+enter DM that shouldn't be a problem.
+
+Buffer history tool:
+
+Put the buffer-history.lisp file into the other-files directory before
+loading ACT-R and put the 78-buffer-history.tcl file into the
+environment/GUI/dialogs directory before starting the environment.
+
+Doing so will add a button called "Buffer History" to the tracing
+section of the Control Panel dialog.
+
+To use the tool you need to either open the buffer history window before 
+running the model or set the :save-buffer-history parameter to t in the model 
+to enable the recording of the data.  Then run the model as you normally would.
+
+Once the model has finished running click the "Get history" button in the upper 
+left corner of the buffer history window.  That will fill in the list on the
+left with all of the times at which some buffer change was made during the
+model's run.  The buffer changes which get recorded are any setting, modifying,
+or clearing of the buffer and changes to the general queries of state free/busy
+and state error.   The list in the middle will be filled with the names of all
+the buffers which were recorded (the setting of the :traced-buffers parameter
+determines which buffers are recorded).
+
+Selecting a time from the first list and a buffer on the second list will 
+fill in the details window showing the chunk which was in that buffer and
+the buffer-status for that buffer at the end of the selected time.  One
+thing to note is that the state of the buffer at the end of the time 
+step (which is what gets recorded) may not be the same as it was at the
+beginning of the time step or the state that a conflict resolution 
+event which occured at the "same" time referenced.  Thus, you may
+need to pick the previous time on the list to see the state of the buffer 
+at the start of the time step.
+
