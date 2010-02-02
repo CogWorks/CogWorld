@@ -124,6 +124,10 @@
 ;;; 2009.06.09 Dan
 ;;;             : * Upped the default delay on run-environment to 12 seconds
 ;;;             :   to be safer.
+;;; 2009.07.17 Dan
+;;;             : * Added a test to the remove handler code so that it 
+;;;             :   shouldn't throw an error on initial connection anymore
+;;;             :   like it would occasionally for some Lisps.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #+:packaged-actr (in-package :act-r)
@@ -370,12 +374,19 @@
     (remove ;; take the handler off the lists and free its name
             ;; calling the optional end funciton if necessary
      (cond ((= (length cmd-list) 2)
-            (let ((handler (gethash (second cmd-list) 
-                                    *handler-table*)))
+            (let ((handler (gethash (second cmd-list) *handler-table*)))
+              
+              (while (null handler)
+                (uni-process-system-events)
+                (setf handler (gethash (second cmd-list) *handler-table*)))
+              
               (delete-handler handler)))
            ((= (length cmd-list) 3)
-            (let ((handler (gethash (second cmd-list) 
-                                    *handler-table*)))
+            (let ((handler (gethash (second cmd-list) *handler-table*)))
+              (while (null handler)
+                (uni-process-system-events)
+                (setf handler (gethash (second cmd-list) *handler-table*)))
+              
               (safe-evaluation (third cmd-list) handler)
               (delete-handler handler)))
            (t (format *error-output* "Invalid remove message: ~s" 

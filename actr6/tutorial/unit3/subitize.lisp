@@ -1,6 +1,6 @@
 (defvar *response* nil)
 (defvar *response-time* nil)
-(defconstant *subitizing-exp-data*  
+(defvar *subitizing-exp-data*  
     '(.6 .65 .7 .86 1.12 1.5 1.79 2.13 2.15 2.58))
 
 

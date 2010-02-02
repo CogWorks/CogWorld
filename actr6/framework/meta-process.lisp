@@ -52,6 +52,13 @@
 ;;; 2008.05.05 Dan
 ;;;             : * Fixed a bug with a missing parameter to format in 
 ;;;             :   delete-meta-process-fct.
+;;; 2009.11.30 Dan
+;;;             : * Make sure to set meta-p-running back to nil on reset because
+;;;             :   some abnormal situations could leave that set.
+;;; 2009.12.03 Dan
+;;;             : * Clear the dynamics and in-slack slots of the meta-process on
+;;;             :   reset and adding an allow-dynamics keyword to mp-real-time-management
+;;;             :   to enable dynamic event testing.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; General Docs:
@@ -154,6 +161,9 @@
   (setf (meta-p-start-real-time meta-process) nil)
   (setf (meta-p-events meta-process) nil)
   (setf (meta-p-delayed meta-process) nil)
+  (setf (meta-p-dynamics meta-process) nil)
+  (setf (meta-p-in-slack meta-process) nil)
+  (setf (meta-p-running meta-process) nil)
   
   (mp-real-time-management :mp meta-process))
 
@@ -174,8 +184,10 @@
                                          (time-function 'get-internal-real-time)
                                          (units-per-second internal-time-units-per-second)
                                      (slack-function 'real-time-slack)
-                                     (max-time-delta nil))
+                                     (max-time-delta nil)
+                                     (allow-dynamics nil))
   (when mp
+    (setf (meta-p-allow-dynamics mp) allow-dynamics)
     (setf (meta-p-time-function mp) time-function)
     (setf (meta-p-units-per-second mp) units-per-second)
     (setf (meta-p-slack-function mp) slack-function)

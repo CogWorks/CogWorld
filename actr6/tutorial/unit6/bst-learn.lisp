@@ -8,8 +8,8 @@
 (defvar *choice*)
 (defvar *experiment-window* nil)
 
-(defconstant *bst-exp-data* '(20.0 67.0 20.0 47.0 87.0 20.0 80.0 93.0
-                               83.0 13.0 29.0 27.0 80.0 73.0 53.0))
+(defvar *bst-exp-data* '(20.0 67.0 20.0 47.0 87.0 20.0 80.0 93.0
+                         83.0 13.0 29.0 27.0 80.0 73.0 53.0))
 
 (defparameter *bst-stimuli* '((15  250  55  125)(10  155  22  101)
                                (14  200  37  112)(22  200  32  114)

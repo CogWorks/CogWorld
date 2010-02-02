@@ -207,7 +207,7 @@
    (center-x :accessor task-center-x :initform (floor *screen-width* 2))    ; x coordinate of center
    (center-y :accessor task-center-y :initform (floor *screen-height* 2))   ; y coordinate of center
    (color-test-images :accessor color-test-images :initform nil :initarg :color-test-images)
-   (color-test-list :initform '((1 12 12) (2 8 3) (3 29 70) (4 5 3) (5 3 5) (6 15 17) (7 74 21) (8 6 ?) (14 ? 5) (15 ? 45)) :accessor color-test-list)
+   (color-test-list :initform (append '((1 12 12)) (permute-lst '((2 8 3) (3 29 70) (4 5 3) (5 3 5) (6 15 17) (7 74 21) (8 6 ?) (14 ? 5) (15 ? 45)))) :accessor color-test-list)
    ))
 
 

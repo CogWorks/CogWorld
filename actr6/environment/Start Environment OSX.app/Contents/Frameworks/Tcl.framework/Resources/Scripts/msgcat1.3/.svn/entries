@@ -9,23 +9,23 @@
    last-author="db30"
    kind="dir"
    uuid="138765e7-a0e9-0310-87f6-9ca992f4eb68"
-   revision="766"/>
+   revision="821"/>
 <entry
    committed-rev="84"
    name="msgcat.tcl"
-   text-time="2009-07-16T20:20:56.000000Z"
+   text-time="2010-01-19T14:29:27.000000Z"
    committed-date="2005-05-12T18:58:00.464626Z"
    checksum="85b99d0ac008eaaa4ba2243e8447c942"
    last-author="db30"
    kind="file"
-   prop-time="2009-07-16T20:20:56.000000Z"/>
+   prop-time="2010-01-19T14:29:27.000000Z"/>
 <entry
    committed-rev="84"
    name="pkgIndex.tcl"
-   text-time="2009-07-16T20:20:56.000000Z"
+   text-time="2010-01-19T14:29:27.000000Z"
    committed-date="2005-05-12T18:58:00.464626Z"
    checksum="d97290c28f9017fc00678224d76b35db"
    last-author="db30"
    kind="file"
-   prop-time="2009-07-16T20:20:56.000000Z"/>
+   prop-time="2010-01-19T14:29:27.000000Z"/>
 </wc-entries>

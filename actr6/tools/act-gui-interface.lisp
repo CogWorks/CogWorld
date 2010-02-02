@@ -62,6 +62,8 @@
 ;;;             : * Adding an add-items-to-exp-window function to compliment
 ;;;             :   the remove-... and to avoid the need to call the UWI
 ;;;             :   function when such an action is necessary.
+;;; 2009.09.10 Dan
+;;;             : * Moved permute-list to the random module's file.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #+:packaged-actr (in-package :act-r)
@@ -213,18 +215,7 @@
 ;;;; The miscelaneous functions used in the tutorial.
 ;;;; ---------------------------------------------------------------------- ;;;;
 
-;;; PERMUTE-LIST  [Function]
-;;; Description : This function returns a randomly ordered copy of the passed
-;;;             : in list.
 
-(defun permute-list (lis)
-  "Return a random permutation of the list"
-  (if (and (listp lis) lis)
-      (do* ((item (nth (act-r-random (length lis)) lis) (nth (act-r-random (length temp)) temp))
-        (temp (remove item lis :count 1) (remove item temp :count 1))
-        (result (list item) (cons item result)))
-           ((null temp) result))
-    nil))
 
 ;;; This is the correlation and deviation functions from the scripting
 ;;; extensions file and the necessary support.  I figured since they are

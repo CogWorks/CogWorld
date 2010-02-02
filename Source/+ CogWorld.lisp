@@ -60,6 +60,7 @@
             "Modules/sendmail.lisp"
              "Modules/aes8.lisp"
             "Modules/logging.lisp"
+            "Modules/remote-app.lisp"
            
 #+:EEG      "Modules/eeg.lisp"
             "GUI/splash-win.lisp"
@@ -83,7 +84,7 @@
             "Modules/sendmail.lisp"
             "Modules/aes8.lisp"
             "Modules/logging.lisp"
-             
+            "Modules/remote-app.lisp" 
             "GUI/splash-win.lisp"
             "GUI/password-win.lisp"
             "GUI/control-win.lisp"
@@ -119,7 +120,7 @@
 (if (not (find :COGWORLD *features*))
     (push :COGWORLD *features*))
 
-(defparameter *version-string* "1.0")
+(defparameter *version-string* "1.1")
 
 (defparameter *mw* nil) ;; Provided for backward compatability: use *cw*
 (defparameter *cw* nil)
@@ -253,3 +254,6 @@
     (build-world))
 
 (provide "MultiWorld")
+
+;;;History
+;;; 12/10/2009: version 1.1 - added remote-app.lisp

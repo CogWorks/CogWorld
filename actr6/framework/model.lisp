@@ -64,6 +64,15 @@
 ;;; 2008.12.15 Dan
 ;;;             : * Added the code to call the third reset function when the
 ;;;             :   model is initially created too.
+;;; 2009.09.09 Dan
+;;;             : * Updated reset-model to also clear the chunk-set from all of
+;;;             :   the multi-buffers.
+;;; 2009.10.08 Dan
+;;;             : * Updated define-model to clear the chunk-set as well since
+;;;             :   reset doesn't happen at initial definition time.
+;;; 2009.12.03 Dan
+;;;             : * Delete-model needs to take events out of the meta-process's 
+;;;             :   dynamics list as well.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; General Docs:
@@ -207,8 +216,12 @@
              ;; instantiate the buffers
             
             (maphash #'(lambda (buffer-name buffer-struct)
-                         (setf (gethash buffer-name (act-r-model-buffers new-model))
-                           (copy-act-r-buffer buffer-struct)))
+                         (let ((buffer (copy-act-r-buffer buffer-struct)))
+                                       
+                            (when (act-r-buffer-multi buffer)
+                              (setf (act-r-buffer-chunk-set buffer) (make-hash-table :test 'eq :size 5)))
+                           
+                           (setf (gethash buffer-name (act-r-model-buffers new-model)) buffer)))
                      *buffers-table*)
             
             
@@ -288,6 +301,9 @@
                
                (setf (meta-p-delayed mp)
                  (remove model-name (meta-p-delayed mp) :key #'evt-model))
+               
+               (setf (meta-p-dynamics mp)
+                 (remove model-name (meta-p-dynamics mp) :key #'(lambda (x) (evt-model (car x)))))
                
                (maphash #'(lambda (module-name instance)
                             (declare (ignore instance))
@@ -376,7 +392,9 @@
     
     (maphash #'(lambda (buffer-name buffer)
                  (declare (ignore buffer-name))
-                 (setf (act-r-buffer-chunk buffer) nil))
+                 (setf (act-r-buffer-chunk buffer) nil)
+                 (when (act-r-buffer-multi buffer)
+                   (setf (act-r-buffer-chunk-set buffer) (make-hash-table :test 'eq :size 5))))
              (act-r-model-buffers model))
     
     (create-model-default-chunk-types-and-chunks)

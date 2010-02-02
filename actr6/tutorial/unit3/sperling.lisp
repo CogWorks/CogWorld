@@ -2,7 +2,7 @@
 (defvar *show-responses* nil)
 (defvar *done* nil)
 
-(defconstant *sperling-exp-data* '(3.03 2.40 2.03 1.50))
+(defvar *sperling-exp-data* '(3.03 2.40 2.03 1.50))
 
 (defun do-trial (onset-time)
   
@@ -14,7 +14,7 @@
          (answers nil)   
          (tone (act-r-random 3))
          (window (open-exp-window "Sperling Experiment"                                      
-                                  :visible nil ;t
+                                  :visible t
                                   :width 300
                                   :height 300)))
     
@@ -114,11 +114,11 @@
 
 (define-model sperling
 
-(sgp :v nil :declarative-finst-span 10)
+(sgp :v t :declarative-finst-span 10)
 
-(sgp :show-focus nil :needs-mouse nil :trace-detail medium)
+(sgp :show-focus t :needs-mouse nil :trace-detail medium)
 
-;(sgp :seed (100 0))
+(sgp :seed (100 0))
 
 (chunk-type read-letters location tone state upper-y lower-y)
 (chunk-type report-row row)

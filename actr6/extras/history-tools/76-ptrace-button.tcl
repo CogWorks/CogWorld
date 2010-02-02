@@ -62,6 +62,8 @@ proc select_ptrace {} {
 
     button $win.zoom_out -command  "p_trace_zoom_out $win" -text "-" -font button_font
 
+    button $win.save -command "save_phistory_trace $win" -text "Save 1P" -font button_font
+    button $win.save2 -command "save_phistory_trace_multi $win" -text "Save Multi." -font button_font
 
     global $win.scale
     set $win.scale 1.0
@@ -72,6 +74,8 @@ proc select_ptrace {} {
     global $win.c_height
     global $win.c_width
 
+    global $win.label_offset
+
     pack $win.frame.scrlx -side bottom -fill x
     pack $win.frame.scrly -side right -fill y
     pack $win.frame.canvas1 -side left -fill y
@@ -79,13 +83,15 @@ proc select_ptrace {} {
  
     place $win.frame -x 0 -y 0 -relwidth 1.0 -relheight 1.0 -height -40
     
-    place $win.notes -x 120 -rely 1.0 -y -39 -relwidth 1.0 -height 39
+    place $win.notes -x 180 -rely 1.0 -y -39 -relwidth 1.0 -height 39
     place $win.text -x 0 -rely 1.0 -y -20 -width 75 -height 20
 
     place $win.update -x 0 -rely 1.0 -y -40 -width 75 -height 20
     place $win.grid -x 75 -rely 1.0 -y -40 -width 40 -height 20
     place $win.zoom_in -x 75 -rely 1.0 -y -20 -width 20 -height 20
     place $win.zoom_out -x 95 -rely 1.0 -y -20 -width 20 -height 20
+    place $win.save -x 115 -rely 1.0 -y -40 -width 65 -height 20
+    place $win.save2 -x 115 -rely 1.0 -y -20 -width 65 -height 20
     
     wm deiconify $win
 } 
@@ -110,16 +116,18 @@ proc draw_p_trace {win} {
                 
   set display "Busy"
 
-    global $win.scale
-    global $win.grid_state
-    global $win.c_height
-    global $win.c_width
+  global $win.scale
+  global $win.grid_state
+  global $win.c_height
+  global $win.c_width
+  global $win.label_offset
 
 
-   upvar $win.scale scale
-   upvar $win.grid_state grid
-   upvar $win.c_height g_c_height
-   upvar $win.c_width g_c_width
+  upvar $win.scale scale
+  upvar $win.grid_state grid
+  upvar $win.c_height g_c_height
+  upvar $win.c_width g_c_width
+  upvar $win.label_offset label_offset
 
   set c_height 0
   set c_width 0
@@ -132,6 +140,8 @@ proc draw_p_trace {win} {
   $win.grid configure -state disabled
   $win.zoom_in configure -state disabled
   $win.zoom_out configure -state disabled
+  $win.save configure -state disabled
+  $win.save2 configure -state disabled
 
 
   set done 0
@@ -154,8 +164,9 @@ proc draw_p_trace {win} {
         foreach p [lrange $x 1 end] {
           set box_name [new_variable_name box]
  
+          $win.frame.canvas create text [expr $label_offset + 5] [expr $y + 5] -anchor nw -font text_font -text $p 
+  
           $win.frame.canvas1 create text 5 $y -anchor nw -font text_font -text $p -tag $box_name
-         # $win.frame.canvas create line 0 [lindex $x 2] $width [lindex $x 2] -width 1 -f gray
           $win.frame.canvas1 create line 0 $y $n_width $y -width 1 -f gray
 
           $win.frame.canvas1 bind $box_name <ButtonPress> "p_history_p_view $p"
@@ -179,6 +190,8 @@ proc draw_p_trace {win} {
        set c_width [lindex $x 4]
        set t_width [lindex $x 5]
 
+       set label_offset [expr -$n_width]
+
        $win.frame.canvas configure -width $t_width -height $t_height
        $win.frame.canvas1 configure -width $n_width -height $t_height
        $win.frame.canvas1 configure -scrollregion "0 0 $n_width $t_height"
@@ -191,7 +204,7 @@ proc draw_p_trace {win} {
 
       column {
         
-        $win.frame.canvas create text [expr $x_display + ($c_width / 2)] 0 -anchor n -font graphic_trace_font -text [lindex $x 1]
+        $win.frame.canvas create text [expr $x_display + ($c_width / 2)] 0 -anchor n -font graphic_trace_font -text [lindex $x 1] -tag zoom
 
         set y $c_height
 
@@ -199,7 +212,7 @@ proc draw_p_trace {win} {
 
           set box_name [new_variable_name box]
  
-          $win.frame.canvas create rectangle $x_display $y [expr $x_display + $c_width] [expr $y + $c_height] -width 0 -fill [lindex $colors $index] -tag $box_name
+          $win.frame.canvas create rectangle $x_display $y [expr $x_display + $c_width] [expr $y + $c_height] -width 0 -fill [lindex $colors $index] -tag [list $box_name zoom]
   
           switch $index {
               0 {
@@ -227,11 +240,11 @@ proc draw_p_trace {win} {
 
 
   for {set x 0} {$x < $t_width} {incr x $c_width} {
-     $win.frame.canvas create line $x 0 $x $t_height -width 1 -f black -tag [list grid grid_vert]
+     $win.frame.canvas create line $x 0 $x $t_height -width 1 -f black -tag [list grid grid_vert zoom]
   }
 
   for {set y $c_height} {$y < $t_height} {incr y $c_height} {
-     $win.frame.canvas create line 0 $y $t_width $y -width 1 -f black -tag grid
+     $win.frame.canvas create line 0 $y $t_width $y -width 1 -f black -tag [list grid zoom]
   }
 
   set scale 1.0
@@ -243,6 +256,8 @@ proc draw_p_trace {win} {
   $win.grid configure -state normal
   $win.zoom_in configure -state normal
   $win.zoom_out configure -state normal
+  $win.save configure -state normal
+  $win.save2 configure -state normal
 
   set display "Done"
 }
@@ -254,7 +269,7 @@ proc p_trace_zoom_out {win} {
 
    set scale [expr .5 * $scale]
  
-   $win.frame.canvas scale all 0 0 0.5 1.0
+   $win.frame.canvas scale zoom 0 0 0.5 1.0
    $win.frame.canvas configure -width [expr .5 * [$win.frame.canvas cget -width]]
    $win.frame.canvas configure -scrollregion "0 0 [$win.frame.canvas cget -width] [$win.frame.canvas cget -height]"
   
@@ -272,7 +287,7 @@ proc p_trace_zoom_in {win} {
    if {$scale < 16} {
       set scale [expr 2 * $scale]
 
-      $win.frame.canvas scale all 0 0 2.0 1.0
+      $win.frame.canvas scale zoom 0 0 2.0 1.0
    $win.frame.canvas configure -width [expr 2.0 * [$win.frame.canvas cget -width]]
    $win.frame.canvas configure -scrollregion "0 0 [$win.frame.canvas cget -width] [$win.frame.canvas cget -height]"
       
@@ -319,6 +334,108 @@ proc p_history_p_view {prod} {
 
     event generate $box <<ListboxSelect>>
 }
+
+
+proc save_phistory_trace {win} {
+  set fname [tk_getSaveFile -title "Save graphic trace as"\
+                                  -filetypes {{"Encapsulated PostScript" "*.eps"}}]
+
+  global $win.label_offset
+  upvar $win.label_offset label_offset
+
+  if {$fname != ""} {
+    $win.frame.canvas postscript -file $fname -width [expr -$label_offset + [$win.frame.canvas cget -width]] -height [$win.frame.canvas cget -height] -x $label_offset -y 0  -pageanchor nw -pagex 0.0 -pagey [$win.frame.canvas cget -height] -pagewidth [expr -$label_offset + [$win.frame.canvas cget -width]]
+  }
+}
+
+proc save_phistory_trace_multi {win} {
+  set fname [tk_getSaveFile -title "Save graphic trace as" -filetypes {{"PostScript" "*.ps"}}]
+
+  global $win.label_offset
+  upvar $win.label_offset label_offset
+
+
+  if {$fname != ""} {  
+ 
+   set width 1400.0
+   set height 400
+
+   set xMax [expr -$label_offset + [$win.frame.canvas cget -width]]
+   set NOP [expr ceil ($xMax / $width)]   
+  
+# The following code was modified from code written by Robert Heller
+# in a file called bridge.tcl which was posted to comp.lang.tcl as
+# an example of producing multi-page ps files.
+
+   set prFile [open $fname w]
+
+  puts $prFile "%!PS-Adobe-2.0"
+  puts $prFile "%%Creator: ACT-R Environment Copyright 2007 Dan Bothell"
+  puts $prFile "%%Title: Horizontal Graphic Trace"
+  puts -nonewline $prFile "%%CreationDate: "
+  global tcl_version
+  if {$tcl_version >= 7.6} {
+    puts $prFile "[clock format [clock seconds]]"
+  } else {
+    puts $prFile "[exec date]"
+  }
+  puts $prFile "%%Pages: $NOP $xMax $width [expr ceil($xMax / $width)]"
+  puts $prFile "%%EndComments"
+  puts $prFile "/EncapDict 200 dict def EncapDict begin"
+  puts $prFile "/showpage {} def /erasepage {} def /copypage {} def end"
+  puts $prFile "/BeginInclude {0 setgray 0 setlinecap 1 setlinewidth"
+  puts $prFile "0 setlinejoin 10 setmiterlimit \[\] 0 setdash"
+  puts $prFile "/languagelevel where {"
+  puts $prFile "  pop"
+  puts $prFile "  languagelevel 2 ge {"
+  puts $prFile "    false setoverprint"
+  puts $prFile "    false setstrokeadjust"
+  puts $prFile "  } if"
+  puts $prFile "} if"
+  puts $prFile "newpath"
+  puts $prFile "save EncapDict begin} def"
+  puts $prFile "/EndInclude {restore end} def"
+  puts $prFile "%%EndProlog"
+  set pageNo 1
+
+
+  for {set xoff 0} {$xoff < $xMax} {set xoff [expr $xoff + $width]} {
+
+      puts $prFile "%%Page: $pageNo $pageNo"
+      puts $prFile "BeginInclude"
+
+      # this one works set eps "[$win.frame.canvas postscript -height $height -width $width -x [expr $xoff - 150] -y 0 -pageanchor nw -pagex 0.25i -pagey 7.5i -pagewidth 8.0i]"
+
+      set eps "[$win.frame.canvas postscript -height $height -width $width -x [expr $xoff + $label_offset] -y 0 -pageanchor nw -pagex 2.0i -pagey 0.5i -pagewidth 10.0i -rotate 1]"
+
+ 
+      set EOC [string first "%%BeginProlog\n" "$eps"]
+      set EOF [expr [string first "%%EOF\n" "$eps"] - 1]
+
+      puts $prFile "[phistory_StripPSComments [string range $eps $EOC $EOF]]"
+      puts $prFile "EndInclude showpage"
+      incr pageNo
+  }
+  puts $prFile "%%EOF"
+  close $prFile
+  }
+}
+
+proc phistory_StripPSComments {PSString} {
+  set result {}
+  foreach l [split "$PSString" "\n"] {
+    set i [string first "%" "$l$"]
+    if {$i == 0} {
+      set result "$result\n"
+    } elseif {$i > 0 && [regexp {(^.*[^\\])(%.*$)} "$l" whole prefix comment]} {
+      set result "$result$prefix\n"
+    } else {
+      set result "$result$l\n"
+    }
+  }
+  return "$result"
+}
+
 
 
 button .control_panel.ptrace_button \

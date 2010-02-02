@@ -24,6 +24,7 @@
 ;;;             : * Make reload/clear-all smart about compiled files so that 
 ;;;             :   it knows to check the .lisp if the current file is a
 ;;;             :   compiled one.
+;;;             : [X] Why doesn't clear-all use the reset-mp command?
 ;;; 
 ;;; ----- History -----
 ;;;
@@ -38,6 +39,14 @@
 ;;; 2005.02.22 Dan
 ;;;             : * Modified reset so it better reports what's happening in
 ;;;             :   other than normal circumstances.
+;;; 2009.10.27 Dan
+;;;             : * Fixed clear-all so that it also restores the meta-process
+;;;             :   timing code to the default if it has been changed by mp-
+;;;             :   real-time-management.
+;;; 2009.12.03 Dan
+;;;             : * Clear the meta-process dynamics and in-slack on a clear-all too.
+;;; 2009.12.04 Dan
+;;;             : * Use reset-mp in clear-all to avoid duplicate code.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; General Docs:
@@ -88,18 +97,21 @@
                  (delete-model-fct name))
              (meta-p-models mp))
     
-    (setf (meta-p-time mp) 0.0)
-    (setf (meta-p-start-time mp) nil)
-    (setf (meta-p-start-real-time mp) nil)
-    (setf (meta-p-events mp) nil)
-    (setf (meta-p-delayed mp) nil)
+    
+    ;; This resets the scheduler and real-time management
+    
+    (reset-mp mp)
+    
+      
     (setf (meta-p-current-model mp) nil)
     (setf (meta-p-model-count mp) 0)
     (setf (meta-p-model-name-len mp) 0)
     (setf (meta-p-pre-events mp) nil)
     (setf (meta-p-post-events mp) nil)
     (setf (meta-p-next-hook-id mp) 0)
+
     (clrhash (meta-p-hook-table mp))
+      
     
     (clrhash (meta-p-models mp)))
   

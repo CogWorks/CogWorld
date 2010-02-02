@@ -174,7 +174,16 @@
 ;;;             : * Added the short-copy-names slot to the model structure too.
 ;;; 2009.04.29 Dan
 ;;;             : * Adding a slot to the meta-process so I can detect recursive
-;;              :   calls to run and signal a warning.
+;;;             :   calls to run and signal a warning.
+;;; 2009.09.09 Dan
+;;;             : * Added the multi, searchable and chunk-set slots to the buffer 
+;;;             :   struct.
+;;; 2009.12.03 Dan
+;;;             : * Adding the dynamics, allow-dynamics, and in-slack to the meta-process 
+;;;             :   to provide more flexibility with real-time when a slack-hook 
+;;;             :   is used and add the dynamic tag to events.
+;;; 2010.01.14 Dan
+;;;             : * Adding the copy slot to the buffer struct.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; General Docs:
@@ -216,7 +225,10 @@
   parameter-name
   requested
   status-printing
-  )
+  multi
+  searchable
+  chunk-set
+  copy)
 
 (defstruct act-r-chunk-spec 
   "The internal structure of a chunk-spec"
@@ -247,7 +259,7 @@
 (defstruct (act-r-event (:conc-name evt-)) 
   "Internal ACT-R event"
   time priority action model mp module destination params details (output t)
-  wait-condition)
+  wait-condition dynamic)
 
 (defstruct (act-r-maintenance-event (:include act-r-event (output 'low)))
   "Events for system maintenance")
@@ -279,6 +291,9 @@
   (model-name-len 0)
   events
   delayed
+  dynamics
+  allow-dynamics
+  in-slack
   break
   pre-events
   post-events
@@ -325,7 +340,7 @@
   "The internal structure of a module"
   name buffers version documentation creation reset query
   request buffer-mod params delete notify-on-clear update
-  secondary-reset tertiary-reset warn)
+  secondary-reset tertiary-reset warn search offset)
 
 (defstruct act-r-parameter 
   "The internal structure of a parameter"

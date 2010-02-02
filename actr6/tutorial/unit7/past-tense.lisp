@@ -207,62 +207,6 @@
   (chunk-type goal state)
   
   (define-chunks (starting-goal isa goal state start))
-
-(p p-start
- =goal> isa goal state start
- =imaginal> isa past-tense
-  verb =word
-  stem nil
-  suffix nil
-==>
- =goal> state retrieve
- +retrieval> isa past-tense
-  verb =word 
-  - suffix nil 
-  )
-
-(p p-retrieval
- =goal> isa goal state retrieve
- =retrieval> isa past-tense
-  verb =word
-  stem =stem
-  suffix =suffix
- =imaginal> isa past-tense
-  verb =word
-==>
- =imaginal> stem =stem suffix =suffix
-=goal> state done)
-
-(p p-retrieval-error
- =goal> isa goal state retrieve
- ?retrieval> state error
-==>
- +retrieval> isa past-tense
- - suffix nil
- =goal> state analogy)
-
-(p p-analogy
-=goal> isa goal state analogy
-=imaginal> isa past-tense verb =word
-=retrieval> isa past-tense
- verb =verb
- stem =verb
- suffix =suffix
-==>
- =imaginal> stem =word suffix =suffix
- =goal> state done)
-
-(p p-analogy1
-=goal> isa goal state analogy
-=imaginal> isa past-tense verb =word
-=retrieval> isa past-tense
- verb =verb
--  stem =verb
- suffix =suffix
-==>
- 
- =goal> state done)
-
   
 
 ;;; When there is no suffix we have an irregular

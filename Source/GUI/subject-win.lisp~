@@ -140,7 +140,7 @@
     (cond ((> 9 (length rin-text))
            (cond ((null (cw-debug-mode))
                   (capi:display-message "RIN must be 9 characters in length, reenter")
-                  (return-from 'registration-done nil))
+                  (return-from registration-done))
                  (t
                   (setf rin-text (subseq (concatenate 'string rin-text "000000000") 0 9))))))
     (setf (first-name info) (capi:text-input-pane-text (text-first-name win)))
@@ -155,8 +155,9 @@
     (let ((blks (ignore-errors (parse-integer (capi:text-input-pane-text (num-blocks win)))))
           (trs (ignore-errors (parse-integer (capi:text-input-pane-text (num-trials win))))))
       (if blks (setf (num-blocks info) blks))
-      (if trs (setf (num-trials info) trs)))
+      (if trs (setf (num-trials info) trs))) 
     (setf (subject-info *cw*) info)
+    
   (capi:execute-with-interface
    win
    #'(lambda () (capi:destroy win)))))
@@ -173,8 +174,8 @@
      (setf (capi:layout-description (info-col (subject-window p))) 
                             (append  (capi:layout-description (info-col (subject-window p))) 
                                      (list (debug-row (subject-window p)))))))
-  (capi:display (subject-window p))
-  (setf (startup-process p) mp:*current-process*)
+  (capi:display (subject-window p)) 
+  (setf (startup-process p) mp:*current-process*) (break)
   (mp:process-wait
    "Waiting for subject registration."
    #'(lambda ()

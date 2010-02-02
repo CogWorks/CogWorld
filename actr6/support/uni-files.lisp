@@ -13,7 +13,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 
 ;;; Filename    : uni-files.lisp
-;;; Version     : 2.0
+;;; Version     : 2.1
 ;;; 
 ;;; Description : Contains the system dependent code for things needed by
 ;;;             : the environment, but now part of support for use by other
@@ -25,9 +25,14 @@
 ;;; Bugs        : 
 ;;; 
 ;;; Todo        : Make sure the packaging stuff plays well here...
-;;;             : [ ] Check that the without-interrupts in uni-send-string
+;;;             : [X] Check that the without-interrupts in uni-send-string
 ;;;             :     isn't a performance issue (if it's unnecessary in a
 ;;;             :     particular Lisp).
+;;;             : [ ] Scrap that previous one since most Lisps are moving
+;;;             :     to an SMP design which makes without-interrupts useless.
+;;;             :     So, now I need to clean up all the separate lock hacks
+;;;             :     I've got which fake a without-interrupts.
+
 ;;; ----- History -----
 ;;;
 ;;; 05/21/2002  Dan
@@ -188,6 +193,10 @@
 ;;;            : * Added an extra switch in uni-send-string for MCL so that
 ;;;            :   it doesn't get used in RMCL since the "normal" write-line
 ;;;            :   works there and ccl::telnet-write
+;;; 2010.01.06 Dan [2.1]
+;;;            : * Both ACL and LispWorks are now (v 8.2 and 6 respectively)
+;;;            :   doing away with without-interrupts so I've added some
+;;;            :   more lock hacks for those to get around that for now.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -402,9 +411,21 @@
 #+:sbcl (defmacro uni-without-interrupts (&body body)
           `(sb-sys:without-interrupts ,@body))
 
-#-(or :sbcl :cmu) (defmacro uni-without-interrupts (&body body)
+#-(or :sbcl :cmu :lispworks6) (defmacro uni-without-interrupts (&body body)
           `(without-interrupts ,@body))
 
+
+;;; Not all that useful now, so send-string is hacked with a 
+;;; specific lock instead. 
+
+#+:lispworks6 (defmacro uni-without-interrupts (&body body)
+                `(mp::with-interrupts-blocked ,@body))
+
+;; same as with lispworks6 above
+
+#+(and :allegro :smp)
+(defmacro uni-without-interrupts (&body body)
+  `(with-delayed-interrupts ,@body))
 
 ;;; uni-send-string 
 ;;; This function takes two parameters the first is a socket stream
@@ -423,17 +444,41 @@
     (write-string string socket)
     (finish-output socket)))
 
-#+(and (not :openmcl-native-threads) (not :allegro)) 
+#+(and (not :openmcl-native-threads) (not :allegro) (not :lispworks6)) 
 (defun uni-send-string (socket string)
   (uni-without-interrupts 
    (write-string string socket)
    (finish-output socket)))
 
-#+:allegro 
+
+#+:lispworks6
+(defvar *environment-lock* (mp::make-lock))
+
+#+:lispworks6
+(defun uni-send-string (socket string)
+  (mp::with-lock (*environment-lock*)
+    (write-string string socket)
+    (finish-output socket)))
+
+
+
+#+(and :allegro (not :smp))
 (defun uni-send-string (socket string)
   (uni-without-interrupts 
    (write-string string socket)
    (force-output socket)))
+
+
+#+(and :allegro :smp)
+(defvar *environment-lock* (mp::make-process-lock))
+
+#+(and :allegro :smp)
+(defun uni-send-string (socket string)
+  (mp::with-process-lock (*environment-lock*)
+    (write-string string socket)
+    (force-output socket)))
+
+
 
 #+(and :mcl (not :openmcl) (not :rmcl))
 (defun uni-send-string (socket string)

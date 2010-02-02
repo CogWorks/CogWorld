@@ -12,7 +12,7 @@
 (clear-all)
 (define-model grouped
 
-(sgp  :rt -.5 :ans .15 :esc t :mp 1.0 :v t :act t
+(sgp  :rt -.5 :ans .15 :esc t :mp 1.0 :v t :act nil
      :declarative-num-finsts 15
      :declarative-finst-span 20
      :trace-detail low)
@@ -53,7 +53,6 @@
       state     free
     - state     error
 ==>
-   !output! (=list)
    =goal>
       group-position first
    +retrieval>
@@ -69,7 +68,6 @@
       isa      group
       id       =group
 ==>    
-  !output! (Retrieved =retrieval id =group)
    =goal>
       group    =group 
       element  first
@@ -89,7 +87,6 @@
       isa      item
       name     =name
 ==>
- !output! (Retrieved =retrieval name =name)
    =goal>
       element  second
    +retrieval>
@@ -109,7 +106,6 @@
       isa      item
       name     =name
 ==>
-    !output! (Retrieved =retrieval name =name)
    =goal>
       element  third
    +retrieval>
@@ -129,7 +125,6 @@
       isa      item
       name     =name
 ==>
-   !output! (Retrieved =retrieval name =name)
    =goal>
       element  fourth
    +retrieval>

@@ -2,7 +2,7 @@
 
 (define-model count
 
-(sgp :esc t :lf .05 :trace-detail medium)
+(sgp :esc t :lf .05 :trace-detail high)
 
 
 (chunk-type count-order first second)
@@ -45,7 +45,7 @@
    +retrieval>
       ISA         count-order
       first       =num2
-   !output!       (this is the current count =num1)
+   !output!       (=num1)
 )
 
 (P stop

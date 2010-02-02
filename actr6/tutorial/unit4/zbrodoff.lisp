@@ -4,7 +4,7 @@
 (defvar *block*)
 (defvar *show-window*)
 
-(defconstant *zbrodoff-control-data* '(1.84 2.46 2.82 1.21 1.45 1.42 1.14 1.21 1.17))
+(defvar *zbrodoff-control-data* '(1.84 2.46 2.82 1.21 1.45 1.42 1.14 1.21 1.17))
 
 (defstruct trial block addend1 addend2 sum answer visible)
 (defstruct response block addend correct time)

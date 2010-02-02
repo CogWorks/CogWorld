@@ -63,9 +63,9 @@
 
 (define-model siegler
     
- ;   (sgp :rt -.45 :esc t :v nil :act nil :ans .4 :mp 16)
+    (sgp :rt -.45 :esc t :v nil :act nil :ans 0.5 :mp 16)
 
-  (sgp :v nil :esc t :mp 16 :ans .5 :act nil :rt -.45)
+  
 (chunk-type plus-fact addend1 addend2 sum)
 (chunk-type number value name)
 

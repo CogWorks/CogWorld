@@ -62,6 +62,21 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Experiment setup
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defmethod run-remote-app ((cw cogworld))
+  (let ((tsk (capi:choice-selected-item (task-list (control-window cw))))
+        (app (remote-app)))
+    (when tsk
+#|
+      (let ((fn (file-namestring tsk))
+            (dir-name (directory-namestring tsk)))
+        (with-open-file (fs (concatenate 'string dir-name "startup.m") :if-exists :overwrite :if-does-not-exist :create :direction :output)
+          (write-line fn fs)))
+|#
+      (run-matlab)
+      (mp:process-wait-with-timeout "matlab" 60 (lambda() (write-stream (comm app))))
+      (when (write-stream (comm app))
+        (send-to app :run tsk)))))
+    
 
 (defmethod load-tasks ((cw cogworld))
   (dotimes (i (length (capi:collection-items (task-list (control-window cw)))))
@@ -144,6 +159,9 @@
        ((equal mode "ACT-R")
         (setf control-mode  :act-r)
         (start-experiment-model cw))
+       ((equal mode "Remote")
+        (setf control-mode  :remote)
+        (start-experiment-remote cw))
        ((equal mode "Replay")
         (setf control-mode  :replay)
         (start-experiment-replay cw))))
@@ -289,6 +307,31 @@
       ;   (let ((secs (capi:prompt-for-value "Run model for how many seconds?")))
       ;     (capi:interactive-pane-execute-command (listener (listener-window *cw*)) (format nil "(run ~a :real-time t)" secs)))
          )
+        (t
+         (stop-experiment cw)))))
+
+(defmethod start-experiment-remote ((cw cogworld))
+  (with-slots (control-window task-list experiment-name dispatched-configs 
+               status subject-info) cw
+    (setf task-list nil)
+    (setf experiment-name  (capi:text-input-pane-text (experiment-name control-window)))
+    (define-logging-folder (capi:title-pane-text (logging-folder control-window)))
+    (setf dispatched-configs 0)
+    (make-remote-app) 
+    (register-subject cw) 
+    (when (capi:item-selected (check-logging control-window)) 
+      (create-history-file cw)
+      (open-logging-file cw))  
+  (cond ((not (eq status :halted))
+         (log-header)
+         (with-slots (first-name  last-name age major gender exp-history) (subject-info cw)
+        (let ((header (list  "FIRST" "LAST" "AGE" "MAJOR" "GENDER" "RIN" "EXP-HISTORY"))
+              (values (list first-name last-name age major gender (get-rin) exp-history)))
+          (when (capi:item-selected (color-vision control-window)) 
+            (setq header (append header '("Normal% Red/Green%")))
+            (setq values (append values (do-color-test))))                    
+          (write-history-file cw header values)))
+         (run-remote-app cw))
         (t
          (stop-experiment cw)))))
 

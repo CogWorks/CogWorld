@@ -135,7 +135,7 @@
 
 (define-model bst-nolearn
 
-(sgp :v t :esc t :egs 3 :show-focus t :ul nil)
+(sgp :v nil :esc t :egs 3 :show-focus t :ul nil)
 
 (chunk-type try-strategy strategy state)
 (chunk-type encoding a-loc b-loc c-loc goal-loc length state over under)
@@ -621,7 +621,7 @@
     =goal>
        state choose-strategy)
 
-(setf *actr-enabled-p* t)
+(setf *actr-enabled-p* nil)
 
 (goal-focus goal)
 

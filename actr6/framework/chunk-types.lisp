@@ -73,6 +73,11 @@
 ;;; 2008.12.08 Dan
 ;;;             : * Added the calls to new-chunk-type-size so the model code
 ;;;             :   can keep track of the largest possible chunk size.
+;;; 2009.11.17 Dan
+;;;             : * Fixed an issue in how subtypes are created if they specify
+;;;             :   slots which already exist in the parent because the current
+;;;             :   procedural matching code relies on the order of the slots
+;;;             :   and that's easier to address here than it is there.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; General Docs:
@@ -187,10 +192,15 @@
                (return-from chunk-type-fct nil))
              
              (when super-type
-               (dolist (parent-slot (reverse (act-r-chunk-type-slots super-type)))
-                 (unless (find (chunk-type-slot-name parent-slot) slots 
-                                 :key #'chunk-type-slot-name)
-                   (push parent-slot slots))))
+               ;; Maintain the order of the parent slots in the subtype
+               (let ((all-slots nil))
+                 (dolist (parent-slot (act-r-chunk-type-slots super-type))
+                   (aif (find (chunk-type-slot-name parent-slot) slots :key 'chunk-type-slot-name)
+                        (progn
+                          (push it all-slots)
+                          (setf slots (remove it slots)))
+                        (push parent-slot all-slots)))
+                 (setf slots (revappend all-slots slots))))
              
              (let ((ct (make-act-r-chunk-type 
                         :name name 

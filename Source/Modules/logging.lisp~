@@ -40,17 +40,16 @@
 (defmethod create-history-file ((cw cogworld))
   (let ((fn (logging-filename :ftype "history")))
     (setf (logging cw) (make-instance 'logging-class))
-    (setf (file-path (logging cw)) fn)
-    (with-open-file (fs fn :direction :output :if-exists :error)
-      (dolist (item (list  "FIRST" "LAST" "AGE" "MAJOR" "GENDER" "RIN" "EXP-HISTORY"))
-        (write item :stream fs) (write-char #\tab fs))
-      (write-char #\newline fs)
-      (with-slots (first-name  last-name age major gender exp-history) (subject-info cw)
-      (dolist (item  (list first-name last-name age major gender (get-rin) exp-history))
-        (write item :stream fs) (write-char #\tab fs))
-      (write-char #\newline fs)))))
+    (setf (file-path (logging cw)) fn)))
 
-       
+(defmethod write-history-file ((cw cogworld) header values)
+    (with-open-file (fs (file-path (logging cw)) :direction :output :if-exists :error)
+      (dolist (item header)
+        (write item :stream fs) (write-char #\tab fs))
+      (write-char #\newline fs)   
+      (dolist (item  values)
+        (write item :stream fs) (write-char #\tab fs))
+      (write-char #\newline fs)))
 
 (defun open-file (filename)
   (open filename :if-exists :supersede :direction :output))
@@ -110,6 +109,7 @@
            (write (first (task-conditions)) :stream (file-handle (logging *mw*)))
            (write-char #\tab (file-handle (logging *mw*)))
            (write internal-time :stream (file-handle (logging *mw*)))
+(break)
            (dolist (field field-list)
              (write-char #\tab (file-handle (logging *mw*)))
              (cond
@@ -133,12 +133,12 @@
       (declare (ignore second daylight zone other))
       (setf date-string (format nil "~d/~d/~d  ~d:~2d" month day year hour minute)))
     (log-info (list "CW-EVENT" "CW-VERSION" *version-string*))
-    (log-info (list "CW-EVENT" "EXPERIMENT-NAME" (experiment-name *mw*)))
+    (log-info (list "CW-EVENT" "EXPERIMENT-NAME" (experiment-name (cw))))
     (log-info (list "CW-EVENT" "SCREEN-RESOLUTION" (capi:screen-width (capi:convert-to-screen)) (capi:screen-height (capi:convert-to-screen))))
     (log-info (list "CW-EVENT" "DATE" date-string))
     (log-info (list "CW-EVENT" "Universal-time" (get-universal-time)))
     (log-info (list "CW-EVENT" "Unix-time" (unix-time)))
-    (when (eql (control-mode *mw*) :human)
+    (when (member (control-mode (cw)) '(:human :remote))
       (log-info (list "CW-EVENT" "ID" (get-uid)))
       (log-info (list "CW-EVENT" "EID" (aes8:rin->id (get-rin)))))
       ))
@@ -161,18 +161,18 @@
                   (setf fn (concatenate 'string fn (get-uid) ))
                 (setf fn (concatenate 'string fn ".dat")))
               (merge-pathnames fn dir)))))
-    ((:human :act-r)
+    ((:human :act-r :remote)
      (let ((condition-string ""))
     
        (if (not (local-path *mw*))
            (progn
              (capi:display-message "Please select a folder to save logging data.~%To avoid this message in the future, add (define-logging-path PATHSTRING) to your task code.")
              (setf (local-path *mw*) (capi:prompt-for-directory "Please select a logging folder:"))))
-
-       (dolist (task (task-list *mw*))
-         (setf condition-string
-               (string-append (task-condition task) condition-string))
-         )
+       (if (task-list *mw*)
+           (dolist (task (task-list *mw*))
+             (setf condition-string
+                   (string-append (task-condition task) condition-string)))
+         (setf condition-string "A"))
        
        (merge-pathnames 
           (make-pathname

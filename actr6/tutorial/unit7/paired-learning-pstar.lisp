@@ -12,8 +12,8 @@
                    ("neck" "0") ("pipe" "1") ("quip" "2") ("rope" "3") ("sock" "4")
                    ("tent" "5") ("vent" "6") ("wall" "7") ("xray" "8") ("zinc" "9")))
 
-(defconstant *paired-latencies* '(0.0 2.158 1.967 1.762 1.680 1.552 1.467 1.402))
-(defconstant *paired-probability* '(0.000 .526 .667 .798 .887 .924 .958 .954))
+(defvar *paired-latencies* '(0.0 2.158 1.967 1.762 1.680 1.552 1.467 1.402))
+(defvar *paired-probability* '(0.000 .526 .667 .798 .887 .924 .958 .954))
 
 (defun do-experiment (size trials)
    (if *actr-enabled-p*

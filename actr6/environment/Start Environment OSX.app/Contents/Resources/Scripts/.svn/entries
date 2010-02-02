@@ -9,23 +9,23 @@
    last-author="db30"
    kind="dir"
    uuid="138765e7-a0e9-0310-87f6-9ca992f4eb68"
-   revision="766"/>
+   revision="821"/>
 <entry
    committed-rev="85"
    name="foo.tcl"
-   text-time="2009-07-16T20:21:01.000000Z"
+   text-time="2010-01-19T14:29:32.000000Z"
    committed-date="2005-05-12T19:03:26.216616Z"
    checksum="4b07da5ec4cd074f345fa938947d1a23"
    last-author="db30"
    kind="file"
-   prop-time="2009-07-16T20:21:01.000000Z"/>
+   prop-time="2010-01-19T14:29:32.000000Z"/>
 <entry
    committed-rev="85"
    name="AppMain.tcl"
-   text-time="2009-07-16T20:21:01.000000Z"
+   text-time="2010-01-19T14:29:32.000000Z"
    committed-date="2005-05-12T19:03:26.216616Z"
    checksum="898d2a65ea6ee8bd04014d8661ed4005"
    last-author="db30"
    kind="file"
-   prop-time="2009-07-16T20:21:01.000000Z"/>
+   prop-time="2010-01-19T14:29:32.000000Z"/>
 </wc-entries>

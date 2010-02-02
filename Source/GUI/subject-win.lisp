@@ -155,8 +155,9 @@
     (let ((blks (ignore-errors (parse-integer (capi:text-input-pane-text (num-blocks win)))))
           (trs (ignore-errors (parse-integer (capi:text-input-pane-text (num-trials win))))))
       (if blks (setf (num-blocks info) blks))
-      (if trs (setf (num-trials info) trs)))
+      (if trs (setf (num-trials info) trs))) 
     (setf (subject-info *cw*) info)
+    
   (capi:execute-with-interface
    win
    #'(lambda () (capi:destroy win)))))
@@ -173,8 +174,8 @@
      (setf (capi:layout-description (info-col (subject-window p))) 
                             (append  (capi:layout-description (info-col (subject-window p))) 
                                      (list (debug-row (subject-window p)))))))
-  (capi:display (subject-window p))
-  (setf (startup-process p) mp:*current-process*)
+  (capi:display (subject-window p)) 
+  (setf (startup-process p) mp:*current-process*) 
   (mp:process-wait
    "Waiting for subject registration."
    #'(lambda ()

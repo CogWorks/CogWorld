@@ -226,6 +226,26 @@
 ;;;             : * There also isn't likely any space savings in general - only
 ;;;             :   when there's duplicate instances of a value in slots (a 
 ;;;             :   fan-in other than 1).
+;;; 2009.08.05 Dan
+;;;             : * Added a new hook for the activation calculations.  The
+;;;             :   :activation-offsets hook holds a list of functions to call
+;;;             :   during activation computation.  A function on the hook will 
+;;;             :   be called with the chunk name during the activation calculation
+;;;             :   and if the function returns a number that value will be
+;;;             :   added to the activation value for the chunk.  
+;;;             :   This hook will make it easier to extend the activation
+;;;             :   calculation without having to completely redefine one of the
+;;;             :   existing components via the other hooks.
+;;; 2009.08.13 Dan
+;;;             : * Added an optional parameter to chunks-similarity to control
+;;;             :   whether or not the activation trace info is displayed since
+;;;             :   it can also be called by the user in which case the trace
+;;;             :   is undesirelable (and since it's model output can't be shut
+;;;             :   off with no-output).
+;;; 2009.09.09 Dan
+;;;             : * With the addition of the multi-buffers and buffer sets DM
+;;;             :   needs to flag any chunk it has as invalid for use in such a
+;;;             :   set to avoid unintentional modification of DM chunks.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; General Docs:
@@ -352,6 +372,8 @@
   partial-matching-hook ;; redefinition of the partial matching component
   noise-hook      ;; redefine the transient noise computation
   
+  offsets         ;; adds optional additional components to the
+                  ;; activation equation
   
   ;;; some retrieval hooks like the conflict resolution
   ;;; system has.  Could get some of this from the main
@@ -1015,6 +1037,15 @@
            
            (:fast-merge (setf (dm-fast-merge dm) (cdr param)))
 
+           (:activation-offsets
+            (if (cdr param)
+              (if (member (cdr param) (dm-offsets dm))
+                (print-warning 
+                 "Setting parameter ~s failed because ~s already on the hook."
+                 :activation-offsets
+                 (cdr param))
+                (push (cdr param) (dm-offsets dm)))
+              (setf (dm-offsets dm) nil)))
            
            (:retrieval-request-hook 
             (if (cdr param)
@@ -1095,7 +1126,9 @@
            (:bl-hook (dm-bl-hook dm))
            (:spreading-hook (dm-spreading-hook dm))
            (:partial-matching-hook (dm-partial-matching-hook dm))
-           (:noise-hook (dm-noise-hook dm))           
+           (:noise-hook (dm-noise-hook dm))
+           
+           (:activation-offsets (dm-offsets dm))
            
            (:fast-merge (dm-fast-merge dm))
            
@@ -1169,6 +1202,10 @@
   (setf (chunk-creation-time chunk) (mp-time))
   (setf (chunk-reference-list chunk) (list (mp-time)))
   (setf (chunk-reference-count chunk) 1)
+  
+  ;; mark it as invalid for a buffer set now
+  
+  (setf (chunk-buffer-set-invalid chunk) t)
   
   ;; when spreading activation is on set the fan-out and fan-in values
   
@@ -1330,6 +1367,11 @@
           :default-value nil
           :warning "a function or nil" :documentation "Noise component hook")
         
+        (define-parameter :activation-offsets :valid-test #'fctornil 
+          :default-value nil
+          :warning "a function or nil" 
+          :documentation "Add additional activation equation components")
+        
         (define-parameter :retrieval-request-hook :valid-test #'fctornil 
           :default-value nil
           :warning "a function or nil" 
@@ -1384,12 +1426,24 @@
     (+ (base-level-activation dm chunk)
        (spreading-activation dm chunk)
        (partial-matching dm chunk request)
-       (activation-noise dm chunk)))
+       (activation-noise dm chunk)
+       (activation-offsets dm chunk)))
   
   (when (dm-act dm)
     (model-output "Chunk ~s has an activation of: ~f" chunk (chunk-activation chunk))))
 
 
+(defun activation-offsets (dm chunk)
+  (let ((offset 0))
+    (if (dm-offsets dm)
+        (dolist (x (dm-offsets dm) offset)
+          (let ((res (funcall x chunk)))
+            (when (numberp res)
+              (when (dm-act dm)
+                (model-output "Adding offset from ~a: ~f" x res))
+              (incf offset res))))
+      offset)))
+                   
 (defun base-level-activation (dm chunk)
   
   (when (dm-act dm)
@@ -1569,9 +1623,10 @@ of operation is more important.
                                         chunk
                                         (second k))))
                        
-                       (let* ((sim (chunks-similarity dm (third k) 
-                                                      (fast-chunk-slot-value-fct chunk
-                                                                                 (second k))))
+                       (let* ((sim (chunks-similarity dm 
+                                                      (third k) 
+                                                      (fast-chunk-slot-value-fct chunk (second k))
+                                                      t))
                               
                               
                               (sim-dif (case (car k) 
@@ -1597,19 +1652,18 @@ of operation is more important.
                          
                          )))
                    (when (dm-act dm)
-                     (model-output "Total similarity score ~f"
-                                   total-sim))
+                     (model-output "Total similarity score ~f" total-sim))
                    
                    total-sim)))))
     0.0))
 
 
-(defun chunks-similarity (dm chunk1 chunk2)
+(defun chunks-similarity (dm chunk1 chunk2 &optional (trace nil))
   (let ((sim (if (dm-sim-hook dm)
                  (funcall (dm-sim-hook dm) chunk1 chunk2)
                nil)))
     (cond ((numberp sim)
-        (when (dm-act dm)
+        (when (and (dm-act dm) trace)
           (model-output "  similarity hook returns: ~f" sim))
            sim)
           (t (setf sim (cond ((not (and (chunk-p-fct chunk1)
@@ -1621,7 +1675,7 @@ of operation is more important.
                              ((eq-chunks-fct chunk1 chunk2)
                               (dm-ms dm))
                              (t (dm-md dm))))
-             (when (dm-act dm)
+             (when (and (dm-act dm) trace)
                (model-output "  similarity: ~f" sim))
              sim))))
 

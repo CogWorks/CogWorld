@@ -313,6 +313,12 @@
 ;;; 2008.12.23 Dan
 ;;;             : * Put in code to make sure that new productions get added to
 ;;;             :   the procedural module the "right" way now.
+;;; 2009.08.27 Dan
+;;;             : * Added code to disable the consistency check between the
+;;;             :   RHS modifications of p1 and the LHS tests of p2 for goal
+;;;             :   style buffers when ppm is enabled.
+;;; 2009.09.14 Dan
+;;;             : * Fixed a bug in the consistency check added for the ppm change.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; General Docs:
@@ -547,7 +553,7 @@
   previous
   previous-time
   (buffer-type-table (make-hash-table))
-  
+  ppm
   tt)
 
 
@@ -612,7 +618,8 @@
            
            (:pct (setf (compilation-module-trace prod) (cdr param)))
            (:tt (setf (compilation-module-tt prod) (cdr param)))
-           (:epl (setf (compilation-module-epl prod) (cdr param)))))
+           (:epl (setf (compilation-module-epl prod) (cdr param)))
+           (:ppm (setf (compilation-module-ppm prod) (cdr param)))))
         (t 
          (case param
            (:pct (compilation-module-trace prod))
@@ -622,7 +629,8 @@
 
 (define-module-fct 'production-compilation
     nil
-  (list (define-parameter :epl :default-value nil 
+  (list (define-parameter :ppm :owner nil)
+        (define-parameter :epl :default-value nil 
           :valid-test #'tornil :warning "T or nil"
           :documentation "Enable Production Learning")
         (define-parameter :pct :default-value nil 
@@ -783,13 +791,13 @@
       (goal
        (case (get-buffer-index p1 buffer)
          ((4 12 13 20 28 29) ;; a RHS +
-          (unless (check-consistency (find (cons #\+ buffer) (production-rhs p1) :key #'car :test #'equal)
+          (unless (check-consistency module (find (cons #\+ buffer) (production-rhs p1) :key #'car :test #'equal)
                                      (second (compilation-module-previous module))
                                      (find (cons #\= buffer) (production-lhs p2) :key #'car :test #'equal)
                                      (production-bindings p2))
             (return-from composeable-productions-p nil)))
          ((9 25) ;; a RHS =
-          (unless (check-consistency (cons (chunk-spec-chunk-type (third (find (cons #\= buffer) (production-lhs p1) :key #'car :test #'equal)))
+          (unless (check-consistency module (cons (chunk-spec-chunk-type (third (find (cons #\= buffer) (production-lhs p1) :key #'car :test #'equal)))
                                            (find (cons #\= buffer) (production-rhs p1) :key #'car :test #'equal))
                                      (second (compilation-module-previous module))
                                      (find (cons #\= buffer) (production-lhs p2) :key #'car :test #'equal)
@@ -818,7 +826,7 @@
        ;; no other styles by default - need to generalize this at some point
        ))))
                                       
-(defun check-consistency (action action-bindings condition cond-bindings)
+(defun check-consistency (module action action-bindings condition cond-bindings)
   (cond ((consp (car action)) ;; it's a +
          
          (let* ((action-spec (define-chunk-spec-fct (replace-variables (second action) action-bindings)))
@@ -831,15 +839,14 @@
            (unless (eq action-type cond-type)
              (return-from check-consistency nil))
            
-           (dolist (cond cond-map)
-             (let ((action (find (second cond) action-map :test #'(lambda (x y)
+           (unless (compilation-module-ppm module)
+             (dolist (cond cond-map)
+               (let ((action (find (second cond) action-map :test #'(lambda (x y)
                                                                     (and (eq (first y) '=)
                                                                          (eq (second y) x))))))
                (when action
                  (unless (chunk-slot-equal (third cond) (third action))
-                   (return-from check-consistency nil)))))
-           
-         ))
+                   (return-from check-consistency nil))))))))
         (t ; this is the  = case
          
          (let* ((action-spec (define-chunk-spec-fct (replace-variables (append (list 'isa (car action)) (third action)) action-bindings)))
@@ -849,26 +856,19 @@
                 (action-type (car action))
                 (cond-type (chunk-spec-chunk-type cond-spec)))
            
-         ;  (pprint action-type)
-         ;  (pprint cond-type)
-         ;  (pprint action-map)
-         ;  (pprint cond-map)
-           
            (unless (eq action-type cond-type)
              (return-from check-consistency nil))
            
-           (dolist (cond cond-map)
-             (let ((action (find (second cond) action-map :test #'(lambda (x y)
-                                                                    (and (eq (first y) '=)
-                                                                         (eq (second y) x))))))
-               (when action
-                 (unless (chunk-slot-equal (third cond) (third action))
-                   (return-from check-consistency nil)))))
-
-           )))
+           (unless (compilation-module-ppm module)
+             (dolist (cond cond-map)
+               (let ((action (find (second cond) action-map :test #'(lambda (x y)
+                                                                      (and (eq (first y) '=)
+                                                                           (eq (second y) x))))))
+                 (when action
+                   (unless (chunk-slot-equal (third cond) (third action))
+                     (return-from check-consistency nil)))))))))
   t)
           
-
 
 
 (defun get-buffer-index (production buffer)

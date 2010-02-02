@@ -13,7 +13,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 
 ;;; Filename    : scheduling.lisp
-;;; Version     : 1.4
+;;; Version     : 1.5
 ;;; 
 ;;; Description : Event creation and scheduling and schedule running functions.
 ;;; 
@@ -22,6 +22,9 @@
 ;;;             :     events correctly during one (in particular the device 
 ;;;             :     device-update-attended-loc doesn't accept the time parameters
 ;;;             :     but just adding that is really just a hack).
+;;;             : [ ] There isn't a way to delete an "after" event that was waiting
+;;;             :     but then got scheduled since it's no longer the same event
+;;;             :     in the queue.
 ;;;
 ;;; To do       : [ ] Finish documentation.
 ;;;             : [x] Add an equivalent to the real-time-slack-hook-fn in rpm.
@@ -203,6 +206,24 @@
 ;;; 2009.04.29 Dan
 ;;;             : * Added checks for recursive calls to run and now signal a
 ;;;             :   warning and just abort the later calls.
+;;; 2009.12.04 Dan [1.5]
+;;;             : * Updated the real-time running code to allow for a little
+;;;             :   more responsiveness when a slack-hook is provided.  Events
+;;;             :   can be scheduled during the slack-hook and they can jump
+;;;             :   "back" in time if desired (which would require explicitly
+;;;             :   scheduling them for that time since "now" has still already 
+;;;             :   moved) which likely requires a custom clock as well (to
+;;;             :   know when "now" is relative to where the event queue is).
+;;;             : * In addition to that, if the allow-dynamics is also provided 
+;;;             :   then events which were scheduled using one of the after
+;;;             :   scheduling functions and are flagged as dynamic will be 
+;;;             :   sensitive to those new events (or events that they schedule)
+;;;             :   and may be moved back in time if appropriate (conflict-resolution 
+;;;             :   is now scheduled as dynamic so it could move back).
+;;;             : * It is important to note however that the scheduling code is
+;;;             :   still not thread safe -- any asynchronous event scheduling
+;;;             :   should occur in the slack-hook (or some other safe place) and 
+;;;             :   be protected appropriately.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; General Docs:
@@ -868,9 +889,9 @@
 ;;; This function takes one required parameter which is a meta-process (not
 ;;; a name of a meta-process).
 ;;;
-;;; The first event on the meta-process's scheduled events queue is removed,
-;;; the clock is updated, a line is printed to the trace to indicate the event,
-;;; and that event's action is executed with *current-model* set to the model
+;;; The clock is updated, the next event on the meta-process's scheduled events 
+;;; queue is removed,  a line is printed to the trace to indicate the event,
+;;; and that event's action is executed with  the current model set to the model
 ;;; specified in that event (even if it doesn't name a model).  If there are 
 ;;; any event hook functions, they are called with the event as a parameter 
 ;;; as appropriate (a pre-hook is called before the action and a post-hook is 
@@ -878,15 +899,20 @@
 
 (defun run-one-event (mp &optional (real-time nil))
   "Dispatch the next event on the meta-process's schedule"
-  (let ((next-event (pop (meta-p-events mp)))
-        (current-model (meta-p-current-model (current-mp))))
+  (let ((current-model (meta-p-current-model mp)))
     (unwind-protect 
-        (progn
-          (set-mp-clock mp (evt-time next-event) real-time)
+        (let ((next-event nil))
+          (set-mp-clock mp (evt-time (car (meta-p-events mp))) real-time)
+          
+          (setf next-event (pop (meta-p-events mp)))
+          
+          (when (evt-dynamic next-event)
+            (setf (meta-p-dynamics mp) (remove next-event (meta-p-dynamics mp) :key #'car))
+            (setf (evt-wait-condition next-event) nil))
           
           (when (evt-model next-event)
-            (setf (meta-p-current-model (current-mp)) 
-              (gethash (evt-model next-event) (meta-p-models (current-mp)))))
+            (setf (meta-p-current-model mp) 
+              (gethash (evt-model next-event) (meta-p-models mp))))
           
           (dolist (hook (meta-p-pre-events mp))
             (funcall hook next-event))
@@ -909,12 +935,12 @@
             (funcall hook next-event))
           )
       
-      (setf (meta-p-current-model (current-mp)) 
-        current-model))))
+      (setf (meta-p-current-model mp) current-model))))
 
 ;;; set-mp-clock
 ;;;
-;;; This function takes two parameters which are a meta-process, and a time.
+;;; This function takes three parameters which are a meta-process, the next
+;;; time as it stands now, and whether or not it's to run in real-time.
 ;;;
 ;;; The meta-process's time is updated to the specified time and then if the
 ;;; meta-process's mp-real-time-p slot is non-nil it spins until the appropriate 
@@ -929,9 +955,12 @@
   "Update the time of a meta-process and maybe spin for the necessary real time"
   
   (setf (meta-p-time mp) time)
-  
+                                    
   (when real-time
-    (do ((delta-model (- time (meta-p-start-time mp)))
+    
+    
+    (do ((delta-model (- time (meta-p-start-time mp))
+                      (- (evt-time (car (meta-p-events mp))) (meta-p-start-time mp)))
          (delta-real (/ (- (funcall (meta-p-time-function mp))
                            (meta-p-start-real-time mp))
                         (meta-p-units-per-second mp))
@@ -939,7 +968,9 @@
                            (meta-p-start-real-time mp))
                         (meta-p-units-per-second mp))))
         ((>= delta-real delta-model))
-      (funcall (meta-p-slack-function mp) (- delta-model delta-real)))))
+      (funcall (meta-p-slack-function mp) (- delta-model delta-real)))
+    
+    (setf (meta-p-time mp) (evt-time (car (meta-p-events mp))))))
 
 
 (defun real-time-slack (delta)
@@ -1223,7 +1254,7 @@
                
                (insert-queue-event mp new-event)
                
-               (when (meta-p-delayed mp)
+               (when (or (meta-p-delayed mp) (meta-p-dynamics mp))
                  (update-waiting-events mp new-event))
                
                new-event)))))))
@@ -1289,6 +1320,8 @@
 ;;; from the waiting events list and it is added to the scheduled events
 ;;; list (which will call update-waiting-events to test whether that event
 ;;; frees others from the waiting list).
+;;; The list of dynamic events is also tested in the same way as the
+;;; waiting events.
 
 (defun update-waiting-events (mp new-event)
   "Check the list of waiting events to see if a new event allows any to run"
@@ -1296,22 +1329,37 @@
     (dolist (event (meta-p-delayed mp))
       (when (conditions-met event new-event)
         (setf (meta-p-delayed mp) (remove event (meta-p-delayed mp)))
-        (setf (evt-wait-condition event) nil)
+        (unless (evt-dynamic event)
+          (setf (evt-wait-condition event) nil))
         (push event moved-events)))
+    
+    (dolist (event-check (meta-p-dynamics mp))
+      (let ((event (car event-check))
+            (cur-time (cdr event-check)))
+        (when (and (< (evt-time new-event) cur-time)
+                   (conditions-met event new-event))
+          (delete-event event)
+          (push event moved-events))))
+    
     (dolist (event moved-events)
-      (if (act-r-break-event-p event)
-          (schedule-break (evt-time new-event)
-                          :priority :min
-                          :details (evt-details event))
-        (schedule-event  (evt-time new-event)
-                        (evt-action event)
-                        :module (evt-module event)
-                        :details (evt-details event)
-                        :params (evt-params event)
-                        :priority :min
-                        :output (evt-output event) 
-                        :destination (evt-destination event)
-                        :maintenance (act-r-maintenance-event-p event))))))
+      (let ((n-event
+             (if (act-r-break-event-p event)
+                 (schedule-break (evt-time new-event)
+                                 :priority :min
+                                 :details (evt-details event))
+               (schedule-event  (evt-time new-event)
+                               (evt-action event)
+                               :module (evt-module event)
+                               :details (evt-details event)
+                               :params (evt-params event)
+                               :priority :min
+                               :output (evt-output event) 
+                               :destination (evt-destination event)
+                               :maintenance (act-r-maintenance-event-p event)))))
+        (when (evt-dynamic event)
+          (setf (evt-dynamic n-event) t)
+          (setf (evt-wait-condition n-event) (evt-wait-condition event))
+          (push (cons n-event (evt-time new-event)) (meta-p-dynamics mp)))))))
 
 ;;; conditions-met
 ;;;
@@ -1374,7 +1422,7 @@
                
                (insert-queue-event mp new-event)
                
-               (when (meta-p-delayed mp)
+               (when (or (meta-p-delayed mp) (meta-p-dynamics mp))
                  (update-waiting-events mp new-event))
                
                new-event)))))))
@@ -1396,7 +1444,8 @@
                                                  (module :none) (destination nil)
                                                  (params nil) (details nil) 
                                                  (output t) (delay t)
-                                                 (include-maintenance nil))
+                                                 (include-maintenance nil)
+                                                 (dynamic nil))
   (let ((first-val
          (verify-current-mp  
           "schedule-event-after-module called with no current meta-process."
@@ -1425,6 +1474,7 @@
                                      :details details
                                      :output output
                                      :destination destination
+                                     :dynamic (and dynamic (meta-p-allow-dynamics mp))
                                      :wait-condition 
                                      (list :module after-module 
                                            include-maintenance)))
@@ -1435,22 +1485,31 @@
                       (cond (matching-event 
                              (setf (evt-time new-event) 
                                (evt-time matching-event))
-                             (setf (evt-wait-condition new-event) nil)
+                             
+                             
+                             (unless (evt-dynamic new-event)
+                               (setf (evt-wait-condition new-event) nil))
+                             
+                             (when (evt-dynamic new-event)
+                               (push (cons new-event (evt-time new-event)) (meta-p-dynamics mp)))
                              
                              (insert-queue-event mp new-event)
                              
-                             (when (meta-p-delayed mp)
+                             (when (or (meta-p-delayed mp) (meta-p-dynamics mp))
                                (update-waiting-events mp new-event))
+                                                          
                              new-event)
                             ((null delay)
                              (setf (evt-time new-event) (meta-p-time mp))
                              (setf (evt-priority new-event) :max)
                              (setf (evt-wait-condition new-event) nil)
+                             (setf (evt-dynamic new-event) nil)
                              
                              (insert-queue-event mp new-event)
                              
-                             (when (meta-p-delayed mp)
+                             (when (or (meta-p-delayed mp) (meta-p-dynamics mp))
                                (update-waiting-events mp new-event))
+                             
                              new-event)
                             ((eq delay :abort)
                              :abort)
@@ -1469,7 +1528,8 @@
                                     (module :none) (destination nil)
                                     (params nil) (details nil) 
                                     (output t) (delay t)
-                                    (include-maintenance nil))
+                                    (include-maintenance nil)
+                                    (dynamic nil))
 
   (let ((first-val
          (verify-current-mp  
@@ -1497,6 +1557,7 @@
                                      :details details
                                      :output output
                                      :destination destination
+                                     :dynamic (and dynamic (meta-p-allow-dynamics mp))
                                      :wait-condition (list :any include-maintenance)))
                            (matching-event 
                             (find-if #'(lambda (x)
@@ -1505,22 +1566,30 @@
                       (cond (matching-event 
                              (setf (evt-time new-event) 
                                (evt-time matching-event))
-                             (setf (evt-wait-condition new-event) nil)
                              
+                             (unless (evt-dynamic new-event)
+                               (setf (evt-wait-condition new-event) nil))
+                             
+                             (when (evt-dynamic new-event)
+                               (push (cons new-event (evt-time new-event)) (meta-p-dynamics mp)))
+                                    
                              (insert-queue-event mp new-event)
                              
-                             (when (meta-p-delayed mp)
+                             (when (or (meta-p-delayed mp) (meta-p-dynamics mp))
                                (update-waiting-events mp new-event))
+                             
                              new-event)
                             ((null delay)
                              (setf (evt-time new-event) (meta-p-time mp))
                              (setf (evt-priority new-event) :max)
                              (setf (evt-wait-condition new-event) nil)
+                             (setf (evt-dynamic new-event) nil)
                              
                              (insert-queue-event mp new-event)
                              
-                             (when (meta-p-delayed mp)
+                             (when (or (meta-p-delayed mp) (meta-p-dynamics mp))
                                (update-waiting-events mp new-event))
+                                                          
                              new-event)
                             ((eq delay :abort)
                              :abort)
@@ -1599,7 +1668,7 @@
                
                (insert-queue-event mp periodic-event)
                
-               (when (meta-p-delayed mp)
+               (when (or (meta-p-delayed mp) (meta-p-dynamics mp))
                  (update-waiting-events mp periodic-event))
                
                periodic-event)))))))
@@ -1631,12 +1700,12 @@
     
     (insert-queue-event mp event)
     
-    (when (meta-p-delayed mp)
+    (when (or (meta-p-delayed mp) (meta-p-dynamics mp))
       (update-waiting-events mp event))
     
     (insert-queue-event mp periodic-event)
     
-    (when (meta-p-delayed mp)
+    (when (or (meta-p-delayed mp) (meta-p-dynamics mp))
       (update-waiting-events mp periodic-event))))
     
   
@@ -1657,7 +1726,7 @@
                
                (insert-queue-event mp new-event)
               
-              (when (meta-p-delayed mp)
+              (when (or (meta-p-delayed mp) (meta-p-dynamics mp))
                 (update-waiting-events mp new-event))
               
               new-event))))))
@@ -1682,13 +1751,13 @@
                
                (insert-queue-event mp new-event)
               
-              (when (meta-p-delayed mp)
+              (when (or (meta-p-delayed mp) (meta-p-dynamics mp))
                 (update-waiting-events mp new-event))
               
               new-event))))))
 
 (defun schedule-break-after-module (after-module 
-                                    &key (details nil) (delay t))
+                                    &key (details nil) (delay t)(dynamic nil))
   
   (let ((first-val
          (verify-current-mp  
@@ -1705,6 +1774,7 @@
                                        :priority :min
                                        :params (list mp)
                                        :details details
+                                       :dynamic (and dynamic (meta-p-allow-dynamics mp))
                                        :wait-condition 
                                        (list :module after-module t)))
                            (matching-event 
@@ -1714,21 +1784,27 @@
                       (cond (matching-event 
                              (setf (evt-time new-event) 
                                (evt-time matching-event))
-                             (setf (evt-wait-condition new-event) nil)
                              
+                             (unless (evt-dynamic new-event)
+                               (setf (evt-wait-condition new-event) nil))
+                             
+                             (when (evt-dynamic new-event)
+                               (push (cons new-event (evt-time new-event)) (meta-p-dynamics mp)))
+                                                          
                              (insert-queue-event mp new-event)
                              
-                             (when (meta-p-delayed mp)
+                             (when (or (meta-p-delayed mp) (meta-p-dynamics mp))
                                (update-waiting-events mp new-event))
                              new-event)
                             ((null delay)
                              (setf (evt-time new-event) (meta-p-time mp))
                              (setf (evt-priority new-event) :max)
                              (setf (evt-wait-condition new-event) nil)
+                             (setf (evt-dynamic new-event) nil)
                              
                              (insert-queue-event mp new-event)
                              
-                             (when (meta-p-delayed mp)
+                             (when (or (meta-p-delayed mp) (meta-p-dynamics mp))
                                (update-waiting-events mp new-event))
                              new-event)
                             ((eq delay :abort)
@@ -1760,7 +1836,7 @@
      
      (insert-queue-event mp new-event)
           
-     (when (meta-p-delayed mp)
+     (when (or (meta-p-delayed mp) (meta-p-dynamics mp))
        (update-waiting-events mp new-event))
      
      new-event)))
@@ -1772,19 +1848,22 @@
 (defmethod delete-event ((event act-r-event))
   (verify-current-mp  
    "delete-event called with no current meta-process."
-   (let* ((mp (current-mp))
-          (events (find event (meta-p-events mp)))
-          (waiting (find event (meta-p-delayed mp))))
-     (cond (events
+   (let ((mp (current-mp)))
+     
+     (cond ((find event (meta-p-events mp))
             (setf (meta-p-events mp) (remove event (meta-p-events mp)))
+            (when (evt-dynamic event)
+              (setf (meta-p-dynamics mp) (remove event (meta-p-dynamics mp) :key #'car)))
             t)
-           (waiting 
+           ((find event (meta-p-delayed mp))
             (setf (meta-p-delayed mp) (remove event (meta-p-delayed mp)))
             t)
            (t
             nil)))))
 
 
+;; A periodic event can't be dynamic so don't worry about adding that
+;; here...
 
 (defmethod delete-event ((event act-r-periodic-event))
   (verify-current-mp  

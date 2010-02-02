@@ -1,9 +1,9 @@
-(defconstant *person-location-data* '(1.11 1.17 1.22
-                                       1.17 1.20 1.22
-                                       1.15 1.23 1.36
-                                       1.20 1.22 1.26
-                                       1.25 1.36 1.29
-                                       1.26 1.47 1.47))
+(defvar *person-location-data* '(1.11 1.17 1.22
+                                 1.17 1.20 1.22
+                                 1.15 1.23 1.36
+                                 1.20 1.22 1.26
+                                 1.25 1.36 1.29
+                                 1.26 1.47 1.47))
 
 (defvar *response*)
 (defvar *response-time*)

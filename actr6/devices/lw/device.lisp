@@ -45,6 +45,9 @@
 ;;; 2009.02.09 Dan
 ;;;             : * Fixed the build-vis-locs-for methods for td-liner and bu-liner
 ;;;             :   so that they get the appropriate color info out of the object.
+;;; 2009.08.12 Dan
+;;;             : * Added the parsing of a text item's color into the build-vis-locs-for
+;;;             :   method.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Check the ACT-R packaging switches
@@ -487,7 +490,7 @@
 ;;; All-in-one function -> keeps all variables local
 ;;; Speak the given string str with the voice of ID voice-num
 ;;; Will return nil if an invalid voice is selected
-(defun lw-speak (str &key (voice 3))
+(defun lw-speak (str &key (voice 19))
   (block nil
     (let ((sc (return-speech-channel))
           (vs (return-voice-spec)))
@@ -1023,13 +1026,18 @@
     (unless (equal text "")
       (multiple-value-bind (ascent descent)
           (font-info  font-spec self)
-        (build-string-feats vis-mod :text text
-                            :start-x (1+ (point-h (view-position self)))  ;;;;(xstart self)
-                            :y-pos (+ (point-v (view-position self))
-                                      descent (round ascent 2))
-                            :width-fct #'(lambda (str)
-                                           (string-width str font-spec))
-                            :height ascent :obj self)))))
+        (let ((feats (build-string-feats vis-mod :text text
+                                         :start-x (1+ (point-h (view-position self)))  ;;;;(xstart self)
+                                         :y-pos (+ (point-v (view-position self))
+                                                   descent (round ascent 2))
+                                         :width-fct #'(lambda (str)
+                                                        (string-width str font-spec))
+                                         :height ascent :obj self))
+              (color (system-color->symbol (capi:pinboard-object-graphics-arg self :foreground))))
+        (dolist (x feats)
+          (set-chunk-slot-value-fct x 'color color)
+          (setf (chunk-visual-object x) self))
+        feats)))))
 
 
 (defmethod build-vis-locs-for ((self capi:item-pinboard-object) ;;static-text-dialog-item
@@ -1040,13 +1048,19 @@
       (unless (equal text "")
         (multiple-value-bind (ascent descent)
             (font-info  font-spec self)
-          (build-string-feats vis-mod :text text
-                              :start-x (1+ (point-h (view-position self)))  ;;;;(xstart self)
-                              :y-pos (+ (point-v (view-position self))
-                                        descent (round ascent 2))
-                              :width-fct #'(lambda (str)
-                                             (string-width str font-spec))
-                              :height ascent :obj self))))))
+          (let ((feats (build-string-feats vis-mod :text text
+                                           :start-x (1+ (point-h (view-position self)))  ;;;;(xstart self)
+                                           :y-pos (+ (point-v (view-position self))
+                                                     descent (round ascent 2))
+                                           :width-fct #'(lambda (str)
+                                                          (string-width str font-spec))
+                                           :height ascent :obj self))
+                
+                (color (system-color->symbol (capi:pinboard-object-graphics-arg self :foreground)))) 
+            (dolist (x feats)
+              (set-chunk-slot-value-fct x 'color color)
+              (setf (chunk-visual-object x) self))
+            feats))))))
 
 
 (defmethod view-loc ((self capi:element))  ;;view

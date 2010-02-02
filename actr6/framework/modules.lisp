@@ -103,6 +103,42 @@
 ;;;             : * Added the option of specifying a third reset function when
 ;;;             :   defining a module.  The third reset function gets called
 ;;;             :   after the user code is evaled.
+;;; 2009.09.09 Dan
+;;;             : * Define-module updated to allow the specification of the
+;;;             :   new multi-buffers.  An entry for the buffers-list can now
+;;;             :   have an optional 6th element.  If a buffer's definition 
+;;;             :   list has a non-nil 6th element then it will be created as
+;;;             :   a multi-buffer.  If that 6th element is the keyword :search
+;;;             :   then it will be a searchable buffer.
+;;;             :   The module definition can also now provide two additional 
+;;;             :   functions which may be used in conjunction with a searchable
+;;;             :   buffer.  They are specified with the :search and :offset 
+;;;             :   keywords.  The search function will be called at the start
+;;;             :   of a conflict-resolution event for each searchable buffer.
+;;;             :   It will be passed the module instance and a buffer name.
+;;;             :   It should return a list of the chunk names from the buffer's
+;;;             :   chunk set in the order in which they should be searched (car
+;;;             :   of the list will be first searched).  If no such function is
+;;;             :   provided then the chunks will be searched in an arbitrary
+;;;             :   order.
+;;;             :   The offset function will be called near the end of the conflict-
+;;;             :   resolution event (after production matching but before the
+;;;             :   final choice).  It will be passed the module instance, the
+;;;             :   name of the buffer and a list of the chunks which were matched
+;;;             :   in productions that may be fired.  It should return a list of
+;;;             :   numbers that represent the offsets to the utilities for the
+;;;             :   productions which matched those chunks i.e. the first element
+;;;             :   in the list returned will be the offset for productions which
+;;;             :   matched the first chunk in the list provided and so on.  If no
+;;;             :   offset function is specified or no list returned by it then no
+;;;             :   offset will be applied and the standard utility will be used
+;;;             :   to choose the production to fire.
+;;; 2009.09.11 Dan
+;;;             : * Added functions to call the search and offset hooks of the
+;;;             :   module given only the buffer name.
+;;; 2010.01.15 Dan
+;;;             : * Added the :search and :offset keywords to the define-module
+;;;             :   macro too.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; General Docs:
@@ -296,12 +332,15 @@
                                      (delete nil) 
                                      (notify-on-clear nil)
                                      (update nil)
-                                     (warning nil))
+                                     (warning nil)
+                                     (search nil)
+                                     (offset nil))
   `(define-module-fct ',module-name ',buffer-list ',params-list ,@(when version `(:version ,version))
      ,@(when documentation `(:documentation ,documentation))
      :creation ',creation :reset ',reset :query ',query :request ',request
      :buffer-mod ',buffer-mod :params ',params  
-     :delete ',delete :notify-on-clear ',notify-on-clear :update ',update :warning ',warning))
+     :delete ',delete :notify-on-clear ',notify-on-clear :update ',update :warning ',warning
+     :search ',search :offset ',offset))
   
   
 (defun define-module-fct (module-name buffer-list params-list
@@ -309,7 +348,8 @@
                                       (documentation "" docs?)
                                       creation reset query
                                       request buffer-mod params 
-                                      delete  notify-on-clear update warning)  
+                                      delete  notify-on-clear update warning
+                                      search offset)  
   (unless (and version? docs?)
     (print-warning "Modules should always provide a version and documentation string."))
   
@@ -347,13 +387,12 @@
         
         ((not (and  (fctornil creation)  (fctornil query)
                    (fctornil request) (fctornil buffer-mod) (fctornil params) 
-                    (fctornil delete) 
+                    (fctornil delete) (fctornil search) (fctornil offset) 
                    (fctornil notify-on-clear) (fctornil update)))
          (print-warning "Invalid parameter for a module call-back function")
-         (do ((items (list creation query request buffer-mod params delete notify-on-clear update warning)
+         (do ((items (list creation query request buffer-mod params delete notify-on-clear update warning search offset)
                      (cdr items))
-              
-              (names '(creation query request buffer-mod params delete notify-on-clear update warning)
+              (names '(creation query request buffer-mod params delete notify-on-clear update warning search offset)
                      (cdr names)))
              ((null items))
            (unless (fctornil (car items))
@@ -392,7 +431,9 @@
                                                     :delete delete
                                                     :notify-on-clear notify-on-clear
                                                     :update update
-                                                    :warn warning)))
+                                                    :warn warning
+                                                    :search search
+                                                    :offset offset)))
                (setf (gethash module-name (act-r-modules-table *modules-lookup*))
                  new-mod)
                (incf (act-r-modules-count *modules-lookup*))
@@ -681,6 +722,41 @@
             
       (print-warning 
        "There is no module named ~S. Cannot update it."  module-name))))
+
+(defun m-buffer-search (buffer-name)
+  (aif (buffers-module-name buffer-name)
+       (module-m-buffer-search it buffer-name)
+       (print-warning "m-buffer-search cannot search ~s because it does not name a valid buffer.")))
+                
+
+(defun module-m-buffer-search (module-name buffer-name)
+  (let ((module (get-abstract-module module-name)))
+    (if module
+        (multiple-value-bind (instance exists)
+            (get-module-fct module-name)
+          (if exists
+              (aif (act-r-module-search module)
+                   (values t (funcall it instance buffer-name))
+                   (values nil nil))
+            (print-warning "There is no module named ~S in the current model. Cannot perform buffer search." module-name)))
+      (print-warning "There is no module named ~S. Cannot perform buffer search."  module-name))))
+
+(defun m-buffer-offset (buffer-name c-list)
+  (aif (buffers-module-name buffer-name)
+       (module-m-buffer-offset it buffer-name c-list)
+       (print-warning "m-buffer-offset cannot get values for ~s because it does not name a valid buffer.")))
+
+(defun module-m-buffer-offset (module-name buffer-name c-list)
+  (let ((module (get-abstract-module module-name)))
+    (if module
+        (multiple-value-bind (instance exists)
+            (get-module-fct module-name)
+          (if exists
+              (aif (act-r-module-offset module)
+                   (values t (funcall it instance buffer-name c-list))
+                   (values nil nil))
+            (print-warning "There is no module named ~S in the current model. Cannot get buffer offsets." module-name)))
+      (print-warning "There is no module named ~S. Cannot get buffer offsets."  module-name))))
 
 #|
 This library is free software; you can redistribute it and/or

@@ -58,6 +58,8 @@
 ;;; 2006.09.11 Dan
 ;;;             : * Take the unnecessary zerop test out of act-r-noise because
 ;;;             :   the plusp already rejects that case.
+;;; 2009.09.10 Dan
+;;;             : * Moved permute-list here from the act-gui-interface.lisp file.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; General Docs:
@@ -464,7 +466,20 @@ in the test output file provided with mt19937ar.c -> mt19937ar.out.txt
 (defun rand-time (time)
   "If time randomizing is on, do the EPIC time randomizing thing."
   (randomize-time time))
-    
+
+
+;;; PERMUTE-LIST  [Function]
+;;; Description : This function returns a randomly ordered copy of the passed
+;;;             : in list.
+
+(defun permute-list (lis)
+  "Return a random permutation of the list"
+  (if (and (listp lis) lis)
+      (do* ((item (nth (act-r-random (length lis)) lis) (nth (act-r-random (length temp)) temp))
+        (temp (remove item lis :count 1) (remove item temp :count 1))
+        (result (list item) (cons item result)))
+           ((null temp) result))
+    nil))
     
 #|
 This library is free software; you can redistribute it and/or

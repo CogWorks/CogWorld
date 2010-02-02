@@ -9,34 +9,34 @@
    last-author="db30"
    kind="dir"
    uuid="138765e7-a0e9-0310-87f6-9ca992f4eb68"
-   revision="766"/>
+   revision="821"/>
 <entry
    committed-rev="84"
    name="parray.tcl"
-   text-time="2009-07-16T20:21:00.000000Z"
+   text-time="2010-01-19T14:29:31.000000Z"
    committed-date="2005-05-12T18:58:00.464626Z"
    checksum="580eede494f235f33594432abde8075e"
    last-author="db30"
    kind="file"
-   prop-time="2009-07-16T20:20:56.000000Z"/>
+   prop-time="2010-01-19T14:29:27.000000Z"/>
 <entry
    committed-rev="84"
    name="history.tcl"
-   text-time="2009-07-16T20:21:00.000000Z"
+   text-time="2010-01-19T14:29:31.000000Z"
    committed-date="2005-05-12T18:58:00.464626Z"
    checksum="611e3e68ebabc4c0a4cff496b84e0b76"
    last-author="db30"
    kind="file"
-   prop-time="2009-07-16T20:20:56.000000Z"/>
+   prop-time="2010-01-19T14:29:27.000000Z"/>
 <entry
    committed-rev="84"
    name="init.tcl"
-   text-time="2009-07-16T20:21:00.000000Z"
+   text-time="2010-01-19T14:29:31.000000Z"
    committed-date="2005-05-12T18:58:00.464626Z"
    checksum="f2f0485b93df2edd522f0cc3c751cd0b"
    last-author="db30"
    kind="file"
-   prop-time="2009-07-16T20:20:56.000000Z"/>
+   prop-time="2010-01-19T14:29:27.000000Z"/>
 <entry
    name="opt0.4"
    kind="dir"/>
@@ -46,33 +46,33 @@
 <entry
    committed-rev="84"
    name="auto.tcl"
-   text-time="2009-07-16T20:21:00.000000Z"
+   text-time="2010-01-19T14:29:31.000000Z"
    committed-date="2005-05-12T18:58:00.464626Z"
    checksum="a02d64e240dbe0eba3cd3c7991477e3b"
    last-author="db30"
    kind="file"
-   prop-time="2009-07-16T20:21:00.000000Z"/>
+   prop-time="2010-01-19T14:29:31.000000Z"/>
 <entry
    committed-rev="84"
    name="word.tcl"
-   text-time="2009-07-16T20:21:00.000000Z"
+   text-time="2010-01-19T14:29:31.000000Z"
    committed-date="2005-05-12T18:58:00.464626Z"
    checksum="46f910f760b614c0f74316e1d8b0115b"
    last-author="db30"
    kind="file"
-   prop-time="2009-07-16T20:21:00.000000Z"/>
+   prop-time="2010-01-19T14:29:31.000000Z"/>
 <entry
    name="http1.0"
    kind="dir"/>
 <entry
    committed-rev="84"
    name="safe.tcl"
-   text-time="2009-07-16T20:21:00.000000Z"
+   text-time="2010-01-19T14:29:31.000000Z"
    committed-date="2005-05-12T18:58:00.464626Z"
    checksum="5dd4d57494b5d59f8f2ebba55edc5c78"
    last-author="db30"
    kind="file"
-   prop-time="2009-07-16T20:20:56.000000Z"/>
+   prop-time="2010-01-19T14:29:27.000000Z"/>
 <entry
    name="msgcat1.3"
    kind="dir"/>
@@ -85,28 +85,28 @@
 <entry
    committed-rev="84"
    name="ldAout.tcl"
-   text-time="2009-07-16T20:21:00.000000Z"
+   text-time="2010-01-19T14:29:31.000000Z"
    committed-date="2005-05-12T18:58:00.464626Z"
    checksum="0126f7916eed5c3f03a1125fd8424c5a"
    last-author="db30"
    kind="file"
-   prop-time="2009-07-16T20:21:00.000000Z"/>
+   prop-time="2010-01-19T14:29:31.000000Z"/>
 <entry
    committed-rev="84"
    name="tclIndex"
-   text-time="2009-07-16T20:21:00.000000Z"
+   text-time="2010-01-19T14:29:31.000000Z"
    committed-date="2005-05-12T18:58:00.464626Z"
    checksum="406ea348a95aaa9c3bb3675146845f03"
    last-author="db30"
    kind="file"
-   prop-time="2009-07-16T20:21:00.000000Z"/>
+   prop-time="2010-01-19T14:29:31.000000Z"/>
 <entry
    committed-rev="84"
    name="package.tcl"
-   text-time="2009-07-16T20:21:00.000000Z"
+   text-time="2010-01-19T14:29:31.000000Z"
    committed-date="2005-05-12T18:58:00.464626Z"
    checksum="124ee41ae8f2b8b4134c2e11695a1130"
    last-author="db30"
    kind="file"
-   prop-time="2009-07-16T20:21:00.000000Z"/>
+   prop-time="2010-01-19T14:29:31.000000Z"/>
 </wc-entries>

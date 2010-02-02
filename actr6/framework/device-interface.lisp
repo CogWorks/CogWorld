@@ -129,6 +129,8 @@
 ;;;             : * Also took the package setting out of the mode line at the
 ;;;             :   top since there isn't a specific package for any of the
 ;;;             :   source files.
+;;; 2009.09.08 Dan
+;;;             : * Fixed the key-to-command mapping for the period.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #+:packaged-actr (in-package :act-r)
@@ -698,7 +700,7 @@
   (setf (gethash 'L ht) 
         '(punch :hand right :finger ring))
   (setf (gethash 'period ht) 
-        '(peck-recoil :hand right :finger index :r 1 :theta 1.57))
+        '(peck-recoil :hand right :finger ring :r 1 :theta 1.57))
   (setf (gethash '0 ht) 
         '(peck-recoil :hand right :finger pinkie :r 2 :theta -1.57))
   (setf (gethash 'P ht) 

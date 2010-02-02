@@ -61,6 +61,10 @@
 ;;;                   returns nil for the query regardless of the request
 ;;;                   which varies from the old module because the old one would 
 ;;;                   consider items no longer in the display as "attended nil".
+;;;             : [ ] Fix the add/delete/update-visicon-item code to work right
+;;;                   when deleteing visicon chunks and test-feats is true.
+;;;                   Pretty low priority since most people use add/delete/update
+;;;                   for performance and test-feats can have a noticeable cost.
 ;;; 
 ;;; ----- History ----- [look also at function comments]
 ;;;
@@ -344,6 +348,52 @@
 ;;;             :   color based on the majority color among the individual words.
 ;;;             :   Also added a colors slot to hold the list of item colors
 ;;;             :   corresponding to the words and objects slots.
+;;; 2009.08.27 Dan
+;;;             : * Changed visicon-update so that it has an optional parameter
+;;;             :   to determine whether or not it needs to count the visicon 
+;;;             :   items for return.
+;;;             : * Modified delete-screen-object (and thus delete-visicon-item)
+;;;             :   so that the internal chunk gets purged if :delete-visicon-chunks
+;;;             :   is true.
+;;; 2009.08.28 Dan
+;;;             : * Added optional update parameters to the internal add-screen-object
+;;;             :   and delete-screen-object and the user commands add-visicon-item
+;;;             :   and delete-visicon-item so that multiple adds & deletes can avoid
+;;;             :   all having to run the updating code.  One benefit to that is that 
+;;;             :   it won't always be the first item added to the screen that gets 
+;;;             :   stuffed if one doesn't want that.
+;;;             : * Added an update-visicon-item command to go along with the 
+;;;             :   add- and delete- ones.  It has a required parameter of the object
+;;;             :   an optional parameter for updating (like add and delete now have)
+;;;             :   and two possible keword parameters :same-chunks and :chunks.
+;;;             :   It works in one of three ways based on which if any of the 
+;;;             :   keyword parameters are provided (if the parameters are invalid
+;;;             :   then it just prints a warning and does nothing):
+;;;             :
+;;;             :   - If neither is given then it does the same thing as if the object 
+;;;             :   had been deleted and then added again.
+;;;             :
+;;;             :   - If :chunks is non-nil and is either a symbol naming a chunk or a 
+;;;             :   list of chunk names all of which correspond to the chunk(s) that
+;;;             :   were originally added to the visicon for the object with add-visicon-
+;;;             :   item then it will update the module's internal representation of 
+;;;             :   those features.
+;;;             :
+;;;             :   - If :chunks is nil but :same-chunks is t then it will call 
+;;;             :   build-vis-locs-for for that object and treat the list of chunks
+;;;             :   that are returned the same as if the :chunks parameter had been
+;;;             :   given with that list.
+;;;             :
+;;;             :   One note on using update-visicon-item is that you must set :test-feats
+;;;             :   to nil for now otherwise it will not work.  That means if you want
+;;;             :   overlapping duplicate features removed you will have to handle that
+;;;             :   explicitly outside of the module.
+;;; 2009.08.31 Dan
+;;;             : * Added more warnings since delete-visicon-item also has a potential
+;;;             :   issue with test-feats if it's set to purge chunks.
+;;; 2009.11.18 Dan
+;;;             : * Fixed an issue with a '(lambda ...)  in synthesize-phrase
+;;;             :   because LispWorks doesn't like that construct.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; General description of update
@@ -629,16 +679,15 @@
           (fast-chunk-slot-value-fct chunk 'screen-y)))
           
 
-(defgeneric visicon-update (vis-mod)
+(defgeneric visicon-update (vis-mod &optional count)
   (:documentation "To be called after every time the visicon changes."))
 
-(defmethod visicon-update ((vis-mod vision-module))
+(defmethod visicon-update ((vis-mod vision-module) &optional (count t))
   (check-finsts vis-mod)
   (update-attended-loc vis-mod)
   (stuff-visloc-buffer vis-mod)
-  (length (visicon-chunks vis-mod)))
-
-
+  (when count
+    (length (visicon-chunks vis-mod))))
 
 
 (defgeneric update-attended-loc (vis-mod)
@@ -1473,7 +1522,7 @@
         (car (define-chunks-fct 
                  `((isa phrase! value ,(phrase-accum words)
                         objects ,word-chunks 
-                        colors ,(mapcar '(lambda (x) (chunk-slot-value-fct x 'color)) word-chunks)
+                        colors ,(mapcar #'(lambda (x) (chunk-slot-value-fct x 'color)) word-chunks)
                         words ,words
                         color ,(car (rassoc (apply #'max (mapcar #'cdr colors)) colors))
                         screen-pos ,loc)))))
@@ -2976,13 +3025,107 @@ will be updated as follows:
 
 (extend-chunks special-visual-object :copy-function identity)
 
-(defun add-visicon-item (obj)
-  (add-screen-object obj (get-module :vision)))
+(defun add-visicon-item (obj &optional (update t))
+  (add-screen-object obj (get-module :vision) update))
 
-(defun delete-visicon-item (obj)
-  (delete-screen-object obj (get-module :vision)))
+(defun delete-visicon-item (obj &optional (update t))
+  (delete-screen-object obj (get-module :vision) update))
 
-(defmethod add-screen-object (obj (vm vision-module))
+
+(defun update-visicon-item (obj &optional (update t) &key same-chunks chunks)
+  (let ((module (get-module :vision)))
+    (cond ((not (or same-chunks chunks)) 
+           ;; simple case just delete and add the item
+           (delete-screen-object obj module nil)
+           (add-screen-object obj module update))
+          
+          (t ;; just update the chunks for the item
+           
+           (cond ((null chunks) ;; if none given get them from build-vis-locs-for
+                  (setf chunks (flatten (build-vis-locs-for obj module))))
+                 ((atom chunks) ;; if it's an atom assume that's a chunk name
+                  (setf chunks (list chunks))))
+                 
+           
+           (dolist (x chunks)
+             (if (eq (chunk-special-visual-object x) obj) ;; make sure it matches the object
+                 
+                 (let ((old (gethash x (visicon module))))
+                   (if old
+                       (let ((entry (copy-chunk-fct x)))
+                         
+                         ;; put the new one in place and set the relevant info for it.
+                         
+                         (setf (gethash x (visicon module)) entry)
+                         (setf (chunk-visicon-entry entry) x)
+                         (setf (chunk-visual-tstamp entry) (chunk-visual-tstamp old))
+                         (setf (chunk-visual-new-p entry) (chunk-visual-new-p old))
+    
+                         ;; presumably, anyone using add/update/delete will turn off
+                         ;; test-feats, but just in case I'll update the appropriate
+                         ;; components here for consistency eventhought it's not going 
+                         ;; to actually check for collisions i.e. there could be 
+                         ;; duplicate overlapping items from an update
+                         
+                         (when (test-feats module)
+                           
+                           (print-warning "Test-feats should be turned off when using update-visicon-item.  Contact Dan if you need that functionality (automatically eliminating identical overlapping items).")
+                           
+                           #| This doesn't work quite right yet...
+
+                           (let ((old-hash-key (chunk-visual-hash-key x)))
+                             ;; rehash the new contents
+                             (setf (chunk-visual-hash-key x) (hash-chunk-contents x))
+                             
+                             ;; take the old ones out
+                             
+                             (let ((old-entries (gethash old-hash-key (feat-table module))))
+                               (setf old-entries (remove x old-entries))
+                               (setf old-entries (remove old old-entries))
+                               
+                               (if old-entries
+                                   (setf (gethash old-hash-key (feat-table module)) old-entries)
+                                 (remhash old-hash-key (feat-table module))))
+                             
+                             ;; put the new one in
+                             (let ((new-entries (gethash (chunk-visual-hash-key x) (feat-table module))))
+                               
+                               (setf new-entries (cons entry new-entries))
+                               (unless (find x new-entries)
+                                 (setf new-entries (cons entry new-entries)))
+                               
+                               (setf (gethash (chunk-visual-hash-key x) (feat-table module))
+                                 new-entries)))
+                             |#)
+
+                         
+                         
+                         #| assuming that nobody is going to use "synthed" features
+                            in their own add/update/delete code, but if needed this
+                            code from enter-into-visicon will need to be made to work
+                            right for the update.
+
+                         (dolist (x (finst-lst vis-mod))
+                           (when (and (synthed-from x) (find (chunk-visicon-entry existing) (synthed-from x)))
+                             (setf (synthed-from x) (substitute vis-loc (chunk-visicon-entry existing) (synthed-from x)))))
+                         |#
+                         
+                         ;; get rid of the old chunk if allowed & there's no other chunks mapped to it
+                         ;; if test-feats is true 
+                         (when (purge-visicon module)
+                           ;; need to add a test to make sure no other chunks
+                           ;; are mapped here to work right with test-feats
+                           (purge-chunk-fct old)))
+                     (print-warning "Chunk ~s is not currently in the visicon.  No update made." x)))
+               (print-warning "Chunk ~s is not a feature of the object ~s.  No update made." x obj)))
+           
+           (when update
+             (visicon-update module nil))))))
+             
+             
+             
+
+(defmethod add-screen-object (obj (vm vision-module) &optional (update t))
   (let ((vfeats (flatten (build-vis-locs-for obj vm))))
     (dolist (x vfeats)
       (if (and (chunk-p-fct x)
@@ -3003,14 +3146,20 @@ will be updated as follows:
                 (setf (chunk-special-visual-object vl) obj)
                 (enter-into-visicon vl vm)) 
       vfeats)
-    (visicon-update vm)))
+    (when update
+      (visicon-update vm nil))))
 
-(defmethod delete-screen-object (obj (vm vision-module))  
-  (maphash (lambda (key val)  
-             (when (eq obj (chunk-special-visual-object val)) 
-               (remhash key (visicon vm))))
+(defmethod delete-screen-object (obj (vm vision-module) &optional (update t))
+  (maphash (lambda (key val)
+             (when (eq obj (chunk-special-visual-object val))
+               (remhash key (visicon vm))
+               (when (and (purge-visicon vm) (chunk-p-fct val))
+                 (when (test-feats vm)
+                     (print-warning "Test-feats should be turned off if using add/delete-visicon-item (let Dan know if you need that functionality)."))
+                 (purge-chunk-fct val))))
            (visicon vm))
-  (visicon-update vm))
+  (when update
+    (visicon-update vm nil)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

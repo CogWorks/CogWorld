@@ -13,7 +13,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 
 ;;; Filename    : procedural.lisp
-;;; Version     : 1.4
+;;; Version     : 2.0a1
 ;;; 
 ;;; Description : Implements the procedural module (productions).
 ;;; 
@@ -355,6 +355,125 @@
 ;;;             :   need to be recreated at reset time unless something in the
 ;;;             :   model has changed.
 ;;;             :   Should improve performance for most models.
+;;; 2009.08.13 Dan [2.0a1]
+;;;             : * Added two new parameters to allow for testing out the 
+;;;             :   possibility of a "new" idea in the production matching.
+;;;             :   The new concept is to allow partial matching to occur on
+;;;             :   the LHS in the tests of the buffers' slots.
+;;;             :
+;;;             :   Here is how it will work at this point:
+;;;             :
+;;;             :   If the :ppm parameter (procedural partial matching)
+;;;             :   is set to nil then there is no change in how production
+;;;             :   matching occurs.  This will be the default value and
+;;;             :   thus all existing models will continue to work exactly
+;;;             :   the same as they did before this was added.
+;;;             :   If :ppm is set to a number, then all of the slots tested
+;;;             :   for equality on the LHS of a production (those without a
+;;;             :   modifier or with the explicit = modifier) will be allowed
+;;;             :   to have a partial matching.  The slot value will be 
+;;;             :   considered a match if:
+;;;             :   
+;;;             :   - it is a symbolic match as would normally occur without 
+;;;             :   this addition
+;;;             :   
+;;;             :   OR  
+;;;             :   
+;;;             :   - there is a similarity value between the indicated value 
+;;;             :   and the value in the slot that is > the maximum similarity 
+;;;             :   difference
+;;;             :   
+;;;             :   
+;;;             :   The similarity value used is the standard one returned by 
+;;;             :   the declarative similarity function and thus the existing 
+;;;             :   :similarity-hook can be used if custom similarities are 
+;;;             :   needed.  The requirement that it be strictly greater than 
+;;;             :   the max difference means that only things which have an 
+;;;             :   explicit similarity setting can possibly be mismatched, and 
+;;;             :   it provides a way to specify a "don't match these in the 
+;;;             :   productions" even if a similarity value may be needed for 
+;;;             :   declarative retrieval purposes.
+;;;             :   
+;;;             :   All slots must still be a match for the production to be 
+;;;             :   considered in the conflict set.
+;;;             :   
+;;;             :   If all of the production's tests are perfect matches then 
+;;;             :   its utility will be unaffected.
+;;;             :   
+;;;             :   If any slot is mismatched, then the utility of the 
+;;;             :   production will be adjusted, by default, by adding the 
+;;;             :   similarity of all the mismatches times a penalty factor.  
+;;;             :   The penalty factor will be the setting of :ppm.  Alternatively, 
+;;;             :   there is a hook :ppm-hook which can be used to override the 
+;;;             :   utility penalty when slot tests are mismatched.  The hook
+;;;             :   function will be passed a production name and a list of 
+;;;             :   mismatch lists, one for each mismatch which occurred while
+;;;             :   testing the named production. A mismatch list will be a 5 
+;;;             :   element list consisting of: a buffer name, a slot name, the 
+;;;             :   requested slot value, the actual value in the slot of the 
+;;;             :   chunk in the buffer, and the reported similarity between those
+;;;             :   two items.  If the hook returns a number that will be added to
+;;;             :   the production's utility, any other return value will result in
+;;;             :   the default calculation being added.
+;;;             :   
+;;;             :   It is important to note that this is very exploratory at this
+;;;             :   time and may undergo significant changes if it persists at all.
+;;; 2009.08.14 Dan
+;;;             : * Changed print-instantiation so that it prints partially matched
+;;;             :   information when appropriate.
+;;; 2009.08.17 Dan
+;;;             : * Fixed test-other-condition with respect to PPM so that it 
+;;;             :   can partial match a value in a variablized slot in a p*.
+;;; 2009.09.10 Dan
+;;;             : * Added the require-compiled for the code that's now in production-
+;;;             :   parsing-support.lisp.
+;;; 2009.09.14 Dan
+;;;             : * Simplified conflict-resolution by colapsing the tree/non-tree
+;;;             :   branch.
+;;;             : * Moved the warning about using the tree with :ppm or :crt on
+;;;             :   to reset time instead of every conflict-resolution.
+;;; 2009.09.18 Dan
+;;;             : * Fixed a bug introduced with moving the warning from the
+;;;             :   previous update.
+;;;             : * Took the require-compiled of production-parsing out for now
+;;;             :   to avoid an issue with when the production structure is
+;;;             :   created.
+;;; 2009.10.15 Dan
+;;;             : * All new conflict-resolution to support the ability of a
+;;;             :   production to search a multi-buffer for a chunk to match.
+;;;             :   The search occurs after the constants have been tested and
+;;;             :   things not dependent on search bindings have occurred (evals
+;;;             :   explicit binds and so forth).  A searched buffer cannot
+;;;             :   be used to name a slot for dynamic matching, but can have
+;;;             :   dynamic slots that are named in standard buffers.
+;;;             : * The general description is that the searches occur in parallel
+;;;             :   across all the searced buffers and only one match is found
+;;;             :   for each.  Then conditions among those searched buffers are
+;;;             :   tested.  If there is a failure at that point the production
+;;;             :   doesn't match -- it doesn't search for a set of chunks which
+;;;             :   satisfy all the conditions.
+;;; 2009.12.03 Dan
+;;;             : * Added the reporting of utilities to the conflict-set trace.
+;;; 2009.12.04 Dan
+;;;             : * Flag conflict-resolution events as dynamic when scheduled so
+;;;             :   that they can be moved "back" in a real-time slack hook that
+;;;             :   uses dynamics.
+;;; 2010.01.11 Dan
+;;;             : * Updates to the buffer search code to address some problems
+;;;             :   in the search code (doesn't affect non-search matching).
+;;; 2010.01.12 Dan
+;;;             : * Fixed a bug with the utility printing in the conflict-set
+;;;             :   trace.
+;;; 2010.01.12 Dan
+;;;             : * Fixed some issues with the utility-offset code for searched
+;;;             :   buffers.
+;;; 2010.01.15 Dan
+;;;             : * Fixed an issue with test-search-buffers because a module may
+;;;             :   be adding the items to the buffer set in the search call.
+;;; 2010.01.18 Dan
+;;;             : * Added a keyword parameter to conflict-tests to allow the
+;;;             :   :crt info to be suppressed during whynot and other user
+;;;             :   commands. 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; General Docs:
@@ -440,6 +559,10 @@
 
 (require-compiled "CENTRAL-PARAMETERS" "ACT-R6:support;central-parameters")
 
+;;; Uses some functions related to parsing productions.
+
+;(require-compiled "PRODUCTION-PARSING" "ACT-R6:support;production-parsing-support")
+
 ;;; The structures for the module and a production
 
 
@@ -467,6 +590,17 @@
   
   req-spec
   
+  current-p
+  ppm
+  md
+  ppm-hook
+  
+  used-search-buffers
+  search-buffer-table
+  search-matches-table
+  temp-search
+  last-cr-time
+  
   (action-parse-table (make-hash-table :test #'equal))
   (condition-parse-table (make-hash-table :test #'equal)))
 
@@ -487,7 +621,12 @@
   (parameter-values (make-hash-table :size 23))
   constants binds others selection-code implicit
     
-  failure-condition)
+  failure-condition
+  
+  partial-matched-slots
+  
+  searches search-binds search-others
+)
 
 
 (defstruct act-r-production-parameter
@@ -496,7 +635,6 @@
 
 
 (defvar *production-parameters-list* nil)
-
 
 
 ;;; Instead of pre-specifying the paramters for a production
@@ -567,9 +705,6 @@
 
 
 
-
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; helper functions.
 
@@ -626,6 +761,19 @@
            (:er (setf (procedural-er prod) (cdr param)))
            
            (:v (setf (procedural-v prod) (cdr param)))
+           (:md (setf (procedural-md prod) (cdr param)))
+           (:ppm (if (cdr param)
+                     (unless (find 'ppm-offset (no-output (car (sgp :utility-offsets))))
+                       (sgp :utility-offsets ppm-offset))
+                   (let ((previous (car (no-output (sgp :utility-offsets)))))
+                     (sgp :utility-offsets nil)
+                     (dolist (x previous)
+                       (unless (eq x 'ppm-offset)
+                         (sgp-fct (list :utility-offsets x))))))
+                 (setf (procedural-ppm prod) (cdr param)))
+                 
+           
+           (:ppm-hook (setf (procedural-ppm-hook prod) (cdr param)))
            (:dat (setf (procedural-dat prod) (cdr param)))
            
            (:crt (setf (procedural-crt prod) (cdr param)))
@@ -668,6 +816,8 @@
         (t 
          (case param
            (:use-tree (procedural-use-tree prod))
+           (:ppm (procedural-ppm prod))
+           (:ppm-hook (procedural-ppm-hook prod))
            
            (:dat (procedural-dat prod))
            (:crt (procedural-crt prod))
@@ -703,6 +853,11 @@
   (unless (procedural-conflict-tree prod)
     (setf (procedural-conflict-tree prod) (make-root-node)))
   
+  (setf (procedural-search-buffer-table prod) (make-hash-table))
+  (setf (procedural-search-matches-table prod) (make-hash-table))
+  
+  (setf (procedural-last-cr-time prod) nil)
+  
   (schedule-event-relative 0 'conflict-resolution :module 'procedural 
                            :priority :min
                            :destination 'procedural  
@@ -715,6 +870,11 @@
   (setf (procedural-delay-tree prod) nil)
 
   (when (procedural-use-tree prod)
+    
+    (when (or (procedural-crt prod)
+              (procedural-ppm prod))
+      (model-warning "Conflict resolution cannot use the decision tree when :crt or :ppm is enabled."))
+   
     (cond ((null (procedural-last-conflict-tree prod))
            (build-conflict-tree prod)
            (setf (procedural-last-conflict-tree prod) (copy-conflict-tree (procedural-conflict-tree prod) nil)))
@@ -788,13 +948,75 @@
           (chunk-type-subtype-p-fct (chunk-chunk-type-fct it) (cr-condition-value test))
           nil))
     (slot 
-     (chunk-slot-equal (cr-condition-value test) (cr-buffer-slot-read prod (cr-condition-buffer test) (cr-condition-bi test) (cr-condition-si test))))
+     
+     (let ((real (cr-buffer-slot-read prod (cr-condition-buffer test) (cr-condition-bi test) (cr-condition-si test))))
+       (if (chunk-slot-equal (cr-condition-value test) real)
+         t
+         (when (procedural-ppm prod)
+           ;;; try a partial match and save the result if it's valid
+           (let ((sim (similarity-fct (cr-condition-value test) real)))
+             (when (and (numberp sim) (> sim (procedural-md prod)))
+               (push (list (cr-condition-buffer test) (cr-condition-slot test) (cr-condition-value test) real sim)
+                     (production-partial-matched-slots (procedural-current-p prod)))))))))
     (query 
      (eq (cr-condition-result test) (query-buffer (cr-condition-buffer test) (list (cons (cr-condition-slot test) (cr-condition-value test))))))
     (test-slot 
      (eq (cr-condition-result test) 
          (funcall (cr-condition-test test) (cr-buffer-slot-read prod (cr-condition-buffer test) (cr-condition-bi test) (cr-condition-si test)) (cr-condition-value test))))))
 
+
+(defun test-search-constants (prod test production)
+  
+  ;; don't use the cache table for slot values since they'd need to be continuously cleared.
+  ;; Instead just use the accessors for the chunk from the table.
+  
+  (case (cr-condition-type test)
+    (isa 
+     (aif (cr-buffer-read prod (cr-condition-buffer test) (cr-condition-bi test)) 
+          (chunk-type-subtype-p-fct (chunk-chunk-type-fct it) (cr-condition-value test))
+          nil))
+    
+    (slot 
+     (let ((real (slot-value-from-index (cr-buffer-read prod (cr-condition-buffer test) (cr-condition-bi test)) (cr-condition-si test))))
+       (if (chunk-slot-equal (cr-condition-value test) real)
+         t
+         (when (procedural-ppm prod)
+           ;;; try a partial match and save the result if it's valid
+           (let ((sim (similarity-fct (cr-condition-value test) real)))
+             (when (and (numberp sim) (> sim (procedural-md prod)))
+               (push (list (cr-condition-buffer test) (cr-condition-slot test) (cr-condition-value test) real sim)
+                     (production-partial-matched-slots (procedural-current-p prod)))))))))
+    
+    (test-slot 
+     (if (eq (cr-condition-result test) (funcall (cr-condition-test test) (slot-value-from-index (cr-buffer-read prod (cr-condition-buffer test) (cr-condition-bi test)) (cr-condition-si test)) (replace-variables (cr-condition-value test) (production-bindings production))))
+         t
+       (when (and (procedural-ppm prod) (eq (cr-condition-test test) 'chunk-slot-equal) (cr-condition-result test))
+         ;;; try a partial match and save the result if it's valid
+         (let* ((desired (replace-variables (cr-condition-value test) (production-bindings production)))
+                (real (slot-value-from-index (cr-buffer-read prod (cr-condition-buffer test) (cr-condition-bi test)) (cr-condition-si test)))
+                (sim (similarity-fct desired real)))
+           (when (and (numberp sim) (> sim (procedural-md prod)))
+             (push (list (cr-condition-buffer test) (cr-condition-slot test) desired real sim)
+                   (production-partial-matched-slots (procedural-current-p prod))))))))
+    
+    (test-var-slot
+     (let* ((ct (chunk-chunk-type-fct (cr-buffer-read prod (cr-condition-buffer test) (cr-condition-bi test))))
+           (index (get-slot-index ct (replace-variables (cr-condition-slot test) (production-bindings production)))))
+       
+       (if (numberp index)
+           (if (eq (cr-condition-result test) (funcall (cr-condition-test test) (slot-value-from-index (cr-buffer-read prod (cr-condition-buffer test) (cr-condition-bi test)) index) (replace-variables (cr-condition-value test) (production-bindings production))))
+               t
+             (when (and (procedural-ppm prod) (eq (cr-condition-test test) 'chunk-slot-equal) (cr-condition-result test))
+               ;;; try a partial match and save the result if it's valid
+               (let* ((desired (replace-variables (cr-condition-value test) (production-bindings production)))
+                      (real (slot-value-from-index (cr-buffer-read prod (cr-condition-buffer test) (cr-condition-bi test)) index))
+                      (sim (similarity-fct desired real)))
+                 (when (and (numberp sim) (> sim (procedural-md prod)))
+                   (push (list (cr-condition-buffer test) (replace-variables (cr-condition-slot test) (production-bindings production)) desired real sim)
+                         (production-partial-matched-slots (procedural-current-p prod)))))))
+         nil))))
+  )
+  
 
 (defun test-and-perfrom-bindings (procedural bind production)
   (case (cr-condition-type bind)
@@ -833,16 +1055,70 @@
     (query 
      (eq (cr-condition-result test) (query-buffer (cr-condition-buffer test) (list (cons (cr-condition-slot test) (replace-variables (cr-condition-value test) (production-bindings production)))))))
     (test-slot 
-     (eq (cr-condition-result test) (funcall (cr-condition-test test) (cr-buffer-slot-read prod (cr-condition-buffer test) (cr-condition-bi test) (cr-condition-si test)) (replace-variables (cr-condition-value test) (production-bindings production)))))
+     (if (eq (cr-condition-result test) (funcall (cr-condition-test test) (cr-buffer-slot-read prod (cr-condition-buffer test) (cr-condition-bi test) (cr-condition-si test)) (replace-variables (cr-condition-value test) (production-bindings production))))
+         t
+       (when (and (procedural-ppm prod) (eq (cr-condition-test test) 'chunk-slot-equal) (cr-condition-result test))
+         ;;; try a partial match and save the result if it's valid
+         (let* ((desired (replace-variables (cr-condition-value test) (production-bindings production)))
+                (real (cr-buffer-slot-read prod (cr-condition-buffer test) (cr-condition-bi test) (cr-condition-si test)))
+                (sim (similarity-fct desired real)))
+           (when (and (numberp sim) (> sim (procedural-md prod)))
+             (push (list (cr-condition-buffer test) (cr-condition-slot test) desired real sim)
+                   (production-partial-matched-slots (procedural-current-p prod))))))))
     (eval
      (eval (replace-variables-for-eval (cr-condition-value test) (production-bindings production))))
     (test-var-slot
      (let* ((ct (chunk-chunk-type-fct (cr-buffer-read prod (cr-condition-buffer test) (cr-condition-bi test))))
            (index (get-slot-index ct (replace-variables (cr-condition-slot test) (production-bindings production)))))
+          
        (if (numberp index)
-           (eq (cr-condition-result test) (funcall (cr-condition-test test) (cr-buffer-slot-read prod (cr-condition-buffer test) (cr-condition-bi test) index) (replace-variables (cr-condition-value test) (production-bindings production))))
+           (if (eq (cr-condition-result test) (funcall (cr-condition-test test) (cr-buffer-slot-read prod (cr-condition-buffer test) (cr-condition-bi test) index) (replace-variables (cr-condition-value test) (production-bindings production))))
+               t
+             (when (and (procedural-ppm prod) (eq (cr-condition-test test) 'chunk-slot-equal) (cr-condition-result test))
+               ;;; try a partial match and save the result if it's valid
+               (let* ((desired (replace-variables (cr-condition-value test) (production-bindings production)))
+                      (real (cr-buffer-slot-read prod (cr-condition-buffer test) (cr-condition-bi test) index))
+                      (sim (similarity-fct desired real)))
+                 (when (and (numberp sim) (> sim (procedural-md prod)))
+                   (push (list (cr-condition-buffer test) (replace-variables (cr-condition-slot test) (production-bindings production)) desired real sim)
+                         (production-partial-matched-slots (procedural-current-p prod)))))))
          nil)))
     ))
+
+
+(defun test-search-buffers (prod test production)
+  (let* ((buffer (cr-condition-buffer test))
+         (chunk-list (multiple-value-bind (val exists)
+                         (gethash buffer (procedural-search-buffer-table prod)) 
+                       (if exists
+                           val
+                         (multiple-value-bind (e new-val)
+                             (m-buffer-search buffer)
+                           (setf (gethash buffer (procedural-search-buffer-table prod)) 
+                             (if e 
+                                 (let ((valid (get-m-buffer-chunks buffer)))
+                                   (remove-if-not (lambda (x) (member x valid)) new-val))
+                               (get-m-buffer-chunks buffer))))))))
+         
+         
+    
+    (dolist (c chunk-list)
+        (overwrite-buffer-chunk buffer c)
+        
+        ;; Only worry about the buffer lookup table
+        ;; test the slots from the buffer chunk directly
+        
+        (setf (aref (procedural-buffer-lookup prod) (cr-condition-bi test)) :untested)
+        
+        (let ((crt (procedural-crt prod)))
+          (setf (procedural-crt prod) nil)
+          (let ((result (conflict-tests prod (cr-condition-value test) production 'test-search-constants)))
+          (setf (procedural-crt prod) crt)
+            (when result
+              (push (cons buffer c) (procedural-temp-search prod))
+              (return-from test-search-buffers t)))))
+    nil))
+                          
 
 
 (defun failure-reason-string (condition procedural production)
@@ -853,6 +1129,7 @@
       (isa (if (buffer-read (cr-condition-buffer condition))
                (format nil "The chunk in the ~S buffer is not of chunk-type ~S." (cr-condition-buffer condition) (cr-condition-value condition))
              (format nil "The ~s buffer is empty." (cr-condition-buffer condition))))
+      (search (format nil "The searched multi-buffer ~s did not have a matching chunk." (cr-condition-buffer condition)))
       (slot (format nil "The ~s slot of the chunk in the ~s buffer does not have the value ~s." (cr-condition-slot condition) (cr-condition-buffer condition) (cr-condition-value condition)))
       (query (format nil "The ~s ~s query of the ~s buffer failed." (cr-condition-slot condition) (cr-condition-value condition) (cr-condition-buffer condition)))
       (test-slot (if (and (eq (cr-condition-test condition) 'chunk-slot-equal) (null (cr-condition-value condition)) (null (cr-condition-result condition)))
@@ -877,6 +1154,34 @@
                              (replace-variables (cr-condition-slot condition) (production-bindings production)) (cr-condition-slot condition) (cr-condition-buffer condition) (cr-condition-value condition))
                          (format nil "The value of the ~s variable does not name a valid slot in the chunk in the ~s buffer." (cr-condition-slot condition) (cr-condition-buffer condition))))))))
 
+
+(defun bind-variable (var value production)
+  (aif (assoc var (production-bindings production))
+       (setf (cdr it) value)
+       (progn
+         (push (cons var value) (production-bindings production))
+         value)))
+
+
+(defun conflict-tests (procedural test-list production tester &key (report t))
+  (if (null test-list) 
+      t
+    (let ((outcome (do* ((tests test-list (cdr tests))
+                         (result (funcall tester procedural (car tests) production)
+                                 (funcall tester procedural (car tests) production)))
+                        
+                        ((or (null result) (null (cdr tests))) (cons result (car tests))))))
+      
+      (if (null (car outcome))
+          (progn
+            (setf (production-failure-condition production) (cdr outcome))
+            (when (and (procedural-crt procedural) report); report failures..
+              (model-output "Fails because: ")
+              (model-output (failure-reason-string (cdr outcome) procedural production)))
+            nil)
+        t))))
+        
+
 (defun conflict-resolution (procedural)
   
   (setf (procedural-delayed-resolution procedural) nil)
@@ -888,142 +1193,101 @@
          (hook-set nil)
          (best nil)
          (best-ut (minimum-utility))
-         (mu best-ut))
+         (mu best-ut)
+         (offsets-table (make-hash-table))
+         (test-set (if (or (null (procedural-use-tree procedural))
+                           (procedural-crt procedural)
+                           (procedural-ppm procedural))
+                       (procedural-productions procedural)
+                     (mapcar (lambda (x) (get-production-internal x procedural)) (get-valid-productions procedural))))
+         (saved-search-chunks (make-hash-table)))
     
-    (if (or (null (procedural-use-tree procedural))
-            (procedural-crt procedural))
-        
-        (progn
-          (when (procedural-use-tree procedural)
-            (model-warning "Conflict resolution not using the decision tree when :crt is enabled."))
-             
-          (dolist (production (procedural-productions procedural))
-            
-            (setf (production-bindings production) nil)
-            (setf (production-failure-condition production) nil)
-            
-            (unless (production-disabled production)
-              (when (procedural-crt procedural)
-                (model-output "Trying production: ~s" (production-name production)))
-              
-              (let ((constant-tests (if (null (production-constants production)) (cons t nil)
-                                      (do* ((tests (production-constants production) (cdr tests))
-                                            (result (test-constant-condition procedural (car tests))
-                                                    
-                                                    (test-constant-condition procedural (car tests))))
-                                           
-                                           ((or (null result) (null (cdr tests))) (cons result (car tests)))))))
-                
-                (if (null (car constant-tests))
-                    (progn
-                      (setf (production-failure-condition production) (cdr constant-tests))
-                      (when (procedural-crt procedural) ; report failures..
-                        (model-output "Fails because: ")
-                        (model-output (failure-reason-string (cdr constant-tests) procedural production))))
-                  
-                  (let ((user-bindings (if (null (production-binds production)) (cons t nil)
-                                         (do* ((tests (production-binds production) (cdr tests))
-                                               (result (test-and-perfrom-bindings procedural (car tests) production)
-                                                       
-                                                       (test-and-perfrom-bindings procedural (car tests) production)))
-                                              
-                                              ((or (null result) (null (cdr tests))) (cons result (car tests)))))))
-                    
-                    (if (null (car user-bindings))
-                        (progn
-                          (setf (production-failure-condition production) (cdr user-bindings))
-                          (when (procedural-crt procedural) ; report failures..
-                            (model-output "Fails because: ")
-                            (model-output (failure-reason-string (cdr user-bindings) procedural production))))
-                      
-                      (let ((others-pass (if (null (production-others production)) (cons t nil)
-                                           
-                                           (do* ((conditions (production-others production) (cdr conditions))
-                                                 (result (test-other-condition procedural (car conditions) production)
-                                                         (test-other-condition procedural (car conditions) production)))
-                                                ((or (null result) (null (cdr conditions))) (cons result (car conditions)))))))
-                        
-                        (if (null (car others-pass))
-                            (progn
-                              (setf (production-failure-condition production) (cdr others-pass))
-                              (when (procedural-crt procedural) ; report failures..
-                                (model-output "Fails because: ")
-                                (model-output (failure-reason-string (cdr others-pass) procedural production))))
-                          
-                          
-                          (let ((u (compute-utility (production-name production) t)))
-                            
-                            (when (procedural-crt procedural)
-                              (model-output "Production ~s matches" (production-name production)))
-                            
-                            (push-last production conflict-set)
-                            
-                            (setf (production-conflict-val production) u)
-                            
-                            (when (and (procedural-crt procedural) mu (< u mu))
-                              (model-output "Fails because:~%Utility ~s is below the threshold ~s" u mu))
-                            
-                            (cond ((or (null best-ut) (> u best-ut))
-                                   (setf best-ut u)
-                                   (setf best (list production)))
-                                  ((= u best-ut)
-                                   (if (procedural-er procedural)
-                                       (push-last production best)
-                                     (setf best (list production)))))))))))))))
+    (setf (procedural-last-cr-time procedural) (mp-time))
+    (clrhash (procedural-search-matches-table procedural))
+    
+    (dolist (b (procedural-used-search-buffers procedural))
+      (aif (buffer-read b)
+           (setf (gethash b saved-search-chunks) it)
+           (setf (gethash b saved-search-chunks) :clear)))
+    
+    (clrhash (procedural-search-buffer-table procedural))
+    
+    (dolist (production test-set)
       
-      (let ((cs (get-valid-productions procedural)))
+      (setf (production-bindings production) nil)
+      (setf (production-failure-condition production) nil)
+      
+      (setf (procedural-current-p procedural) production)
+      (setf (production-partial-matched-slots production) nil)
+      
+      
+      (setf (procedural-temp-search procedural) nil)
+      
+      
+      
+      (unless (production-disabled production)
+        (when (procedural-crt procedural)
+          (model-output "Trying production: ~s" (production-name production)))
         
-        (dolist (production (mapcar (lambda (x) (get-production-internal x procedural)) cs))
+        (when (and (conflict-tests procedural (production-constants production) production 'test-constant-condition)
+                   (conflict-tests procedural (production-binds production) production 'test-and-perfrom-bindings)
+                   (conflict-tests procedural (production-others production) production 'test-other-condition)
+                   (conflict-tests procedural (production-searches production) production 'test-search-buffers)
+                   (conflict-tests procedural (production-search-binds production) production 'test-and-perfrom-bindings)
+                   (conflict-tests procedural (production-search-others production) production 'test-other-condition)
+                   ) 
           
+          (dolist (s (procedural-temp-search procedural))
+            (pushnew (cdr s)
+                     (gethash (car s) (procedural-search-matches-table procedural))))
           
-          (unless (production-disabled production)
+          (push-last production conflict-set)
+          )))
+    
+    
+    ;; get and save any potential chunk offsets 
+         
+    (maphash (lambda (buffer chunks)
+               (multiple-value-bind (exists offsets)
+                   (m-buffer-offset buffer chunks)
+                 (when (and exists offsets (every 'numberp offsets))
+                   (setf (gethash buffer offsets-table)
+                     (mapcar 'cons chunks offsets)))))
+             (procedural-search-matches-table procedural))
+         
+    
+    (dolist (production conflict-set)
+      
+      (let ((u (compute-utility (production-name production) t)))
+        
+        (when (procedural-crt procedural)
+          (model-output "Production ~s matches" (production-name production)))
+        
+        
+        (dolist (s (production-searches production))
+          (let* ((buf (cr-condition-buffer s))
+                 (buf-var (cr-condition-test s))
+                 (bound-chunk (cdr (assoc buf-var (production-bindings production))))
+                 (offset (cdr (assoc bound-chunk (gethash buf offsets-table)))))
             
-            (let ((constant-tests (if (null (production-constants production)) (cons t nil)
-                                    (do* ((tests (production-constants production) (cdr tests))
-                                          (result (test-constant-condition procedural (car tests))
-                                                  (test-constant-condition procedural (car tests))))
-                                         
-                                           ((or (null result) (null (cdr tests))) (cons result (car tests)))))))
-                
-                (if (null (car constant-tests))
-                    (setf (production-failure-condition production) (cdr constant-tests))
-                      
-                  
-                  (let ((user-bindings (if (null (production-binds production)) (cons t nil)
-                                         (do* ((tests (production-binds production) (cdr tests))
-                                               (result (test-and-perfrom-bindings procedural (car tests) production)
-                                                       
-                                                       (test-and-perfrom-bindings procedural (car tests) production)))
-                                              
-                                              ((or (null result) (null (cdr tests))) (cons result (car tests)))))))
-                    
-                    (if (null (car user-bindings))
-                        (setf (production-failure-condition production) (cdr user-bindings))
-                      
-                      (let ((others-pass (if (null (production-others production)) (cons t nil)
-                                           
-                                           (do* ((conditions (production-others production) (cdr conditions))
-                                                 (result (test-other-condition procedural (car conditions) production)
-                                                         (test-other-condition procedural (car conditions) production)))
-                                                ((or (null result) (null (cdr conditions))) (cons result (car conditions)))))))
-                        
-                        (if (null (car others-pass))
-                            (setf (production-failure-condition production) (cdr others-pass))
-                          
-                          (let ((u (compute-utility (production-name production) t)))
-                            
-                            (push-last production conflict-set)
-                            
-                            (setf (production-conflict-val production) u)
-                            
-                            (cond ((or (null best-ut) (> u best-ut))
-                                   (setf best-ut u)
-                                   (setf best (list production)))
-                                  ((= u best-ut)
-                                   (if (procedural-er procedural)
-                                       (push-last production best)
-                                     (setf best (list production))))))))))))))))
-          
+            (when (numberp offset)
+              (incf u offset))))        
+        
+        
+        (setf (production-conflict-val production) u)
+        
+        (when (and (procedural-crt procedural) mu (< u mu))
+          (model-output "Fails because:~%Utility ~s is below the threshold ~s" u mu))
+        
+        (cond ((or (null best-ut) (> u best-ut))
+               (setf best-ut u)
+               (setf best (list production)))
+              ((= u best-ut)
+               (if (procedural-er procedural)
+                   (push-last production best)
+                 (setf best (list production)))))))
+         
+         
     
     
     (when (and (listp best) best (procedural-er procedural))
@@ -1032,12 +1296,12 @@
     (when (procedural-conflict-set-hook procedural)
       (let ((val nil)
             (old-val nil)
-        
+            
             (cs-names (mapcar #'production-name
                         (sort (copy-list conflict-set)
                               #'(lambda (x y) 
                                   (sort-productions x y best))))))
-
+        
         (dolist (hook (procedural-conflict-set-hook procedural))
           (when val
             (setf old-val val))
@@ -1051,7 +1315,20 @@
     
     (when (and (procedural-cst procedural) (procedural-v procedural))
       (dolist (x conflict-set)
-        (print-instantiation x)))
+        (print-instantiation x)
+        (spp-fct (list (production-name x) :utility :u))
+        (unless (= (production-conflict-val x) (no-output (caar (spp-fct (list (production-name x) :u)))))
+          (command-output "{buffer search adjusted u value is ~,3f}" (production-conflict-val x)))))
+    
+    ;; restore the chunks to the search buffers then any "new" search results will overwrite
+    ;; those in the conflict-code
+    
+    (dolist (b (procedural-used-search-buffers procedural))
+      (let ((val (gethash b saved-search-chunks)))
+        (when val
+          (if (eq val :clear)
+              (erase-buffer b)
+            (overwrite-buffer-chunk b val)))))
     
     (cond ((null hook-set) ;; default mechanims are used
            (let ((best-production (car best))) ; not (car conflict-set) because that's only sorted for the hook
@@ -1076,7 +1353,7 @@
                    (when (production-break best-production)
                      
                      (schedule-event-relative 0 'print-instantiation
-                                             :module 'procedural
+                                              :module 'procedural
                                               :output nil
                                               :priority :max
                                               :params (list best-production))
@@ -1092,7 +1369,8 @@
                  (schedule-event-after-change 'conflict-resolution
                                               :module 'procedural
                                               :destination 'procedural
-                                              :output 'medium)))))
+                                              :output 'medium
+                                              :dynamic t)))))
           
           ((symbolp hook-set) ;; an over-ride production specified
            
@@ -1110,7 +1388,7 @@
                     (funcall code)))
            
            (when (production-break (get-production-internal hook-set procedural))
-            
+             
              (schedule-event-relative 0 'print-instantiation
                                       :module 'procedural
                                       :output nil
@@ -1124,13 +1402,25 @@
                                                  (symbol-name hook-set)))))
           
           ((stringp hook-set) ;; an abort selection reason provided
-            (model-warning "conflict-set-hook function canceled selection because : ~a" hook-set)
-            (schedule-event-relative (procedural-dat procedural) 'conflict-resolution
-                                     :module 'procedural
-                                     :destination 'procedural
-                                     :output 'medium))
+           (model-warning "conflict-set-hook function canceled selection because : ~a" hook-set)
+           (schedule-event-relative (procedural-dat procedural) 'conflict-resolution
+                                    :module 'procedural
+                                    :destination 'procedural
+                                    :output 'medium))
           (t ;; shouldn't happen but this is a saftey case
            (print-warning "Illegal conflict resolution situation occured. Contact Dan to let him know.")))))
+
+
+
+(defun ppm-offset (production) ;; it's the name called through the utility-offsets
+  (let ((prod (get-module procedural))
+        (p (get-production production)))
+    (when (and prod p (numberp (procedural-ppm prod)) (production-partial-matched-slots p))
+      (let ((override (awhen (procedural-ppm-hook prod)
+                             (funcall it production (production-partial-matched-slots p)))))
+        (if (numberp override)
+            override
+          (* (procedural-ppm prod) (reduce #'+ (production-partial-matched-slots p) :key #'fifth)))))))
 
 
 (defun un-delay-conflict-resolution ()
@@ -1160,9 +1450,14 @@
                                  
 (defun print-instantiation (production)
   
-  (print-production-text (replace-variables 
-                          (production-text production)
-                          (production-bindings production))))
+  (let ((prod (get-module procedural)))
+    (when prod
+      (if (and (procedural-ppm prod)
+               (production-partial-matched-slots production))
+          (print-partial-matched-production production)
+        (print-production-text (replace-variables 
+                                (production-text production)
+                                (production-bindings production)))))))
 
 
 (defun print-production (production)
@@ -1171,6 +1466,172 @@
   (print-production-text (production-text production)))
 
 
+
+(defun print-partial-matched-production (p)
+  
+  (let* ((text (copy-tree (production-text p)))
+         (p-name (pop text))
+         (str nil)
+         (buffer nil)
+         (slot nil)
+         (value nil)
+         (lhs t))
+    (if (production-dynamic p)
+        (command-output "(P* ~a" p-name)
+      (command-output "(P ~a" p-name))
+    
+    (loop
+      (when (null text) (return))
+      (cond ((stringp (car text))
+             (setf str (format nil "  ~S" (pop text)))
+             (command-output str))
+            ((equal (car text) '==>)
+             (setf lhs nil)
+             (setf str (format nil " ~a" (pop text)))
+             (command-output str))
+            ;; The direct request special case
+            ((and
+              (> (length (symbol-name (car text))) 1)
+              (equal #\> (aref (reverse (symbol-name (car text))) 0))
+              (equal #\+ (aref (symbol-name (car text)) 0))
+              (or (= (length text) 2)
+                  (and (> (length text) 2)
+                       (symbolp (third text))
+                       (not (eq (second text) 'isa))
+                       (> (length (symbol-name (third text))) 1)
+                       (or (equal #\> (aref (reverse (symbol-name (third text))) 0))
+                           (equal #\! (aref (reverse (symbol-name (third text))) 0))))))
+             (setf str (format nil "   ~a ~s" (pop text) (replace-variables 
+                                                          (pop text)
+                                                          (production-bindings p))))
+             (command-output str))
+            
+            ;; direct assignments are a trick too
+            ((and
+              (> (length (symbol-name (car text))) 1)
+              (equal #\> (aref (reverse (symbol-name (car text))) 0))
+              (equal #\= (aref (symbol-name (car text)) 0))
+              (> (length text) 1)
+              (not (and (> (length (symbol-name (second text))) 1)
+                        (equal #\> (aref (reverse (symbol-name (second text))) 0))))
+              (or (= (length text) 2)
+                  (and (symbolp (third text))
+                       (> (length (symbol-name (third text))) 1)
+                       (not (eq (second text) 'isa))
+                       (or (equal #\> (aref (reverse (symbol-name (third text))) 0))
+                           (equal #\! (aref (reverse (symbol-name (third text))) 0))))))
+              (setf str (format nil "   ~a ~s" (pop text) (replace-variables 
+                                                           (pop text)
+                                                           (production-bindings p))))
+             (command-output str))
+            
+            ((and
+              (> (length (symbol-name (car text))) 1)
+              (equal #\> (aref (reverse (symbol-name (car text))) 0)))
+             (let* ((val (pop text))
+                    (string (symbol-name val)))
+               (setf buffer (if (and lhs (equal #\= (aref string 0)))
+                                (intern (subseq string 1 (1- (length string))))
+                              nil))
+             (setf str (format nil "   ~a" val))
+             (command-output str)))
+            
+            ((equal (car text) '!stop!)
+             (setf str (format nil "   ~a" (pop text)))
+             (command-output str))
+            ((or
+              (equal (car text) '!output!)
+              (equal (car text) '!eval!)
+              (equal (car text) '!safe-eval!))
+             (setf buffer nil)
+             (setf str (format nil "   ~a ~s" (pop text) (replace-variables 
+                                                           (pop text)
+                                                           (production-bindings p))))
+             (command-output "~a" str))
+            ((or
+              (equal (car text) '!bind!)
+              (equal (car text) '!mv-bind!)
+              (equal (car text) '!safe-bind!))
+             (setf buffer nil)
+             (setf str 
+               (format nil "   ~a ~s ~s" (pop text) (replace-variables 
+                                                     (pop text)
+                                                     (production-bindings p))
+                 (replace-variables 
+                  (pop text)
+                  (production-bindings p))))
+             (command-output "~a" str))
+            ((member (car text) '(= - < > <= >=))
+             (if (and lhs buffer (eq (car text) '=))
+                 (setf slot 
+                   (replace-variables 
+                    (second text)
+                    (production-bindings p))
+                   
+                   value
+                   (replace-variables 
+                    (third text)
+                    (production-bindings p)))
+               (setf slot nil value nil))
+             (let ((partial (find (list buffer slot value) (production-partial-matched-slots p) :test 'equal :key (lambda (x) (subseq x 0 3)))))
+               
+               (if partial
+                   (setf str
+                     (format nil "    ~2a ~s [~s, ~s, ~f]" (pop text) 
+                       (replace-variables 
+                        (pop text)
+                        (production-bindings p))
+                       (replace-variables 
+                        (pop text)
+                        (production-bindings p))
+                       (fourth partial) (fifth partial)))
+                 
+                 (setf str 
+                   (format nil "    ~2a ~s ~s" (pop text) 
+                     (replace-variables 
+                      (pop text)
+                      (production-bindings p))
+                     (replace-variables 
+                      (pop text)
+                      (production-bindings p)))))
+             (command-output "~a" str)))
+            
+            
+            (t
+             (if (and lhs buffer)
+                 (setf slot 
+                   (replace-variables 
+                    (first text)
+                    (production-bindings p))
+                   
+                   value
+                   (replace-variables 
+                    (second text)
+                    (production-bindings p)))
+               (setf slot nil value nil))
+             (let ((partial (find (list buffer slot value) (production-partial-matched-slots p) :test 'equal :key (lambda (x) (subseq x 0 3)))))
+               
+               (if partial
+                   (setf str
+                     (format nil "       ~s [~s, ~s, ~f]"  
+                       (replace-variables 
+                        (pop text)
+                        (production-bindings p))
+                       (replace-variables 
+                        (pop text)
+                        (production-bindings p))
+                       (fourth partial) (fifth partial)))
+                 
+                 (setf str 
+                   (format nil "       ~s ~s"  
+                     (replace-variables 
+                      (pop text)
+                      (production-bindings p))
+                     (replace-variables 
+                      (pop text)
+                      (production-bindings p)))))
+               (command-output "~a" str)))))
+    (command-output ")")))
 
 
 (defun print-production-text (p-text)
@@ -1273,7 +1734,10 @@
          (schedule-query-buffer (second x) (replace-variables (third x) (production-bindings production)) 0 :module 'procedural )))
       (buffer-read 
        (when (procedural-lhst procedural)
-         (schedule-buffer-read (second x) 0 :module 'procedural)))))
+         (schedule-buffer-read (second x) 0 :module 'procedural)))
+      (buffer-search
+       (when (procedural-lhst procedural)
+         (schedule-event-relative 0 'buffer-search :module 'procedural :params (cdr x))))))
   
   (note-production-selection (production-name production))
   
@@ -1294,7 +1758,11 @@
               (symbol-name (production-name production)))
    :output 'low))
       
-
+      
+(defun buffer-search (buffer-name)
+  "dummy function to show in the trace"
+  (declare (ignore buffer-name)))
+      
 (defun production-fired (procedural production)
   ;(if t 
   ; productions can't fail to fire 
@@ -1351,7 +1819,11 @@
 (define-module-fct 'procedural '(production)
   (list (define-parameter :er :owner nil)
         
-        (define-parameter :v :owner nil)        
+        (define-parameter :v :owner nil)    
+        (define-parameter :md :owner nil)
+        (define-parameter :ppm :valid-test #'numornil :default-value nil
+          :warning "a number or nil" :documentation "Procedural partial matching")
+        
         (define-parameter :dat :valid-test #'numberp :default-value .05
           :warning "a number" :documentation "Default Action Time")
         
@@ -1366,6 +1838,11 @@
         (define-parameter :rhst :valid-test #'tornil :default-value t
           :warning "T or nil" 
           :documentation "Right Hand Side Trace")
+        
+        (define-parameter :ppm-hook :valid-test #'fctornil 
+          :default-value nil
+          :warning "a function or nil" 
+          :documentation "Procedural partial matching utility adjustment hook")
         
         (define-parameter :cycle-hook :valid-test #'fctornil 
           :default-value nil
@@ -1394,7 +1871,7 @@
           :documentation "Use a decision tree in production matching")
         )
   
-  :version "1.4" 
+  :version "2.0a1" 
   :documentation 
   "The procedural module handles production definition and execution"
     

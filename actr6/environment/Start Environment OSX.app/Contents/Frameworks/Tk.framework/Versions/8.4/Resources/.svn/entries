@@ -9,25 +9,25 @@
    last-author="db30"
    kind="dir"
    uuid="138765e7-a0e9-0310-87f6-9ca992f4eb68"
-   revision="766"/>
+   revision="821"/>
 <entry
    committed-rev="84"
    name="Info.plist"
-   text-time="2009-07-16T20:20:55.000000Z"
+   text-time="2010-01-19T14:29:25.000000Z"
    committed-date="2005-05-12T18:58:00.464626Z"
    checksum="1bb50db8a85c05fa5ebe3f18d4415254"
    last-author="db30"
    kind="file"
-   prop-time="2009-07-16T20:20:53.000000Z"/>
+   prop-time="2010-01-19T14:29:24.000000Z"/>
 <entry
    committed-rev="84"
    name="Tk.rsrc"
-   text-time="2009-07-16T20:20:55.000000Z"
+   text-time="2010-01-19T14:29:25.000000Z"
    committed-date="2005-05-12T18:58:00.464626Z"
    checksum="4b7091dae642b4e4918f9a3e6b78c82f"
    last-author="db30"
    kind="file"
-   prop-time="2009-07-16T20:20:53.000000Z"/>
+   prop-time="2010-01-19T14:29:24.000000Z"/>
 <entry
    name="Scripts"
    kind="dir"/>

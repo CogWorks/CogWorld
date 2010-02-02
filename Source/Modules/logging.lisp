@@ -132,12 +132,12 @@
       (declare (ignore second daylight zone other))
       (setf date-string (format nil "~d/~d/~d  ~d:~2d" month day year hour minute)))
     (log-info (list "CW-EVENT" "CW-VERSION" *version-string*))
-    (log-info (list "CW-EVENT" "EXPERIMENT-NAME" (experiment-name *mw*)))
+    (log-info (list "CW-EVENT" "EXPERIMENT-NAME" (experiment-name (cw))))
     (log-info (list "CW-EVENT" "SCREEN-RESOLUTION" (capi:screen-width (capi:convert-to-screen)) (capi:screen-height (capi:convert-to-screen))))
     (log-info (list "CW-EVENT" "DATE" date-string))
     (log-info (list "CW-EVENT" "Universal-time" (get-universal-time)))
     (log-info (list "CW-EVENT" "Unix-time" (unix-time)))
-    (when (eql (control-mode *mw*) :human)
+    (when (member (control-mode (cw)) '(:human :remote))
       (log-info (list "CW-EVENT" "ID" (get-uid)))
       (log-info (list "CW-EVENT" "EID" (aes8:rin->id (get-rin)))))
       ))
@@ -160,18 +160,18 @@
                   (setf fn (concatenate 'string fn (get-uid) ))
                 (setf fn (concatenate 'string fn ".dat")))
               (merge-pathnames fn dir)))))
-    ((:human :act-r)
+    ((:human :act-r :remote)
      (let ((condition-string ""))
     
        (if (not (local-path *mw*))
            (progn
              (capi:display-message "Please select a folder to save logging data.~%To avoid this message in the future, add (define-logging-path PATHSTRING) to your task code.")
              (setf (local-path *mw*) (capi:prompt-for-directory "Please select a logging folder:"))))
-
-       (dolist (task (task-list *mw*))
-         (setf condition-string
-               (string-append (task-condition task) condition-string))
-         )
+       (if (task-list *mw*)
+           (dolist (task (task-list *mw*))
+             (setf condition-string
+                   (string-append (task-condition task) condition-string)))
+         (setf condition-string "A"))
        
        (merge-pathnames 
           (make-pathname

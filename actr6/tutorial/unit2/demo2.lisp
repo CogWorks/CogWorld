@@ -15,7 +15,7 @@
                               "Q" "R" "S" "T" "V" "W" 
                               "X" "Y" "Z")))
          (text1 (first lis))
-         (window (open-exp-window "Letter recognition" )))
+         (window (open-exp-window "Letter recognition")))
     
     (add-text-to-exp-window :text text1 :x 125 :y 150)
     
@@ -39,7 +39,7 @@
 (define-model demo2
 
 (sgp :seed (123456 0))
-(sgp :v t :needs-mouse nil :show-focus t :trace-detail high :esc t)
+(sgp :v t :needs-mouse nil :show-focus t :trace-detail high)
   
 (chunk-type read-letters state)
 (chunk-type array letter)
@@ -114,5 +114,5 @@
 
 (goal-focus goal)
 
-(setf *actr-enabled-p* t)
+(setf *actr-enabled-p* nil)
 )

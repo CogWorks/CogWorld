@@ -58,6 +58,10 @@
 ;;;             :   note which parameters should trigger the warning.
 ;;; 2008.08.01 Dan
 ;;;             : * Procedural now owns :dat.
+;;; 2009.08.12 Dan
+;;;             : * Added a utility-offset hook which is called after the normal
+;;;             :   utility for a production is computed and set (without noise).  
+;;;             :   If it returns a number that's added into the utility value.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; General:
 ;;;
@@ -145,7 +149,8 @@
   egs esc dat ul ut
   iu nu alpha
   utility-hook 
-  history)
+  history
+  offsets)
 
 ;;; Functions necessary to support the production parameters
 
@@ -187,7 +192,15 @@
                         (+ (if (and (utility-esc u) (utility-egs u) (not (zerop (utility-egs u))))
                                (act-r-noise (utility-egs u))
                              0)
-                           (production-u production)))))
+                           (production-u production)
+                           (if (utility-offsets u)
+                               (reduce #'+ (mapcar  (lambda (x) 
+                                             (let ((val (funcall x production)))
+                                               (if (numberp val)
+                                                   val
+                                                 0)))
+                                             (utility-offsets u)))
+                             0)))))
         (if save
             (setf (production-utility production) utility)
           utility)))))
@@ -292,7 +305,16 @@
                "Utility-hook was set to ~S and is being overwritten"
                (utility-utility-hook u)))
             (setf (utility-utility-hook u) (cdr param)))
-            
+           
+           (:utility-offsets
+            (if (cdr param)
+              (if (member (cdr param) (utility-offsets u))
+                (print-warning 
+                 "Setting parameter ~s failed because ~s already on the hook."
+                 :activation-offsets
+                 (cdr param))
+                (push (cdr param) (utility-offsets u)))
+              (setf (utility-offsets u) nil)))
            ))
         (t 
          (case param
@@ -306,7 +328,8 @@
 
            (:alpha (utility-alpha u))
            
-           (:utility-hook (utility-utility-hook u))))))
+           (:utility-hook (utility-utility-hook u))
+           (:utility-offsets (utility-offsets u))))))
 
 
 (defun reset-utility-module (u)
@@ -336,7 +359,12 @@
         (define-parameter :utility-hook :valid-test #'fctornil 
           :default-value nil
           :warning "a function or nil" 
-          :documentation "Utility computation hook"))
+          :documentation "Utility computation hook")
+        
+        (define-parameter :utility-offsets :valid-test #'fctornil 
+          :default-value nil
+          :warning "a function or nil" 
+          :documentation "Add additional utility equation components"))
   
   :version "2.1" 
   :documentation  "A module that computes production utilities"

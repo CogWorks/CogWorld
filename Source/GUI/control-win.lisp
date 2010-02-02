@@ -169,14 +169,16 @@
    (file-buttons capi:row-layout '(button-add-task button-remove-task))
    (tasks capi:column-layout '(task-list file-buttons) :title "Tasks:" :title-position :frame :adjust :left)
    (equip-row capi:row-layout '( check-eyetracker check-response-pad check-eeg))
+   (equip-row1 capi:row-layout '( check-eyetracker  check-eeg))
    (human-layout capi:column-layout '(check-logging equip-row color-vision tasks))
    (model-layout capi:row-layout '(title-model model-file button-model)) 
    (actr-layout capi:column-layout '(model-layout actr-environment tasks))
-   (replay-layout capi:column-layout '())                
+   (replay-layout capi:column-layout '())
+   (remote-layout capi:column-layout '(check-logging equip-row1 color-vision tasks ))
    (control-layout capi:tab-layout '() :items '(("Human" human-layout)
                                               ("ACT-R" actr-layout)
                                               ("Logging" log-layout)
-                                              ("Replay" replay-layout))
+                                              ("Remote" remote-layout))
                  :visible-min-width 340 :visible-max-width 440
                  :print-function 'first :visible-child-function 'second :accessor control-layout)
    (buttons capi:column-layout '(button-start button-save-settings ))
@@ -186,7 +188,7 @@
    :title (format nil "CogWorld v~a" *version-string*)
    :destroy-callback 'shutdown-world
    :initial-focus 'experiment-name
-   :visible-min-height 640
+   :visible-min-height 700
    :visible-min-width 380
    :layout 'main
    :x 30
