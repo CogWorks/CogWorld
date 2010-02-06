@@ -66,12 +66,7 @@
   (let ((tsk (capi:choice-selected-item (task-list (control-window cw))))
         (app (remote-app)))
     (when tsk
-#|
-      (let ((fn (file-namestring tsk))
-            (dir-name (directory-namestring tsk)))
-        (with-open-file (fs (concatenate 'string dir-name "startup.m") :if-exists :overwrite :if-does-not-exist :create :direction :output)
-          (write-line fn fs)))
-|#
+      (change-directory (directory-namestring tsk))
       (mp:process-run-function "MATLAB" nil 'run-matlab)
       (mp:process-wait-with-timeout "matlab" 60 (lambda() (write-stream (comm app))))
       (when (write-stream (comm app))
@@ -735,5 +730,5 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun run-matlab ()
   (setf e (matlab:eng-open nil))
-  (matlab:eng-eval-string e "cd('~/Documents/MATLAB/MOT'); Cogworld('Connect'); Cogworld('Socket'); Cogworld('Disconnect');")
+  (matlab:eng-eval-string e "Cogworld('Connect'); Cogworld('Socket'); Cogworld('Disconnect');")
   (matlab:eng-close e))
