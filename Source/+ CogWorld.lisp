@@ -50,7 +50,7 @@
   :members 
 #+MACOSX
            (
-            
+            "Modules/matlab-lispworks.lisp"
             "Modules/control.lisp"
             "Modules/eyegaze.lisp"
             "Modules/foreign.lisp"
@@ -75,7 +75,7 @@
 
 #+WIN32
           (
-            
+            "Modules/matlab-lispworks.lisp"
             "Modules/control.lisp"
             "Modules/eyegaze.lisp"
             "Modules/foreign-win32.lisp"
