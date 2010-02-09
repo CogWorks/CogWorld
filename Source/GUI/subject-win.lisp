@@ -137,7 +137,7 @@
          (sel-idxs (capi:choice-selection exp-menu))
          (items (capi:collection-items exp-menu))
          (rin-text (capi:text-input-pane-text (text-rin win))))
-    (cond ((> 9 (length rin-text))
+    (cond ((not (eql 9 (length rin-text)))
            (cond ((null (cw-debug-mode))
                   (capi:display-message "RIN must be 9 characters in length, reenter")
                   (return-from registration-done))
