@@ -218,6 +218,7 @@
     (setf dispatched-configs 0)
     ;; Load the tasks
     (load-tasks cw)
+    (hide-menu-bar)
     (create-background-window)
     (show-background-window)
     (when (not (cw-debug-mode))
@@ -312,9 +313,15 @@
     (setf experiment-name  (capi:text-input-pane-text (experiment-name control-window)))
     (define-logging-folder (capi:title-pane-text (logging-folder control-window)))
     (setf dispatched-configs 0)
- ;    (create-background-window)
-  ;  (show-background-window)
+     (create-background-window)
+    (show-background-window)
     (make-remote-app)
+    (when (not (cw-debug-mode))
+      (capi:execute-with-interface control-window
+         #'(lambda () (capi:hide-interface control-window nil)))
+      (if listener-window
+          (capi:execute-with-interface listener-window
+             #'(lambda () (capi:hide-interface listener-window nil)))))
     (when (not (capi:item-selected (check-debug control-window)))
       (register-subject cw)) 
     (when (capi:item-selected (check-logging control-window)) 

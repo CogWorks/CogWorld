@@ -537,7 +537,7 @@
 ;;; All-in-one function -> keeps all variables local
 ;;; Speak the given string str with the voice of ID voice-num
 ;;; Will return nil if an invalid voice is selected
-(defun mw-speak (str &optional &key (voice 3) (model-string nil))
+(defun cw-speak (str &optional &key (voice 3) (model-string nil))
   (objc:with-autorelease-pool ()
     (block nil
       (let ((sc (return-speech-channel))
@@ -548,7 +548,7 @@
             (speak-phrase str sc)
           (return nil))
         
-        (if (equal (control-mode *mw*) :ACT-R)
+        (if (equal (control-mode *cw*) :ACT-R)
             (if model-string (new-word-sound model-string)
               (new-word-sound str)))
         

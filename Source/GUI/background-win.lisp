@@ -148,7 +148,7 @@
 
 
 (defun create-background-window ()
-  (hide-menu-bar)
+  
   (if (background-window *mw*)
       (capi:execute-with-interface
        (background-window *mw*)
