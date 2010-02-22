@@ -308,7 +308,7 @@
 
 (defmethod start-experiment-remote ((cw cogworld))
   (with-slots (control-window task-list experiment-name dispatched-configs 
-               status subject-info) cw
+               status subject-info listener-window background-window) cw
     (setf task-list nil)
     (setf experiment-name  (capi:text-input-pane-text (experiment-name control-window)))
     (define-logging-folder (capi:title-pane-text (logging-folder control-window)))
@@ -344,6 +344,7 @@
              (capi:apply-in-pane-process background-window #'capi:raise-interface background-window)
              (if (null (connect-eyetracker cw)) 
                  (setf status :halted)))
+           (hide-background-window)
            (if (not (eq status :halted)) 
                (run-remote-app cw)
              (stop-experiment cw)))
