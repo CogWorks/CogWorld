@@ -43,13 +43,14 @@
     (setf (file-path (logging cw)) fn)))
 
 (defmethod write-history-file ((cw cogworld) header values)
+  (when (logging cw)
     (with-open-file (fs (file-path (logging cw)) :direction :output :if-exists :error)
       (dolist (item header)
         (write item :stream fs) (write-char #\tab fs))
       (write-char #\newline fs)   
       (dolist (item  values)
         (write item :stream fs) (write-char #\tab fs))
-      (write-char #\newline fs)))
+      (write-char #\newline fs))))
 
 (defun open-file (filename)
   (open filename :if-exists :supersede :direction :output))
