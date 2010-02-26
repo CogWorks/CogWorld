@@ -131,6 +131,7 @@
            (with-slots (write-stream ip to-device stream-type) comm
              (setf ip (remove #\| (write-to-string ip-in)) to-device port)
              (setf write-stream (comm:open-tcp-stream ip  to-device  :direction :output :element-type 'base-char)))))
+        (END (stop-experiment (cw)))
 #|
         (MousePos
          (destructuring-bind ( x y) args
