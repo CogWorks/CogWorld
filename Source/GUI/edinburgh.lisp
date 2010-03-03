@@ -1,36 +1,6 @@
-(defmacro likert-button-left (label)
-  `(make-instance 'capi:radio-button
-                  :text ""
-                  :title ,label
-                  :title-position :left))
-
-(defmacro likert-button-right (label)
-  `(make-instance 'capi:radio-button
-                  :text ""
-                  :title ,label
-                  :title-position :right
-                  :title-gap -10))
-
-(defmacro likert-button-center ()
-  `(make-instance 'capi:radio-button
-                  :text ""))
-
-(defmacro likert-button-list (&rest labels)
-  `(let ((len (list-length ',labels))
-         (likert-buttons '()))
-     (let ((mid (/ len 2.0)))
-       (let ((sidelen (floor mid)))
-         (loop for i from 0 to (1- sidelen) do
-               (push (likert-button-right (nth i (reverse ',labels))) likert-buttons))
-         (cond
-          ((/= mid sidelen)
-           (push (likert-button-center) likert-buttons)
-           (loop for i from (1+ sidelen) to (1- len) do
-                 (push (likert-button-left (nth i (reverse ',labels))) likert-buttons)))
-          (t (loop for i from sidelen to (1- len) do
-                 (push (likert-button-left (nth i (reverse ',labels))) likert-buttons)))
-          )))
-     likert-buttons))
+(defun done-dialog (data win)
+  (declare (ignore data win))
+  (capi:abort-dialog))
           
 (capi:define-interface edinburgh ()
   ()
@@ -101,11 +71,22 @@
           :title-position :left
           :items (likert-button-list "Left" "" "Right")
           :layout-args '(:gap 10))
-   )
+   (button-done capi:push-button
+                :text "Done"
+                :callback 'done-dialog
+                :default-p t))
   (:layouts
-   (main capi:column-layout '(description inventory) :adjust :left)
-   (inventory capi:column-layout '(row1 row2 row3 row4 row5 row6 row7 row8 row9 row10) :adjust :right)
+   (main capi:column-layout '(description inventory buttons) :adjust :left)
+   (inventory capi:column-layout '(row1 row2 row3 row4 row5 row6 row7 row8 row9 row10) :adjust :right :accessor inventory)
+   (buttons capi:row-layout '(nil button-done nil) :adjust :center)
    )
   (:default-initargs
    :title "The Edinburgh Handedness Inventory")
   )
+     
+(defmethod initialize-instance :after ((win edinburgh) &rest args)
+  (let ((panels (capi:layout-description (inventory win))))
+    (dolist (panel panels)
+      (setf (capi:choice-selection (slot-value win panel)) nil))))
+
+(capi:display (make-instance 'edinburgh))
