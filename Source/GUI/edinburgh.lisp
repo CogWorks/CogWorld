@@ -89,4 +89,4 @@
     (dolist (panel panels)
       (setf (capi:choice-selection (slot-value win panel)) nil))))
 
-(capi:display (make-instance 'edinburgh))
+(capi:display-dialog (make-instance 'edinburgh))
