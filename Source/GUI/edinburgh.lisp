@@ -43,44 +43,64 @@
                        :weight :bold))
    (row1 capi:radio-button-panel
          :title "Writing:"
+         :title-gap 30
          :title-position :left
-         :items (likert-button-list "Left" "" "Right"))
+         :items (likert-button-list "Left" "" "Right")
+         :layout-args '(:gap 10))
    (row2 capi:radio-button-panel
           :title "Drawing:"
+          :title-gap 30
           :title-position :left
-          :items (likert-button-list "Left" "" "Right"))
+          :items (likert-button-list "Left" "" "Right")
+          :layout-args '(:gap 10))
    (row3 capi:radio-button-panel
           :title "Throwing:"
+          :title-gap 30
           :title-position :left
-          :items (likert-button-list "Left" "" "Right"))
+          :items (likert-button-list "Left" "" "Right")
+          :layout-args '(:gap 10))
    (row4 capi:radio-button-panel
           :title "Using Scissors:"
+          :title-gap 30
           :title-position :left
-          :items (likert-button-list "Left" "" "Right"))
+          :items (likert-button-list "Left" "" "Right")
+          :layout-args '(:gap 10))
    (row5 capi:radio-button-panel
           :title "Using a Toothbrush:"
+          :title-gap 30
           :title-position :left
-          :items (likert-button-list "Left" "" "Right"))
+          :items (likert-button-list "Left" "" "Right")
+          :layout-args '(:gap 10))
    (row6 capi:radio-button-panel
           :title "Using a Knife (without a fork):"
+          :title-gap 30
           :title-position :left
-          :items (likert-button-list "Left" "" "Right"))
+          :items (likert-button-list "Left" "" "Right")
+          :layout-args '(:gap 10))
    (row7 capi:radio-button-panel
           :title "Using a Spoon:"
+          :title-gap 30
           :title-position :left
-          :items (likert-button-list "Left" "" "Right"))
+          :items (likert-button-list "Left" "" "Right")
+          :layout-args '(:gap 10))
    (row8 capi:radio-button-panel
           :title "Using a broom (upper hand):"
+          :title-gap 30
           :title-position :left
-          :items (likert-button-list "Left" "" "Right"))
+          :items (likert-button-list "Left" "" "Right")
+          :layout-args '(:gap 10))
    (row9 capi:radio-button-panel
           :title "Striking a Match:"
+          :title-gap 30
           :title-position :left
-          :items (likert-button-list "Left" "" "Right"))
+          :items (likert-button-list "Left" "" "Right")
+          :layout-args '(:gap 10))
    (row10 capi:radio-button-panel
           :title "Opening a Box (holding the lid):"
+          :title-gap 30
           :title-position :left
-          :items (likert-button-list "Left" "" "Right"))
+          :items (likert-button-list "Left" "" "Right")
+          :layout-args '(:gap 10))
    )
   (:layouts
    (main capi:column-layout '(description inventory) :adjust :left)
