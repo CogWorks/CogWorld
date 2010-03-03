@@ -1,7 +1,17 @@
 (defun done-dialog (data win)
   (declare (ignore data win))
   (capi:abort-dialog))
-          
+
+(defun iscomplete (data win)
+  (let ((missing '())
+        (panels (capi:layout-description (inventory win))))
+    (dolist (panel (rest panels))
+      (let ((p (slot-value win panel)))
+        (if (= 0 (list-length (capi:choice-selected-items p)))
+            (push "!" missing))))
+    (if (zerop (list-length missing))
+        (setf (capi:button-enabled (done win)) t))))
+
 (capi:define-interface edinburgh ()
   ()
   (:panes
@@ -47,43 +57,50 @@
          :title-gap 30
          :title-position :left
          :items (likert-button-list "Left" "no pref" "Right")
-         :layout-args '(:gap 10))
+         :layout-args '(:gap 10)
+         :selection-callback 'iscomplete)
    (row2 capi:radio-button-panel
           :title "Drawing:"
           :title-gap 30
           :title-position :left
           :items (likert-button-list "Left" "" "Right")
-          :layout-args '(:gap 10))
+          :layout-args '(:gap 10)
+          :selection-callback 'iscomplete)
    (row3 capi:radio-button-panel
           :title "Throwing:"
           :title-gap 30
           :title-position :left
           :items (likert-button-list "Left" "" "Right")
-          :layout-args '(:gap 10))
+          :layout-args '(:gap 10)
+          :selection-callback 'iscomplete)
    (row4 capi:radio-button-panel
           :title "Using Scissors:"
           :title-gap 30
           :title-position :left
           :items (likert-button-list "Left" "" "Right")
-          :layout-args '(:gap 10))
+          :layout-args '(:gap 10)
+          :selection-callback 'iscomplete)
    (row5 capi:radio-button-panel
           :title "Using a Toothbrush:"
           :title-gap 30
           :title-position :left
           :items (likert-button-list "Left" "" "Right")
-          :layout-args '(:gap 10))
+          :layout-args '(:gap 10)
+          :selection-callback 'iscomplete)
    (row6 capi:radio-button-panel
           :title "Using a Knife (without a fork):"
           :title-gap 30
           :title-position :left
           :items (likert-button-list "Left" "" "Right")
-          :layout-args '(:gap 10))
+          :layout-args '(:gap 10)
+          :selection-callback 'iscomplete)
    (row7 capi:radio-button-panel
           :title "Using a Spoon:"
           :title-gap 30
           :title-position :left
           :items (likert-button-list "Left" "" "Right")
-          :layout-args '(:gap 10))
+          :layout-args '(:gap 10)
+          :selection-callback 'iscomplete)
    (row8 capi:radio-button-panel
           :title "Using a broom (upper hand):"
           :title-gap 30
@@ -95,17 +112,22 @@
           :title-gap 30
           :title-position :left
           :items (likert-button-list "Left" "" "Right")
-          :layout-args '(:gap 10))
+          :layout-args '(:gap 10)
+          :selection-callback 'iscomplete)
    (row10 capi:radio-button-panel
           :title "Opening a Box (holding the lid):"
           :title-gap 30
           :title-position :left
           :items (likert-button-list "Left" "" "Right")
-          :layout-args '(:gap 10))
+          :layout-args '(:gap 10)
+          :selection-callback 'iscomplete)
    (button-done capi:push-button
                 :text "Evaluate"
                 :callback 'done-dialog
-                :default-p t)
+                :default-p nil
+                :accepts-focus-p nil
+                :enabled nil
+                :accessor done)
    (np0 capi:display-pane
          :text "                 "
          :background :transparent)
