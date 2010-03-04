@@ -57,8 +57,9 @@
             "Modules/event.lisp"
             "Modules/response-pad.lisp"
             "Modules/color-vision.lisp"
-            "Modules/sendmail.lisp"
              "Modules/aes8.lisp"
+            "Modules/sendmail.lisp"
+            
             "Modules/logging.lisp"
             "Modules/remote-app.lisp"
            
