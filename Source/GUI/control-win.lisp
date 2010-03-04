@@ -116,6 +116,7 @@
    (task-list
     capi:list-panel
     :internal-border 5
+    :interaction :multiple-selection 
     :visible-min-width '(character 31)
     :visible-max-width '(character 31)
     :visible-min-height '(character 8)

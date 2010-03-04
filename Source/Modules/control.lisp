@@ -74,10 +74,12 @@
     
 
 (defmethod load-tasks ((cw cogworld))
-  (dotimes (i (length (capi:collection-items (task-list (control-window cw)))))
-    (load (aref (capi:collection-items (task-list (control-window cw))) i)))
-  (dolist (task (task-list cw))
-    (log-info (list "CW-EVENT" "TASK-LOADED" (name task)))))
+  (let* ((task-panel (task-list (control-window cw)))
+         (pos (capi:choice-selection task-panel )))
+    (dolist (i pos) ;;;(length (capi:collection-items task-panel)))
+      (load (aref (capi:collection-items task-panel) i)))
+    (dolist (task (task-list cw))
+      (log-info (list "CW-EVENT" "TASK-LOADED" (name task))))))
 
 (defmethod configure-tasks ((cw cogworld))
   (setf (dispatched-configs cw) 0)
@@ -218,7 +220,7 @@
     (setf dispatched-configs 0)
     ;; Load the tasks
     (load-tasks cw)
-    (hide-menu-bar)
+    ;(hide-menu-bar)
     (create-background-window)
     (show-background-window)
     (when (not (cw-debug-mode))
@@ -511,7 +513,7 @@
     (capi:apply-in-pane-process               ;; Set the CW start/stop button to Start
          (button-start control-window)
          #'(lambda () (setf (capi:item-text (button-start control-window)) "Start")))
-    (mp:process-run-function "done" '() (lambda () (sleep 1) (show-menu-bar)))
+    ;(mp:process-run-function "done" '() (lambda () (sleep 1) (show-menu-bar)))
     (setf task-list nil)))
 
 (defun stop-experiment-log-only ()
@@ -671,7 +673,8 @@
     (capi:apply-in-pane-process
      (task-list interface)
      #'(lambda () (setf (capi:collection-items (task-list interface))
-                        file-list)))
+                        file-list)
+         (if file-list (setf (capi:choice-selection (task-list interface)) '(0)))  ))
     (capi:apply-in-pane-process
      (control-layout interface)
      #'(lambda () (setf (capi:choice-selection (control-layout interface))
