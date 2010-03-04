@@ -1,4 +1,4 @@
-(defun done-dialog (data win)
+(defun score (win)
   (let ((score 0)
         (panels (capi:layout-description (inventory win)))
         (otherhands (capi:layout-description (otherhands win))))
@@ -11,15 +11,20 @@
                 (cond
                  ((string= val "Left")
                   (cond
-                   (oh (setf score (+ (- score len) (/ len 2))))
+                   (oh (setf score (- score (/ len 2))))
                    (t (setf score (- score len)))))
                  ((string= val "Right")
                   (cond
-                   (oh (setf score (- (+ score len) (/ len 2))))
+                   (oh (setf score (+ score (/ len 2))))
                    (t (setf score (+ score len))))))))
-        (capi:exit-dialog (/ score (* len len)))))))
+        (/ score (* len len 1.0))))))
+
+(defun done-dialog (data win)
+  (declare (ignore data))
+  (capi:exit-dialog (score win)))
 
 (defun iscomplete (data win)
+  (declare (ignore data))
   (let ((missing '())
         (panels (capi:layout-description (inventory win))))
     (dolist (panel (rest panels))
@@ -195,8 +200,5 @@
       (let ((p (slot-value win panel)))
         (setf (capi:choice-selection p) nil)
         (setf (capi:simple-pane-background p) :gray85)))))
-;        (let ((buttons (capi:collection-items p)))
- ;         (loop for button across buttons do
-  ;              (setf (capi:simple-pane-foreground button) :red)))))))
 
 (print (capi:display-dialog (make-instance 'edinburgh)))
