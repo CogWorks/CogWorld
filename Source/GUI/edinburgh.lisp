@@ -1,6 +1,23 @@
 (defun done-dialog (data win)
-  (declare (ignore data win))
-  (capi:abort-dialog))
+  (let ((score 0)
+        (panels (capi:layout-description (inventory win)))
+        (otherhands (capi:layout-description (otherhands win))))
+    (let ((p (rest panels))
+          (o (rest otherhands)))
+      (let ((len (list-length p)))
+        (loop for i from 0 to (1- len) do
+              (let ((val (capi:item-data (capi:choice-selected-item (slot-value win (nth i p)))))
+                    (oh (capi:button-selected (slot-value win (nth i o)))))
+                (cond
+                 ((string= val "Left")
+                  (cond
+                   (oh (setf score (+ (- score len) (/ len 2))))
+                   (t (setf score (- score len)))))
+                 ((string= val "Right")
+                  (cond
+                   (oh (setf score (- (+ score len) (/ len 2))))
+                   (t (setf score (+ score len))))))))
+        (capi:exit-dialog (/ score (* len len)))))))
 
 (defun iscomplete (data win)
   (let ((missing '())
@@ -164,7 +181,7 @@
    (inventory capi:column-layout '(row0 row1 row2 row3 row4 row5 row6 row7 row8 row9 row10) :adjust :right :accessor inventory)
    (row0 capi:row-layout '(col0 np0))
    (col0 capi:column-layout '(np1 np2))
-   (otherhands capi:column-layout '(h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10) :adjust :right)
+   (otherhands capi:column-layout '(h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10) :adjust :right :accessor otherhands)
    (h0 capi:column-layout '(oh1 oh2) :background :gray75)
    (ba capi:row-layout '(nil button-done nil) :adjust :center)
    )
@@ -182,4 +199,4 @@
  ;         (loop for button across buttons do
   ;              (setf (capi:simple-pane-foreground button) :red)))))))
 
-(capi:display-dialog (make-instance 'edinburgh))
+(print (capi:display-dialog (make-instance 'edinburgh)))
