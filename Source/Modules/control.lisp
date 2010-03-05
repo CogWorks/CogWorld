@@ -63,7 +63,8 @@
 ;; Experiment setup
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defmethod run-remote-app ((cw cogworld))
-  (let ((tsk (capi:choice-selected-item (task-list (control-window cw))))
+  (let* ((task-panel (task-list (control-window cw)))
+         (tsk (aref (capi:collection-items task-panel) (first (capi:choice-selection task-panel )) ))
         (app (remote-app)))
     (when tsk
       (change-directory (directory-namestring tsk))
