@@ -737,8 +737,7 @@
   (capi:button-selected (check-eeg (control-window *cw*))))
 
 (defun eeg-proc (func &rest args)
-#+:eeg
-  (when (eeg-p)
+  (when (eeg-p) 
     (apply (read-from-string (concatenate 'string "eeg:" (symbol-name func))) args)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

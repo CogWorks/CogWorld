@@ -15,7 +15,7 @@
 
 (if (not (find-package 'eeg)) (make-package 'eeg))
 (in-package 'eeg)
-(export '(socket closed-socket-p event connect sync-time begin-record end-record quit-eeg send-event disconnect connect-din disconnect-din send-din-event test-din test-tcpip initialize uninitialize event-notify))
+(export '(socket closed-socket-p event connect sync-time begin-record end-record quit-eeg send-event disconnect     test-tcpip initialize uninitialize event-notify))
 
 (defclass socket ()
   ((tcp-stream :initform nil :initarg :stream :accessor socket-stream)
@@ -267,7 +267,7 @@
 ;; 4 byte data type
 ;; 2 byte variable length data
 ;; variable length data
-
+#|
 (fli:register-module (probe-file "/usr/lib/libeeglib.dylib") :connection-style :immediate)
 
 (fli:define-foreign-function
@@ -305,6 +305,7 @@
     (send-din-event x)
     (sleep 1))
   (disconnect-din))
+|#
 
 (defun test-tcpip ()
   (initialize "1.0.0.4")
@@ -315,20 +316,21 @@
 (defun event-notify (eid &key (duration 1) (type-code nil) (label "") (description "") (data nil))
   (let ((tm (get-internal-real-time))
         (evt nil))
-    (send-din-event eid)
+    ;(send-din-event eid)
     ;(let ((res (get-din-event)))
     ;  (if (/= res eid) (capi:display-message (format nil "Sent ~A, but bitwhacker shows ~A" eid res))))
     (setq evt (make-instance 'event :start tm :duration duration :type (if type-code type-code (format nil "D~A" eid)) :label label :description description :data data))
     (send-event evt)
-    (send-din-event 0)
+   ; (send-din-event 0)
     evt))
 
 (defun initialize (ip &optional (port 55513) &key (os "MAC-") (sync t))
   (connect ip port :os os :sync sync)
-  (connect-din)
-  (send-din-event 0)
+;  (connect-din)
+  ;(send-din-event 0)
 )
 
 (defun uninitialize ()
   (disconnect)
-  (disconnect-din))
+;  (disconnect-din)
+)

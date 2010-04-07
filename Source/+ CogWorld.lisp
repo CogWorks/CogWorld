@@ -63,7 +63,7 @@
             "Modules/logging.lisp"
             "Modules/remote-app.lisp"
            
-#+:EEG      "Modules/eeg.lisp"
+            "Modules/eeg.lisp"
             "GUI/splash-win.lisp"
             "GUI/password-win.lisp"
             "GUI/control-win.lisp"
