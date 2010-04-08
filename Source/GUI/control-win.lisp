@@ -216,17 +216,15 @@
 
 (defun button-remove-push (&rest args)
   (declare (ignore args))
-  (let ((choice (capi:choice-selected-item (task-list (control-window *mw*))))
+  (let ((choices (capi:choice-selected-items (task-list (control-window *mw*))))
         (cur-vector (capi:collection-items (task-list (control-window *mw*))))
         (cur-list nil))
-    (if choice
-        (progn (dotimes (i (length cur-vector))
-                 (push (aref cur-vector i) cur-list))
-          (setf (capi:collection-items (task-list (control-window *mw*)))
-                (remove choice cur-list)))
-      )
-    )
-  )
+    (when choices
+      (dotimes (i (length cur-vector))
+        (push (aref cur-vector i) cur-list))
+      (dolist (choice choices)
+        (setf (capi:collection-items (task-list (control-window *mw*)))
+              (remove choice cur-list))))))
 
 (defun button-model-push (&rest args)
   (declare (ignore args))
