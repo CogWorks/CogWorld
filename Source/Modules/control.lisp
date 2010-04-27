@@ -793,7 +793,9 @@
       (uid (subject-info *cw*))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun run-matlab ()
-  (if (matlab:init "/Applications/MATLAB_R2010a.app")
+  (if (or
+       (matlab:init "/Applications/MATLAB_R2010a.app")
+       (matlab:init "/Applications/MATLAB_R2008b.app"))
       (let ((e (matlab:eng-open "matlab -maci")))
         (matlab:eng-eval-string e "Cogworld('Connect'); Cogworld('Socket'); Cogworld('Disconnect');")
         (matlab:eng-close e))))
