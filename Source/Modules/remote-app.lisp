@@ -47,6 +47,7 @@
 ; cur-loc  
 ; (cur-cursor (vector 0 0))
 ; objects
+ task-obj
  comm)
 
 
@@ -113,7 +114,7 @@
 
 (defmethod send-to ((dev remote-app) msg &rest args)
   (with-slots (write-stream msgs-out ) (comm dev)
-    (push msg msgs-out)  
+    (push (cons msg args) msgs-out)  
     (case msg
       (:RUN
        (write-to-stream write-stream (format nil "~A" (first args))))
@@ -122,7 +123,7 @@
 
 (defvar debuglog nil)
 (defmethod msg-from ((dev remote-app) msg)
-  (with-slots (cur-cursor comm) dev
+  (with-slots (task-obj comm) dev
     (destructuring-bind (cmd &rest args) msg
       (case cmd
 
@@ -131,7 +132,7 @@
            (with-slots (write-stream ip to-device stream-type) comm
              (setf ip (remove #\| (write-to-string ip-in)) to-device port)
              (setf write-stream (comm:open-tcp-stream ip  to-device  :direction :output :element-type 'base-char)))))
-        (END (stop-experiment (cw)))
+        (END (setf (write-stream comm) nil) (task-finished task-obj))
 #|
         (MousePos
          (destructuring-bind ( x y) args
@@ -154,12 +155,7 @@
         (otherwise 
          (error-message (format nil "Remote Device received invalid message ~S ~S" msg args )))
         ))))
-#|
-(defun run-remote-app (&optional (delay 12))
-  (sys:call-system "\"Start Environment.exe\"" :current-directory (translate-logical-pathname "ACT-R6:environment") :wait nil)
-  (sleep delay)
-  (start-environment))
-|#
+
 (let ((rd nil))
   (defun make-remote-app ()
     (setf rd (make-instance 'remote-app :comm (make-instance 'comm-object)))

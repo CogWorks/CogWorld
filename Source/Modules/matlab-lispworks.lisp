@@ -54,12 +54,13 @@
 (in-package "MATLAB")
 
 ;;; Should try and avoid hardcoding these paths in the future.
-#+MACOSX
+
+
 (register-module "/Applications/MATLAB_R2008b.app/bin/maci/libmat.dylib")
 (register-module "/Applications/MATLAB_R2008b.app/bin/maci/libeng.dylib")
-#+UNIX
-(register-module "/opt/matlab/bin/glnx86/libmat.dylib")
-(register-module "/opt/matlab/bin/glnx86/libeng.dylib")
+
+
+
 
 (define-c-typedef (file (:foreign-name "FILE")) :struct)
 

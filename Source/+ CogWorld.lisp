@@ -72,6 +72,7 @@
             "GUI/background-win.lisp"
             "GUI/eyegaze-win.lisp"
             "GUI/toolbar.lisp"
+            "GUI/movie-view.lisp"
             )
 
 #+WIN32
@@ -152,6 +153,7 @@
    (experiment-version :initform 1 :initarg :experiment-version :accessor experiment-version)
    (subject-info :initform nil :initarg :subject-info :accessor subject-info)
    (task-list :initform nil :initarg :task-list :accessor task-list)
+   (current-task :initform 0 :initarg :current-task :accessor current-task)
    (status :initform nil :initarg :status :accessor status)
    (control-mode :initform nil :initarg :control-mode :accessor control-mode)
    (dispatched-configs :initform 0 :initarg :dispatched-configs :accessor dispatched-configs)
@@ -166,10 +168,13 @@
    (listener-window :initform nil :initarg :listener-window :accessor listener-window)
    (background-window :initform nil :initarg :background-window :accessor background-window)
    (eyegaze-window :initform nil :initarg :eyegaze-window :accessor eyegaze-window)
-   (color-task :initform nil :initarg :color-task :accessor color-task)))
+   (color-task :initform nil :initarg :color-task :accessor color-task)
+   (run-proc :initform nil :initarg :run-proc :accessor run-proc)))
 
 (defclass task-class ()
   ((name :initform nil :initarg :name :accessor name)
+   (app :initform 'lisp :initarg :app :accessor app) 
+   (path :initform nil :initarg :path :accessor path)
    (task-condition :initform "?" :initarg :task-condition :accessor task-condition)
    (process :initform nil :initarg :process :accessor process)
    (status :initform nil :initarg :status :accessor status)

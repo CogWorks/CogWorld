@@ -35,15 +35,17 @@
 
 (defun register-task (name &key (run-function nil) (break-function nil)
                            (configure-function nil) (replay-function nil)
-                           (model-run-function nil))
+                           (model-run-function nil) (path nil) (app 'lisp))
   (let ((task (make-instance 'task-class
                              :name name
                              :configure-function configure-function
                              :run-function run-function
                              :model-run-function model-run-function
                              :break-function break-function
-                             :replay-function replay-function))
-        )
+                             :replay-function replay-function
+                             :path path
+                             :app app)))
+        
     (push task (task-list *cw*))
     task))
 
@@ -62,23 +64,33 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Experiment setup
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defmethod run-remote-app ((cw cogworld))
-  (let* ((task-panel (task-list (control-window cw)))
-         (tsk (aref (capi:collection-items task-panel) (first (capi:choice-selection task-panel )) ))
-        (app (remote-app)))
+(defmethod run-remote-app ()
+  (let* ((app (remote-app))
+         (cw (cw))
+         (tsk (nth (current-task cw) (task-list cw))))
     (when tsk
-      (change-directory (directory-namestring tsk))
+      (setf (task-obj app) tsk)
+      (change-directory (directory-namestring (path tsk)))
       (mp:process-run-function "MATLAB" nil 'run-matlab)
       (mp:process-wait-with-timeout "matlab" 60 (lambda() (write-stream (comm app))))
       (when (write-stream (comm app))
-        (send-to app :run tsk)))))
-    
+        (send-to app :run (path tsk))))))
+           
 
 (defmethod load-tasks ((cw cogworld))
   (let* ((task-panel (task-list (control-window cw)))
-         (pos (capi:choice-selection task-panel )))
-    (dolist (i pos) ;;;(length (capi:collection-items task-panel)))
-      (load (aref (capi:collection-items task-panel) i)))
+         (items (capi:collection-items task-panel)))
+    (dotimes (i (length items))
+      (let* ((tsk (aref items i))
+             (fn (file-namestring tsk)))
+        (cond ((not (equal (subseq fn (- (length fn) 2) (length fn)) ".m"))
+               (load tsk))
+              ((equal (subseq fn (- (length fn) 2) (length fn)) ".m")
+               (if (null (local-path cw)) (define-logging-folder (capi:title-pane-text (logging-folder (control-window cw)))))
+               (if (null (remote-app)) (make-remote-app))
+               (register-task (subseq fn 0 (- (length fn) 2)) :run-function 'run-remote-app :app 'matlab :path tsk)
+               ))))
+    (setf (task-list cw) (reverse (task-list cw)))
     (dolist (task (task-list cw))
       (log-info (list "CW-EVENT" "TASK-LOADED" (name task))))))
 
@@ -109,7 +121,7 @@
 (defun task-conditions ()
   (task-condition-list *cw*))
 
-(defmethod run-tasks ((cw cogworld))
+(defmethod run-tasks-concurrently ((cw cogworld))
   (dolist (task (task-list cw))
     (mp:process-run-function
      (name task)
@@ -117,6 +129,16 @@
        #'(lambda (task)
            (apply (run-function task) nil))
        task)))
+
+(defmethod run-tasks ((cw cogworld))
+  (with-slots (current-task task-list) cw
+    (while current-task
+      (let ((task (nth (current-task cw) task-list))
+            (save-idx current-task))
+        (mp:process-run-function (name task) nil #'(lambda (task) (apply (run-function task) nil)) task)
+        (mp:process-wait-local "task" (lambda (obj) (or (null (current-task obj)) (> (current-task obj) save-idx))) cw)))
+    (stop-experiment cw))
+  )
 
 ;; Provided for backward compatability: use TASK-FINISHED.
 (defun mw-task-finished (name)
@@ -127,11 +149,22 @@
      ((null (task-list *mw*))
       (stop-experiment *cw*))))
 
+#|
 (defun task-finished (task)
   ;(if (break-function task)
   ;    (apply (break-function task) nil))
   (setf (task-list *cw*) (remove task (task-list *cw*) :test 'equal))
   (if (null (task-list *cw*)) (stop-experiment *cw*)))
+|#
+
+(defmethod task-finished ((task task-class))
+  (when (eql (app task) 'matlab)
+    (capi:display-message "Press OK for next task"))
+  (with-slots (current-task run-proc task-list) (cw)
+    (set-mouse-position 10 40)
+     (incf current-task)
+     (if (>= current-task (length task-list)) (setf current-task nil))
+     (mp:process-poke run-proc )))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Experiment control
@@ -209,7 +242,7 @@
 
 (defmethod start-experiment-human ((cw cogworld))
   (with-slots (control-window task-list experiment-name dispatched-configs 
-              listener-window background-window status) cw
+              listener-window background-window status run-proc) cw
     ;; Kill the LispWorks toolbar window
     (if (not *delivered*)
         (dolist (interface (capi:screen-interfaces (capi:convert-to-screen)))
@@ -221,7 +254,8 @@
     (setf dispatched-configs 0)
     ;; Load the tasks
     (load-tasks cw)
-    ;(hide-menu-bar)
+    ;(hide-menu-bar) 
+
     (create-background-window)
     (show-background-window)
     (when (not (cw-debug-mode))
@@ -256,8 +290,10 @@
         (if (not (cw-debug-mode)) (capi:apply-in-pane-process  background-window #'capi:raise-interface background-window))
         (raise-tasks)
         (if (capi:item-selected (check-eyetracker control-window)) (start-eyetracking "BEGINNING-OF-TASK")))
-      (if (not (eql status :halted)) (run-tasks cw) (capi:display-message "CW :HALTED")))
-    ))
+      (if (not (eql status :halted)) 
+          (setf run-proc (mp:process-run-function "run-task" '() #'run-tasks cw)) 
+        (capi:display-message "CW :HALTED"))
+    )))
 
 
 (defun load-actr () 
@@ -502,7 +538,7 @@
     (if (not (cw-debug-mode)) (hide-background-window))
     ;(show-menu-bar)
     (dolist (task task-list)      ;; Close each task in the task-list
-    (if (break-function task) (apply (break-function task) nil)))
+      (if (break-function task) (apply (break-function task) nil)))
 
     (capi:execute-with-interface              ;; Show the CW control window
           control-window

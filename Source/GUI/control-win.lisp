@@ -203,16 +203,10 @@
 
 (defun button-add-push (&rest args)
   (declare (ignore args))
-  (let ((cur-vector (capi:collection-items (task-list (control-window *mw*))))
-        (cur-list nil)
-        (choice (capi:prompt-for-file "Select a file:"
+  (let ( (choice (capi:prompt-for-file "Select a file:"
                                  :filter "*.*")))
-    (if choice
-        (progn  (dotimes (i (length cur-vector))
-                  (push (aref cur-vector i) cur-list))
-          (setf (capi:collection-items (task-list (control-window *mw*)))
-                (cons choice cur-list))
-          ))))
+    (aif choice (capi:append-items (task-list (control-window *mw*)) (list it)))))
+        
 
 (defun button-remove-push (&rest args)
   (declare (ignore args))
