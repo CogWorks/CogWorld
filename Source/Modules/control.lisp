@@ -240,11 +240,15 @@
   (show-menu-bar)
   (capi:display (make-instance 'LISPWORKS-TOOLS::LISPWORKS-TOOLBAR-WINDOW)))
 
+(defun find-listener ()
+  (find 'lispworks-tools:listener (capi:screen-interfaces (capi:convert-to-screen)) :key 'type-of))
+
 (defmethod start-experiment-human ((cw cogworld))
   (with-slots (control-window task-list experiment-name dispatched-configs 
               listener-window background-window status run-proc) cw
     ;; Kill the LispWorks toolbar window
     (if (not *delivered*)
+        (setf listener-window (find-listener))
         (dolist (interface (capi:screen-interfaces (capi:convert-to-screen)))
           (if (equal (type-of interface)
                      'LISPWORKS-TOOLS::LISPWORKS-TOOLBAR-WINDOW)

@@ -9,8 +9,8 @@
     capi:title-pane :accessor info-pane)
    (controls
     capi:push-button-panel
-    :items '( "Play" "Done")
-    :callbacks '(movie-play movie-done)
+    :items '( "Play" "Replay" "Done")
+    :callbacks '(movie-play movie-play movie-done)
     :callback-type :interface)
    )
   (:layouts
