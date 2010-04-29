@@ -793,9 +793,14 @@
       (uid (subject-info *cw*))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun run-matlab ()
-  (if (or
-       (matlab:init "/Applications/MATLAB_R2010a.app")
-       (matlab:init "/Applications/MATLAB_R2008b.app"))
+  (let (dir)
+    (cond
+     ((probe-file "/Applications/MATLAB_R2010a.app")
+      (setf dir "/Applications/MATLAB_R2010a.app"))
+     ((probe-file "/Applications/MATLAB_R2008b.app")
+      (setf dir "/Applications/MATLAB_R2008b.app")))
+    (cond
+     ((matlab:init dir)
       (let ((e (matlab:eng-open "matlab -maci")))
         (matlab:eng-eval-string e "Cogworld('Connect'); Cogworld('Socket'); Cogworld('Disconnect');")
-        (matlab:eng-close e))))
+        (matlab:eng-close e))))))
