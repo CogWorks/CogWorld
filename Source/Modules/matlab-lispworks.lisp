@@ -20,6 +20,7 @@
 (defpackage "MATLAB"
   (:use "COMMON-LISP" "FLI")
   (:export
+   init
    mx-add-field
    mx-array-to-string
    mx-calc-single-subscript
@@ -52,15 +53,6 @@
    eng-output-buffer))
 
 (in-package "MATLAB")
-
-;;; Should try and avoid hardcoding these paths in the future.
-
-
-(register-module "/Applications/MATLAB_R2008b.app/bin/maci/libmat.dylib")
-(register-module "/Applications/MATLAB_R2008b.app/bin/maci/libeng.dylib")
-
-
-
 
 (define-c-typedef (file (:foreign-name "FILE")) :struct)
 
@@ -253,3 +245,12 @@
      (length :int))
   :result-type :int
   :documentation "Specify buffer for MATLAB output")
+
+(defun init (matlab-path)
+  #+:lispworks-32bit
+  (setf (lispworks:environment-variable "DYLD_LIBRARY_PATH") (concatenate 'string matlab-path "/bin/maci"))
+  #+:lispworks-64bit
+  (setf (lispworks:environment-variable "DYLD_LIBRARY_PATH") (concatenate 'string matlab-path "/bin/maci64"))
+  (and
+   (not (null (fli:register-module "libmat" :connection-style :immediate)))
+   (not (null (fli:register-module "libeng" :connection-style :immediate)))))
