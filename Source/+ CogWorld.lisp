@@ -106,11 +106,15 @@
 
 (defparameter *version-string* "1.2")
 
+(defparameter *default-experiment-settings-file-directory* (concatenate 'string (format nil "~a" (sys:get-folder-path :documents)) "CogWorks/"))
+
 (defparameter *mw* nil) ;; Provided for backward compatability: use *cw*
 (defparameter *cw* nil)
 (defparameter *delivered*
   #+:delivered t
   #-:delivered nil)
+
+(defparameter *experiment-settings-file* nil)
 
 (defparameter *task-conditions* nil)
 

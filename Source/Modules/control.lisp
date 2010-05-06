@@ -576,12 +576,12 @@
                    'LISPWORKS-TOOLS::LISPWORKS-TOOLBAR-WINDOW)
             (capi:destroy interface))))
 |#
+
+  (if (not (probe-file *default-experiment-settings-file-directory*))
+      (sys:make-directory *default-experiment-settings-file-directory*))
+
   (create-cw-windows)
-  (if (probe-file (or (parse-namestring (format nil "~~/Library/Preferences/CogWorld/cw-~a_init.lisp" *version-string*))
-                      ;; Provided for backward compatability:
-                      (parse-namestring (format nil "~~/Library/Preferences/MultiWorld/mw-~a_init.lisp" *version-string*))))
-      (load-settings)
-    (define-settings))
+  (define-settings)
   T)
 
 (defun create-cw-windows ()
@@ -621,7 +621,6 @@
        (&key
         (experiment-name "UNTITLED")
         (experiment-version 1)
-        (control-mode 0)
         (eyetracking nil)
         (logging t)
         (pad nil)
@@ -633,7 +632,8 @@
         (file-io nil)
         (sym->str nil)
         (file-list nil)
-        (model-file nil))
+        (model-file nil)
+        (debug nil))
 
   (let ((interface (control-window *cw*)))
 
@@ -701,26 +701,26 @@
      #'(lambda () (setf (capi:collection-items (task-list interface))
                         file-list)
          (if file-list (setf (capi:choice-selection (task-list interface)) '(0)))  ))
+
+    (capi:apply-in-pane-process
+     (delayed-file-io interface)
+     #'(lambda () (setf (capi:button-selected (check-debug interface))
+                        debug )))
     t))
 
 (defun save-settings ()
-  (let* ((filename
-          (ensure-directories-exist
-           (parse-namestring (format nil "~~/Library/Preferences/CogWorld/cw-~a_init.lisp" *version-string*))))
-         (handle (open-file filename))
-         (interface (control-window *cw*))
-         (file-list nil))
-
-    (dotimes (i (length (capi:collection-items (task-list interface))))
-      (push (format nil "~s" (aref (capi:collection-items (task-list interface)) i))
-            file-list)
-
-      )
-    (write (read-from-string (format nil
+  (if (null *experiment-settings-file*)
+      nil
+    (let* ((handle (open-file *experiment-settings-file*))
+           (interface (control-window *cw*))
+           (file-list nil))
+      (dotimes (i (length (capi:collection-items (task-list interface))))
+        (push (format nil "~s" (aref (capi:collection-items (task-list interface)) i))
+              file-list))
+      (write (read-from-string (format nil
 "(define-settings
    :experiment-name \"~a\"
    :experiment-version ~a
-   :control-mode ~a
    :eyetracking ~a
    :logging ~a
    :pad ~a
@@ -732,24 +732,26 @@
    :file-io ~a
    :sym->str ~a
    :file-list \'~a
-   :model-file \"~a\")"
-   (capi:text-input-pane-text (experiment-name interface))
-   (capi:text-input-pane-text (experiment-version interface))
-   (capi:choice-selection (control-layout interface))
-   (capi:button-selected (check-eyetracker interface))
-   (capi:button-selected (check-logging interface)) 
-   (capi:button-selected (check-response-pad interface))
-   (capi:button-selected (check-eeg interface))
-   (capi:button-selected (color-vision interface))
-   (capi:title-pane-text (logging-folder interface))
-   (capi:text-input-pane-text (logging-fn interface))
-   (capi:button-selected (fn-date interface))
-   (capi:button-selected (delayed-file-io interface))
-   (capi:button-selected (write-symbols-as-strings interface))
-   file-list
-   (capi:text-input-pane-text (model-file interface))))
-           :stream handle)
-    (close handle)))
+   :model-file \"~a\"
+   :debug ~a)"
+(capi:text-input-pane-text (experiment-name interface))
+(capi:text-input-pane-text (experiment-version interface))
+(capi:button-selected (check-eyetracker interface))
+(capi:button-selected (check-logging interface)) 
+(capi:button-selected (check-response-pad interface))
+(capi:button-selected (check-eeg interface))
+(capi:button-selected (color-vision interface))
+(capi:title-pane-text (logging-folder interface))
+(capi:text-input-pane-text (logging-fn interface))
+(capi:button-selected (fn-date interface))
+(capi:button-selected (delayed-file-io interface))
+(capi:button-selected (write-symbols-as-strings interface))
+file-list
+(capi:text-input-pane-text (model-file interface))
+(capi:button-selected (check-debug interface))))
+             :stream handle)
+    (close handle)
+    t)))
 
 (defun load-settings ()
   (load (format nil "~~/Library/Preferences/CogWorld/cw-~a_init.lisp" *version-string*)))

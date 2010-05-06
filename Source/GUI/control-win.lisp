@@ -145,11 +145,6 @@
     :visible-min-width 130
     :accessor button-start
     :text "Start")
-   (button-save-settings
-    capi:push-button
-    :callback 'button-save-settings-push
-    :visible-min-width 130
-    :text "Save Settings")
 ;;;;
    (logging-folder capi:title-pane :title "Logging Folder: " :text " " :accessor logging-folder :visible-min-width 300)
    (choose-logging-folder capi:push-button :title "Choose Logging Folder" :text "..." :accessor choose-logging-folder 
@@ -175,7 +170,7 @@
             :title "Options:"
             :title-position :frame
             :adjust :left)
-   (buttons capi:column-layout '(button-start button-save-settings ))
+   (buttons capi:column-layout '(button-start))
    (exp-opts capi:row-layout '(options tasks) :ratios '(1 1))
    (main capi:column-layout '(exp-info exp-opts log-layout buttons ) :adjust :center :accessor main)
    )
@@ -183,13 +178,24 @@
    :title (format nil "CogWorld v~a" *version-string*)
    :destroy-callback 'shutdown-world
    :initial-focus 'experiment-name
-   ;:visible-min-width 640
-   ;:visible-min-height 480
    :layout 'main
-   ;:x 30
-   ;:y 30
-   )
-  )
+   :toolbar-items (list 
+                   (make-instance
+                    'capi:toolbar-component
+                    :items
+                    (list
+                     (make-instance 'capi:toolbar-button
+                                    :text "New"
+                                    :image :std-file-new
+                                    :callback 'button-new-push)
+                     (make-instance 'capi:toolbar-button
+                                    :text "Open"
+                                    :image :std-file-open
+                                    :callback 'button-open-push)
+                     (make-instance 'capi:toolbar-button
+                                    :text "Save"
+                                    :image :std-file-save
+                                    :callback 'button-save-settings-push))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Event Handlers
@@ -224,11 +230,33 @@
     )
   )
 
-(defun button-save-settings-push (&rest args)
-  (declare (ignore args))
-  (save-settings)
-  (capi:display-message "Settings saved.")
-  )
+(defun button-save-settings-push (data interface)
+  (declare (ignore data)
+           (ignore interface))
+  (if (null *experiment-settings-file*)
+      (setf *experiment-settings-file* (capi:prompt-for-file
+                                        nil
+                                        :pathname *default-experiment-settings-file-directory*
+                                        :operation :save)))
+  (if (not (null *experiment-settings-file*))
+      (progn
+        (save-settings)
+        (capi:display-message "Settings saved."))))
+
+(defun button-new-push (data interface)
+  (declare (ignore data)
+           (ignore interface))
+  (define-settings))
+
+(defun button-open-push (data interface)
+  (declare (ignore data)
+           (ignore interface))
+  (let ((path (capi:prompt-for-file
+               nil
+               :pathname *default-experiment-settings-file-directory*
+               :operation :open)))
+    (if (not (null path))
+        (load path))))
 
 (defun button-start-push (data interface)
   (declare (ignore data))
