@@ -795,10 +795,10 @@
 (defun run-matlab ()
   (let (dir)
     (cond
-     ((probe-file "/Applications/MATLAB_R2010a.app")
-      (setf dir "/Applications/MATLAB_R2010a.app"))
      ((probe-file "/Applications/MATLAB_R2008b.app")
-      (setf dir "/Applications/MATLAB_R2008b.app")))
+      (setf dir "/Applications/MATLAB_R2008b.app"))
+     ((probe-file "/Applications/MATLAB_R2010a.app")
+      (setf dir "/Applications/MATLAB_R2010a.app")))
     (cond
      ((matlab:init dir)
       (let ((e (matlab:eng-open "matlab -maci")))
