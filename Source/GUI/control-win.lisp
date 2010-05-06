@@ -127,14 +127,20 @@
     :accessor task-list)
    (button-add-task
     capi:push-button
-    :width 10
     :callback 'button-add-push
-    :text "Add")
+    :text "+")
    (button-remove-task
     capi:push-button
-    :width 10
     :callback 'button-remove-push
-    :text "Remove")
+    :text "-")
+   (button-up-task
+    capi:push-button
+    ;:callback 'button-up-push
+    :text "<")
+   (button-down-task
+    capi:push-button
+    ;:callback 'button-down-push
+    :text ">")
    
 ;;;;
    (button-start
@@ -160,7 +166,7 @@
    (log-folder-info capi:column-layout '(logging-folder choose-logging-folder logging-fn))
    (log-opts capi:column-layout '(fn-date delayed-file-io write-symbols-as-strings))
    (log-layout capi:row-layout '(log-folder-info log-opts) :title "Logging Options:" :title-position :frame :adjust :left)
-   (file-buttons capi:column-layout '(nil button-add-task button-remove-task nil) :ratios '(1 1) :adjust :center)
+   (file-buttons capi:column-layout '(nil button-add-task button-remove-task button-up-task button-down-task nil) :ratios '(1 nil nil nil nil 1) :adjust :center)
    (tasks capi:row-layout'(task-list file-buttons)
           :title "Tasks:"
           :title-position :frame
