@@ -15,9 +15,9 @@
 (deliver 'build-world
          #+:cocoa 
          (CL-USER::write-macos-application-bundle
-          "/Applications/CogWorld\ 1.1/CogWorld.app"
+          "/Applications/CogWorld\ 1.2/CogWorld.app"
           :DOCUMENT-TYPES NIL)
-         #-:cocoa "MultiWorld"
+         #-:cocoa "CogWorld"
          0 :interface :capi)
 
 (quit)

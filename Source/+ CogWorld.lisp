@@ -1,33 +1,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Filename     : + MultiWorld.lisp
+;; Filename     : + CogWorld.lisp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;;
-;; Author       : Mike Schoelles, Chris R. Sims
-;; Copyright    : (C) 2005, 2009 CogWorks Laboratory
+;; Author       : Mike Schoelles, Chris R. Sims, Ryan M. Hope
+;; Copyright    : (C) 2005, 2009-2010 CogWorks Laboratory
 ;; Address      : Cognitive Science Department
 ;;              : Rennselaer Polytechnic Institute
 ;;              : Troy, NY 12180
 ;;              : schoem@rpi.edu
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;; Version      : 2.3.3
-;; Description  : MultiWorld system for developing and running experiments.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;; History
-;;
-;; [2005.03.10] : File created
-;; [2009.08.24] : Converted to Cogworld
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package definition
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-
-
 
 (export
  '(register-task mw-register-task configuration-done mw-configure-done
@@ -39,13 +23,11 @@
 
 (require "comm")
 
-(if (probe-file "/usr/lib/libeeglib.dylib") (push :eeg *features*))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; File system definition
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defsystem "MultiWorld-Files"
+(defsystem "CogWorld-Files"
   (:package CL-USER)
   :members 
 #+MACOSX
@@ -122,7 +104,7 @@
 (if (not (find :COGWORLD *features*))
     (push :COGWORLD *features*))
 
-(defparameter *version-string* "1.1")
+(defparameter *version-string* "1.2")
 
 (defparameter *mw* nil) ;; Provided for backward compatability: use *cw*
 (defparameter *cw* nil)
@@ -250,16 +232,10 @@
 ;; Startup
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;(if (not *delivered*)
-;    (compile-system "MultiWorld-Files"))
-
-(compile-system "MultiWorld-Files" :force t)
-(load-system "MultiWorld-Files")
+(compile-system "CogWorld-Files" :force t)
+(load-system "CogWorld-Files")
 
 (if (not *delivered*)
     (build-world))
 
-(provide "MultiWorld")
-
-;;;History
-;;; 12/10/2009: version 1.1 - added remote-app.lisp
+(provide "CogWorld")

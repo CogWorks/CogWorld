@@ -37,8 +37,7 @@
     :accessor experiment-name
     :title "Name:"
     :title-position :top
-    :visible-min-width '(character 25)
-    :visible-max-width '(character 25))
+    :visible-min-width '(character 25))
    (experiment-version
     capi:text-input-pane
     :accessor experiment-version
@@ -63,7 +62,6 @@
 ;;;;;;; Human ;;;;;;;;
    (check-logging
     capi:check-button
-    :title "Options:"
     :title-position :top
     :text "Data logging"
     :accessor check-logging)
@@ -117,10 +115,8 @@
     capi:list-panel
     :internal-border 5
     :interaction :multiple-selection 
-    :visible-min-width '(character 31)
-    :visible-max-width '(character 31)
+    :visible-min-width '(character 40)
     :visible-min-height '(character 8)
-    :visible-max-height '(character 8)
     :print-function #'(lambda (item)
                         (format nil "~a.~a"
                                 (pathname-name item)
@@ -131,10 +127,12 @@
     :accessor task-list)
    (button-add-task
     capi:push-button
+    :width 10
     :callback 'button-add-push
-    :text "Add...")
+    :text "Add")
    (button-remove-task
     capi:push-button
+    :width 10
     :callback 'button-remove-push
     :text "Remove")
    
@@ -163,35 +161,33 @@
 ;;;;
    )
   (:layouts
-   (row-0 capi:row-layout '(experiment-name experiment-version ))
-   (exp-info  capi:column-layout '(row-0 check-debug) :title "Experiment Info:" :title-position :frame)
-   (log-layout capi:column-layout '( logging-folder choose-logging-folder logging-fn fn-date delayed-file-io write-symbols-as-strings) 
-               :gap 20)
-   (file-buttons capi:row-layout '(button-add-task button-remove-task))
-   (tasks capi:column-layout '(task-list file-buttons) :title "Tasks:" :title-position :frame :adjust :left)
-   (equip-row capi:row-layout '( check-eyetracker check-response-pad check-eeg))
-   (equip-row1 capi:row-layout '( check-eyetracker  check-eeg))
-   (human-layout capi:column-layout '(check-logging equip-row color-vision tasks))
-   (model-layout capi:row-layout '(title-model model-file button-model)) 
-   (actr-layout capi:column-layout '(model-layout actr-environment tasks))
-   (replay-layout capi:column-layout '())
-   (control-layout capi:tab-layout '() :items '(("Human" human-layout)
-                                              ("ACT-R" actr-layout)
-                                              ("Logging" log-layout))
-                 :visible-min-width 340 :visible-max-width 440
-                 :print-function 'first :visible-child-function 'second :accessor control-layout)
+   (exp-info capi:row-layout '(experiment-name experiment-version) :ratios '(1 1) :title "Experiment Info:" :title-position :frame)
+   (log-folder-info capi:column-layout '(logging-folder choose-logging-folder logging-fn))
+   (log-opts capi:column-layout '(fn-date delayed-file-io write-symbols-as-strings))
+   (log-layout capi:row-layout '(log-folder-info log-opts) :title "Logging Options:" :title-position :frame :adjust :left)
+   (file-buttons capi:column-layout '(nil button-add-task button-remove-task nil) :ratios '(1 1) :adjust :center)
+   (tasks capi:row-layout'(task-list file-buttons)
+          :title "Tasks:"
+          :title-position :frame
+          :adjust :left
+          :ratios '(1 1))
+   (options capi:column-layout '(check-debug check-logging check-eyetracker check-response-pad check-eeg color-vision)
+            :title "Options:"
+            :title-position :frame
+            :adjust :left)
    (buttons capi:column-layout '(button-start button-save-settings ))
-   (main capi:column-layout '(exp-info   control-layout buttons )  :adjust :center :accessor main :gap 50) ;options tasks buttons)
+   (exp-opts capi:row-layout '(options tasks) :ratios '(1 1))
+   (main capi:column-layout '(exp-info exp-opts log-layout buttons ) :adjust :center :accessor main)
    )
   (:default-initargs
    :title (format nil "CogWorld v~a" *version-string*)
    :destroy-callback 'shutdown-world
    :initial-focus 'experiment-name
-   :visible-min-height 700
-   :visible-min-width 380
+   ;:visible-min-width 640
+   ;:visible-min-height 480
    :layout 'main
-   :x 30
-   :y 30
+   ;:x 30
+   ;:y 30
    )
   )
 
