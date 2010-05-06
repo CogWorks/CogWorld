@@ -175,11 +175,9 @@
    (model-layout capi:row-layout '(title-model model-file button-model)) 
    (actr-layout capi:column-layout '(model-layout actr-environment tasks))
    (replay-layout capi:column-layout '())
-   (remote-layout capi:column-layout '(check-logging equip-row1 color-vision tasks ))
    (control-layout capi:tab-layout '() :items '(("Human" human-layout)
                                               ("ACT-R" actr-layout)
-                                              ("Logging" log-layout)
-                                              ("Remote" remote-layout))
+                                              ("Logging" log-layout))
                  :visible-min-width 340 :visible-max-width 440
                  :print-function 'first :visible-child-function 'second :accessor control-layout)
    (buttons capi:column-layout '(button-start button-save-settings ))
