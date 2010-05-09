@@ -71,7 +71,7 @@
     (when tsk
       (setf (task-obj app) tsk)
       (change-directory (directory-namestring (path tsk)))
-      (mp:process-run-function "MATLAB" nil 'run-matlab)
+      (mp:process-run-function "MATLAB" nil 'run-matlab-task)
       (mp:process-wait-with-timeout "matlab" 60 (lambda() (write-stream (comm app))))
       (when (write-stream (comm app))
         (send-to app :run (path tsk))))))
@@ -89,8 +89,11 @@
                (if (null (local-path cw)) (define-logging-folder (capi:title-pane-text (logging-folder (control-window cw)))))
                (if (null (remote-app)) (make-remote-app))
                (register-task (subseq fn 0 (- (length fn) 2)) :run-function 'run-remote-app :app 'matlab :path tsk)
+               (setf *use-matlab* (1+ *use-matlab*))
                ))))
     (setf (task-list cw) (reverse (task-list cw)))
+    (if (plusp *use-matlab*)
+        (mp:process-run-function "Start MATLAB engine" nil 'start-matlab))
     (dolist (task (task-list cw))
       (log-info (list "CW-EVENT" "TASK-LOADED" (name task))))))
 
@@ -135,6 +138,7 @@
     (while current-task
       (let ((task (nth (current-task cw) task-list))
             (save-idx current-task))
+        (mp:process-wait-local "matlab-engine" (lambda () (not (null *matlab-engine*))))
         (mp:process-run-function (name task) nil #'(lambda (task) (apply (run-function task) nil)) task)
         (mp:process-wait-local "task" (lambda (obj) (or (null (current-task obj)) (> (current-task obj) save-idx))) cw)))
     (stop-experiment cw))
@@ -539,6 +543,8 @@
     (capi:apply-in-pane-process               ;; Set the CW start/stop button to Start
          (button-start control-window)
          #'(lambda () (setf (capi:item-text (button-start control-window)) "Start")))
+    (if *matlab-engine* do
+      (stop-matlab))     ;; Close MATLAB if its 
     ;(mp:process-run-function "done" '() (lambda () (sleep 1) (show-menu-bar)))
     (setf task-list nil)))
 
@@ -775,7 +781,7 @@ file-list
   (if (and *cw* (subject-info *cw*))
       (uid (subject-info *cw*))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun run-matlab ()
+(defun start-matlab ()
   (let (dir)
     (cond
      ((probe-file "/Applications/MATLAB_R2008b.app")
@@ -784,6 +790,10 @@ file-list
       (setf dir "/Applications/MATLAB_R2010a.app")))
     (cond
      ((matlab:init dir)
-      (let ((e (matlab:eng-open "matlab -maci")))
-        (matlab:eng-eval-string e "Cogworld('Connect'); Cogworld('Socket'); Cogworld('Disconnect');")
-        (matlab:eng-close e))))))
+      (setf *matlab-engine* (matlab:eng-open "matlab -maci"))))))
+
+(defun run-matlab-task ()
+  (matlab:eng-eval-string *matlab-engine* "Cogworld('Connect'); Cogworld('Socket'); Cogworld('Disconnect');"))
+
+(defun stop-matlab ()
+  (matlab:eng-close *matlab-engine*))

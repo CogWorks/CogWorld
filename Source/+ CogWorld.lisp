@@ -114,6 +114,9 @@
   #+:delivered t
   #-:delivered nil)
 
+(defparameter *use-matlab* 0)
+(defparameter *matlab-engine* nil)
+
 (defparameter *experiment-settings-file* nil)
 
 (defparameter *task-conditions* nil)
