@@ -128,19 +128,19 @@
    (button-add-task
     capi:push-button
     :callback 'button-add-push
-    :text "+")
+    :image *list-add*)
    (button-remove-task
     capi:push-button
     :callback 'button-remove-push
-    :text "-")
+    :image *list-remove*)
    (button-up-task
     capi:push-button
     ;:callback 'button-up-push
-    :text "<")
+    :image *go-up*)
    (button-down-task
     capi:push-button
     ;:callback 'button-down-push
-    :text ">")
+    :image *go-down*)
    
 ;;;;
    (button-start
@@ -166,7 +166,7 @@
    (log-folder-info capi:column-layout '(logging-folder choose-logging-folder logging-fn))
    (log-opts capi:column-layout '(fn-date delayed-file-io write-symbols-as-strings))
    (log-layout capi:row-layout '(log-folder-info log-opts) :title "Logging Options:" :title-position :frame :adjust :left)
-   (file-buttons capi:column-layout '(nil button-add-task button-remove-task button-up-task button-down-task nil) :ratios '(1 nil nil nil nil 1) :adjust :center)
+   (file-buttons capi:column-layout '(nil button-up-task button-add-task button-remove-task button-down-task nil) :ratios '(1 nil nil nil nil 1) :adjust :center)
    (tasks capi:row-layout'(task-list file-buttons)
           :title "Tasks:"
           :title-position :frame
@@ -257,12 +257,12 @@
 (defun button-open-push (data interface)
   (declare (ignore data)
            (ignore interface))
-  (let ((path (capi:prompt-for-file
-               nil
-               :pathname *default-experiment-settings-file-directory*
-               :operation :open)))
-    (if (not (null path))
-        (load path))))
+  (setf *experiment-settings-file* (capi:prompt-for-file
+                                    nil
+                                    :pathname *default-experiment-settings-file-directory*
+                                    :operation :open))
+  (if (not (null *experiment-settings-file*))
+      (load *experiment-settings-file*)))
 
 (defun button-start-push (data interface)
   (declare (ignore data))

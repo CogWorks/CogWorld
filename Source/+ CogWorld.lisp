@@ -128,6 +128,12 @@
 (defparameter *sponsors* (gp:read-external-image (current-pathname "Images/Sponsors.bmp")))
 (defparameter *color-test* nil)
 
+;; Icon files
+(defparameter *list-add* (gp:read-external-image (current-pathname "Images/icons/edit_add.png")))
+(defparameter *list-remove* (gp:read-external-image (current-pathname "Images/icons/edit_remove.png")))
+(defparameter *go-up* (gp:read-external-image (current-pathname "Images/icons/1downarrow.png")))
+(defparameter *go-down* (gp:read-external-image (current-pathname "Images/icons/1uparrow.png")))
+
 (defparameter *screen-width* nil)
 (defparameter *screen-height* nil)
 
