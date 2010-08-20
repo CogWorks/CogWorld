@@ -228,6 +228,45 @@
   :result-type :void
   :language :c)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(fli:define-c-enum ui-modes
+  (kuimodenormal 0)
+  (kuimodecontentsuppressed 1)
+  (kuimodecontenthidden 2)
+  (kuimodeallhidden 3)
+  (kuimodeallsuppressed 4))
+  
+(fli:define-c-enum ui-options
+  (kuioptionautoshowmenubar 1) ; 1 << 0
+  (kuioptiondisableapplemenu 4) ; 1 << 2
+  (kuioptiondisableprocessswitch 8) ; 1 << 3 
+  (kuioptiondisableforcequit 16) ; 1 << 4
+  (kuioptiondisablesessionterminate 32) ; 1 << 5
+  (kuioptiondisablehide 64) ; 1 << 6
+  (kuioptiondisablemenubartransparency 512)) ; 1 << 9
+
+(fli:define-c-typedef (systemuimode (:foreign-name "SystemUIMode")) int32-t)
+(fli:define-c-typedef (systemuioptions (:foreign-name "SystemUIOptions")) int32-t)
+(fli:define-c-typedef (osstatus (:foreign-name "OSStatus")) int32-t)
+
+(fli:define-foreign-function (setsystemuimode "SetSystemUIMode" :source)
+    ((in-mode systemuimode)
+     (in-options systemuioptions))
+  :result-type osstatus
+  :language :c)
+
+(defun kiosk-mode (enabled)
+  (if enabled
+      (setsystemuimode
+       (fli:enum-symbol-value 'ui-modes 'kuimodeallhidden)
+       (fli:enum-symbol-value 'ui-options 'kuioptionautoshowmenubar))
+    (setsystemuimode
+     (fli:enum-symbol-value 'ui-modes 'kuimodenormal)
+     0)))
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (fli:define-foreign-function (cgcapturealldisplays "CGCaptureAllDisplays" :source)
     ()
   :result-type cgdisplayerr
