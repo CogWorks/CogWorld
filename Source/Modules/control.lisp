@@ -138,7 +138,8 @@
     (while current-task
       (let ((task (nth (current-task cw) task-list))
             (save-idx current-task))
-        (mp:process-wait-local "matlab-engine" (lambda () (not (null *matlab-engine*))))
+        (if (plusp *use-matlab*)
+           (mp:process-wait-local "matlab-engine" (lambda () (not (null *matlab-engine*)))))
         (mp:process-run-function (name task) nil #'(lambda (task) (apply (run-function task) nil)) task)
         (mp:process-wait-local "task" (lambda (obj) (or (null (current-task obj)) (> (current-task obj) save-idx))) cw)))
     (stop-experiment cw))
