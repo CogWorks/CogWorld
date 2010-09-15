@@ -169,7 +169,8 @@
     (set-mouse-position 10 40)
      (incf current-task)
      (if (>= current-task (length task-list)) (setf current-task nil))
-     (mp:process-poke run-proc )))
+     (mp:process-poke run-proc ))
+  (kiosk-mode nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Experiment control
@@ -248,7 +249,7 @@
     (setf dispatched-configs 0)
     ;; Load the tasks
     (load-tasks cw)
-    ;(hide-menu-bar) 
+    (kiosk-mode t) 
 
     (create-background-window)
     (show-background-window)
