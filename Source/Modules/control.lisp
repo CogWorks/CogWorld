@@ -724,6 +724,7 @@
       (dotimes (i (length (capi:collection-items (task-list interface))))
         (push (format nil "~s" (aref (capi:collection-items (task-list interface)) i))
               file-list))
+        (setf file-list (reverse file-list))
       (write (read-from-string (format nil
 "(define-settings
    :experiment-name \"~a\"
