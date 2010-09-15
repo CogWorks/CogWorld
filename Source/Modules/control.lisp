@@ -781,8 +781,6 @@ file-list
 (defun start-matlab ()
   (let (dir)
     (cond
-     ((probe-file "/Applications/MATLAB_R2008b.app")
-      (setf dir "/Applications/MATLAB_R2008b.app"))
      ((probe-file "/Applications/MATLAB_R2010a.app")
       (setf dir "/Applications/MATLAB_R2010a.app")))
     (cond

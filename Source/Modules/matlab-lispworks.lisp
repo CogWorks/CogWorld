@@ -252,5 +252,6 @@
   #+:lispworks-64bit
   (setf (lispworks:environment-variable "DYLD_LIBRARY_PATH") (concatenate 'string matlab-path "/bin/maci64"))
   (and
+   (not (null (fli:register-module "libtbb" :connection-style :immediate)))
    (not (null (fli:register-module "libmat" :connection-style :immediate)))
    (not (null (fli:register-module "libeng" :connection-style :immediate)))))
