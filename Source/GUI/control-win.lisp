@@ -203,6 +203,13 @@
                                     :image :std-file-save
                                     :callback 'button-save-settings-push))))))
 
+(defmethod initialize-instance :after ((win control-window) &key)
+  (if (not *delivered*)
+      (dolist (interface (capi:screen-interfaces (capi:convert-to-screen)))
+        (if (equal (type-of interface)
+                   'LISPWORKS-TOOLS::LISPWORKS-TOOLBAR-WINDOW)
+            (capi:destroy interface)))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Event Handlers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

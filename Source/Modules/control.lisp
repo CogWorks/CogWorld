@@ -192,13 +192,7 @@
 
 (defmethod start-experiment-log-only ((cw cogworld))
   (with-slots (status control-window subject-info  experiment-name
-               dispatched-configs listener-window background-window task-list) cw
-    ;; Kill the LispWorks toolbar window
-    (if (not *delivered*)
-      (dolist (interface (capi:screen-interfaces (capi:convert-to-screen)))
-        (if (equal (type-of interface)
-                   'LISPWORKS-TOOLS::LISPWORKS-TOOLBAR-WINDOW)
-            (capi:destroy interface))))
+               dispatched-configs listener-window background-window task-list) cw   
     (setf task-list  nil)
     (setf subject-info (make-instance 'subject-info-class))
     (setf experiment-name (capi:text-input-pane-text experiment-name control-window ))
