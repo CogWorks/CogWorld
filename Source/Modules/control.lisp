@@ -70,8 +70,7 @@
          (tsk (nth (current-task cw) (task-list cw))))
     (when tsk
       (setf (task-obj app) tsk)
-      (change-directory (directory-namestring (path tsk)))
-      (mp:process-run-function "MATLAB" nil 'run-matlab-task)
+      (mp:process-run-function "MATLAB" nil 'run-matlab-task (directory-namestring (path tsk)))
       (mp:process-wait-with-timeout "matlab" 60 (lambda() (write-stream (comm app))))
       (when (write-stream (comm app))
         (send-to app :run (path tsk))))))
@@ -787,8 +786,9 @@ file-list
      ((matlab:init dir)
       (setf *matlab-engine* (matlab:eng-open "matlab -maci"))))))
 
-(defun run-matlab-task ()
-  (matlab:eng-eval-string *matlab-engine* "Cogworld('Connect'); Cogworld('Socket'); Cogworld('Disconnect');"))
+(defun run-matlab-task (path)
+  (let ((cmd (concatenate 'string "cd('" path "'); Cogworld('Connect'); Cogworld('Socket'); Cogworld('Disconnect');")))
+    (matlab:eng-eval-string *matlab-engine* cmd)))
 
 (defun stop-matlab ()
   (matlab:eng-close *matlab-engine*))
