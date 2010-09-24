@@ -539,7 +539,7 @@
     (capi:apply-in-pane-process               ;; Set the CW start/stop button to Start
          (button-start control-window)
          #'(lambda () (setf (capi:item-text (button-start control-window)) "Start")))
-    (if *matlab-engine* do
+    (if *matlab-engine*
       (stop-matlab))     ;; Close MATLAB if its 
     ;(mp:process-run-function "done" '() (lambda () (sleep 1) (show-menu-bar)))
     (setf task-list nil)))
