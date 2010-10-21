@@ -240,5 +240,3 @@
       (let ((p (slot-value win panel)))
         (setf (capi:choice-selection p) nil)
         (setf (capi:simple-pane-background p) :gray85)))))
-
-(print (capi:display-dialog (make-instance 'edinburgh)))

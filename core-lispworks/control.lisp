@@ -591,7 +591,7 @@
   #|
   (let ((sound-path (format nil "~a" (merge-pathnames 
                                       (make-pathname
-                                       :directory '(:RELATIVE "Source" "Sounds")
+                                       :directory '(:RELATIVE "Source" "sounds")
                                        :name "resolve-reverse"
                                        :type "wav")
                                       (local-path *cw*)))))
