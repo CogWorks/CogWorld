@@ -70,8 +70,7 @@
          (tsk (nth (current-task cw) (task-list cw))))
     (when tsk
       (setf (task-obj app) tsk)
-      (change-directory (directory-namestring (path tsk)))
-      (mp:process-run-function "MATLAB" nil 'run-matlab-task)
+      (mp:process-run-function "MATLAB" nil 'run-matlab-task (directory-namestring (path tsk)))
       (mp:process-wait-with-timeout "matlab" 60 (lambda() (write-stream (comm app))))
       (when (write-stream (comm app))
         (send-to app :run (path tsk))))))
@@ -169,7 +168,8 @@
     (set-mouse-position 10 40)
      (incf current-task)
      (if (>= current-task (length task-list)) (setf current-task nil))
-     (mp:process-poke run-proc )))
+     (mp:process-poke run-proc ))
+  (kiosk-mode nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Experiment control
@@ -191,13 +191,7 @@
 
 (defmethod start-experiment-log-only ((cw cogworld))
   (with-slots (status control-window subject-info  experiment-name
-               dispatched-configs listener-window background-window task-list) cw
-    ;; Kill the LispWorks toolbar window
-    (if (not *delivered*)
-      (dolist (interface (capi:screen-interfaces (capi:convert-to-screen)))
-        (if (equal (type-of interface)
-                   'LISPWORKS-TOOLS::LISPWORKS-TOOLBAR-WINDOW)
-            (capi:destroy interface))))
+               dispatched-configs listener-window background-window task-list) cw   
     (setf task-list  nil)
     (setf subject-info (make-instance 'subject-info-class))
     (setf experiment-name (capi:text-input-pane-text experiment-name control-window ))
@@ -248,7 +242,7 @@
     (setf dispatched-configs 0)
     ;; Load the tasks
     (load-tasks cw)
-    ;(hide-menu-bar) 
+    (kiosk-mode t) 
 
     (create-background-window)
     (show-background-window)
@@ -724,6 +718,7 @@
       (dotimes (i (length (capi:collection-items (task-list interface))))
         (push (format nil "~s" (aref (capi:collection-items (task-list interface)) i))
               file-list))
+        (setf file-list (reverse file-list))
       (write (read-from-string (format nil
 "(define-settings
    :experiment-name \"~a\"
@@ -785,16 +780,15 @@ file-list
 (defun start-matlab ()
   (let (dir)
     (cond
-     ((probe-file "/Applications/MATLAB_R2008b.app")
-      (setf dir "/Applications/MATLAB_R2008b.app"))
      ((probe-file "/Applications/MATLAB_R2010a.app")
       (setf dir "/Applications/MATLAB_R2010a.app")))
     (cond
      ((matlab:init dir)
       (setf *matlab-engine* (matlab:eng-open "matlab -maci"))))))
 
-(defun run-matlab-task ()
-  (matlab:eng-eval-string *matlab-engine* "Cogworld('Connect'); Cogworld('Socket'); Cogworld('Disconnect');"))
+(defun run-matlab-task (path)
+  (let ((cmd (concatenate 'string "cd('" path "'); Cogworld('Connect'); Cogworld('Socket'); Cogworld('Disconnect');")))
+    (matlab:eng-eval-string *matlab-engine* cmd)))
 
 (defun stop-matlab ()
   (matlab:eng-close *matlab-engine*))
