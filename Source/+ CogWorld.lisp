@@ -106,10 +106,7 @@
 
 (defparameter *version-string* "1.2")
 
-#-:UNIX
 (defparameter *default-experiment-settings-file-directory* (concatenate 'string (format nil "~a" (sys:get-folder-path :documents)) "CogWorld/"))
-#+:UNIX
-(defparameter *default-experiment-settings-file-directory* "~/.CogWorld")
 
 (defparameter *mw* nil) ;; Provided for backward compatability: use *cw*
 (defparameter *cw* nil)
