@@ -4,6 +4,7 @@
   :version "2.0"
   :licence "LGPL-2.1"
   :serial t
+  :depends-on (:cogworld.core-generic)
   :components (
                (:file "eeg")
                (:file "eyegaze")

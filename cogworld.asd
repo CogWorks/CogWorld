@@ -5,9 +5,9 @@
   :licence "LGPL-2.1"
   :serial t
   :depends-on (
-               :cogworld.hardware
                :cogworld.core-generic
                :cogworld.core-lispworks
+	       :cogworld.hardware
                :cogworld.gui
                :cogworld.mini-tasks
                )

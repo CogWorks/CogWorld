@@ -10,5 +10,7 @@
                (:file "classes")
                (:file "aes8")
                (:file "string-utils")
+	       #+MACOSX (:file "foreign-macosx")
+	       #+WIN32 (:file "foreign-win32")
                )
   )
