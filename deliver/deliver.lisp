@@ -12,7 +12,7 @@
 ;; Now deliver the application itself and create the 
 ;; application
 
-(deliver 'build-world
+(deliver 'cogworld
          #+:cocoa 
          (CL-USER::write-macos-application-bundle
           "/Applications/CogWorld.app"

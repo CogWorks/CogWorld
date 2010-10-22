@@ -558,7 +558,7 @@
 (defun cw () *cw*)
 
 ;; Initialize *cw* and create the control interface
-(defun build-world ()
+(defun cogworld ()
   (setf *screen-width* (capi:screen-width (capi:convert-to-screen)))
   (setf *screen-height* (capi:screen-height (capi:convert-to-screen)))
   (setf *cw* (make-instance 'cogworld)) ;;; :color-task (make-instance 'color-task)))

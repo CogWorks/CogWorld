@@ -1,0 +1,29 @@
+Prerequisites
+==============
+
+1.	ASDF... If you are using a Lisp implementation which does not include ASDF (like Lispworks)
+	I recommend you use Quicklisp to get it (http://www.quicklisp.org/beta/). Installation is
+	dead simple, just follow the directions on the website.
+
+
+Setup For Developers
+=====================
+
+1.	If the directory "~/.config/common-lisp/source-registry.conf/"
+    	does not exist, create it.
+2.  	Edit the file "~/.config/common-lisp/source-registry.conf/10-cogworld.conf"
+    	to contain a like like below making sure to set the correct path to CogWorld source code:
+	
+	(:tree "/Users/ryan/workspace/CogWorld")
+
+
+Compiling and Loading CogWorld
+===============================
+
+1.	(asdf:load-system 'cogworld)
+
+
+Running CogWorld
+=================
+
+1.	(cogworld)
