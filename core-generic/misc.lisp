@@ -10,3 +10,6 @@
   `(do ()
        ((not ,test))
      ,@body))
+
+(defun delete-nth (sequence n)
+  (delete-if (constantly t) sequence :start n :count 1))

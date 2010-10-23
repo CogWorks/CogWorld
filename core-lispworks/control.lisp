@@ -263,9 +263,6 @@
       (with-slots (first-name  last-name age major gender exp-history) (subject-info cw)
         (let ((header (list  "FIRST" "LAST" "AGE" "MAJOR" "GENDER" "RIN" "EXP-HISTORY"))
               (values (list first-name last-name age major gender (get-rin) exp-history)))
-          (when (capi:item-selected (color-vision control-window)) 
-            (setq header (append header '("Normal% Red/Green%")))
-            (setq values (append values (do-color-test))))                    
           (write-history-file cw header values)))
       (when (capi:item-selected (check-eyetracker control-window))     
         (mp:process-wait "idle" (lambda (win) 
@@ -300,39 +297,6 @@
     (capi:display (listener-window *cw*)))
   (setq *act-r-stream* (capi:interactive-pane-stream (listener (listener-window *cw*)))))
 
-(defmethod start-experiment-model ((cw cogworld))
-  (with-slots (control-window task-list experiment-name dispatched-configs 
-               status subject-info) cw
-    (load-actr)
-    (if (capi:item-selected (actr-environment control-window)) (run-environment 10))
-    (setf task-list nil)
-    (setf experiment-name  (capi:text-input-pane-text (experiment-name control-window)))
-    (setf dispatched-configs 0)
- 
-    (load-tasks cw) 
-    (configure-tasks cw)
-    (setf subject-info (make-instance 'subject-info-class))
-  
-    (let ((m (capi:text-input-pane-text (model-file control-window))))
-      (when (plusp (length m)) 
-        (cond  ((or (not (probe-file (capi:text-input-pane-text (model-file control-window))))
-                  (not (pathname-name (capi:text-input-pane-text (model-file control-window)))))
-              (capi:display-message "Could not load ACT-R model file.")
-              (setf status  :halted))
-             (t
-              (load m)
-              ;(define-multiworld-chunk-types)
-              ))))
-
-  (cond ((not (eq status :halted))
-         (log-header)
-         (run-tasks cw)
-      ;   (let ((secs (capi:prompt-for-value "Run model for how many seconds?")))
-      ;     (capi:interactive-pane-execute-command (listener (listener-window *cw*)) (format nil "(run ~a :real-time t)" secs)))
-         )
-        (t
-         (stop-experiment cw)))))
-
 (defmethod start-experiment-remote ((cw cogworld))
   (with-slots (control-window task-list experiment-name dispatched-configs 
                status subject-info listener-window background-window) cw
@@ -359,10 +323,7 @@
              (log-header)
              (with-slots (first-name  last-name age major gender exp-history) (subject-info cw)
                (let ((header (list  "FIRST" "LAST" "AGE" "MAJOR" "GENDER" "RIN" "EXP-HISTORY"))
-                     (values (list first-name last-name age major gender (get-rin) exp-history)))
-                 (when (capi:item-selected (color-vision control-window)) 
-                   (setq header (append header '("Normal% Red/Green%")))
-                   (setq values (append values (do-color-test))))                    
+                     (values (list first-name last-name age major gender (get-rin) exp-history)))                    
                  (write-history-file cw header values))))
            (when (capi:item-selected (check-eyetracker control-window))     
              (mp:process-wait "idle" (lambda (win) 
@@ -623,17 +584,17 @@
         (experiment-name "UNTITLED")
         (experiment-version 1)
         (eyetracking nil)
+        (eyetracker-ip "192.168.1.2")
         (logging t)
         (pad nil)
         (eeg nil)
-        (color-vision-test nil)
-        (log-dir "    ")
+        (eeg-ip "192.168.1.3")
+        (log-dir "")
         (log-fn "")
         (append-day-hr-min nil)
         (file-io nil)
         (sym->str nil)
         (file-list nil)
-        (model-file nil)
         (debug nil))
 
   (let ((interface (control-window *cw*)))
@@ -647,52 +608,36 @@
      #'(lambda () (setf (capi:text-input-pane-text (experiment-version interface))
                         (format nil "~a" experiment-version))))
     (capi:apply-in-pane-process
-     (model-file interface)
-     #'(lambda () (setf (capi:text-input-pane-text (model-file interface))
-                        model-file)))
-
-    (capi:apply-in-pane-process
      (check-response-pad interface)
      #'(lambda () (setf (capi:button-selected (check-response-pad interface))
                         pad)))
-
     (capi:apply-in-pane-process
      (check-eeg interface)
      #'(lambda () (setf (capi:button-selected (check-eeg interface))
                         eeg)))
-
     (capi:apply-in-pane-process
-     (color-vision interface)
-     #'(lambda () (setf (capi:button-selected (color-vision interface))
-                        color-vision-test)))
-
+     (eeg-ip interface)
+     #'(lambda () (setf (capi:text-input-pane-text (eeg-ip interface))
+                        eeg-ip)))
     (capi:apply-in-pane-process
      (check-eyetracker interface)
      #'(lambda () (setf (capi:button-selected (check-eyetracker interface))
                         eyetracking)))
     (capi:apply-in-pane-process
+     (eyetracker-ip interface)
+     #'(lambda () (setf (capi:text-input-pane-text (eyetracker-ip interface))
+                        eyetracker-ip)))
+    (capi:apply-in-pane-process
      (check-logging interface)
      #'(lambda () (setf (capi:button-selected (check-logging interface))
                         logging))) 
-  
     (capi:apply-in-pane-process
      (logging-folder interface)
-       (lambda () (setf (capi:title-pane-text (logging-folder interface)) log-dir)))
-
-    (capi:apply-in-pane-process
-     (logging-fn interface)
-       (lambda () (setf (capi:text-input-pane-text (logging-fn interface)) log-fn)))
-
-    (capi:apply-in-pane-process
-     (fn-date interface)
-     #'(lambda () (setf (capi:button-selected (fn-date interface))
-                        append-day-hr-min)))
-           
+       (lambda () (setf (capi:text-input-pane-text (logging-folder interface)) log-dir)))
     (capi:apply-in-pane-process
      (delayed-file-io interface)
      #'(lambda () (setf (capi:button-selected (delayed-file-io interface))
                         file-io )))
-
     (capi:apply-in-pane-process
      (write-symbols-as-strings interface)
      #'(lambda () (setf (capi:button-selected (write-symbols-as-strings interface))
@@ -702,7 +647,6 @@
      #'(lambda () (setf (capi:collection-items (task-list interface))
                         file-list)
          (if file-list (setf (capi:choice-selection (task-list interface)) '(0)))  ))
-
     (capi:apply-in-pane-process
      (delayed-file-io interface)
      #'(lambda () (setf (capi:button-selected (check-debug interface))
@@ -724,32 +668,29 @@
    :experiment-name \"~a\"
    :experiment-version ~a
    :eyetracking ~a
+   :eyetracker-ip ~a
    :logging ~a
    :pad ~a
    :eeg ~a
-   :color-vision-test ~a
+   :eeg-ip ~a
    :log-dir ~S
-   :log-fn ~S
    :append-day-hr-min ~a
    :file-io ~a
    :sym->str ~a
    :file-list \'~a
-   :model-file \"~a\"
    :debug ~a)"
 (capi:text-input-pane-text (experiment-name interface))
 (capi:text-input-pane-text (experiment-version interface))
 (capi:button-selected (check-eyetracker interface))
+(capi:text-input-pane-text (eyetracker-ip interface))
 (capi:button-selected (check-logging interface)) 
 (capi:button-selected (check-response-pad interface))
 (capi:button-selected (check-eeg interface))
-(capi:button-selected (color-vision interface))
+(capi:text-input-pane-text (eeg-ip interface))
 (capi:title-pane-text (logging-folder interface))
-(capi:text-input-pane-text (logging-fn interface))
-(capi:button-selected (fn-date interface))
 (capi:button-selected (delayed-file-io interface))
 (capi:button-selected (write-symbols-as-strings interface))
 file-list
-(capi:text-input-pane-text (model-file interface))
 (capi:button-selected (check-debug interface))))
              :stream handle)
     (close handle)

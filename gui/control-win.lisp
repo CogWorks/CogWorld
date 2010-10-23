@@ -30,100 +30,30 @@
   ((visible :initform t :accessor visible)
    (pending-debug-messages :initform nil :accessor pending-debug-messages)
    )
-
-  (:panes
-   (experiment-name
+  (:panes 
+   ;;;;;;; Info ;;;;;;;
+   (exp-name
     capi:text-input-pane
     :accessor experiment-name
     :title "Name:"
-    :title-position :top
-    :visible-min-width '(character 25))
-   (experiment-version
+    :visible-min-width '(character 32))
+   (exp-ver
     capi:text-input-pane
     :accessor experiment-version
     :title "Version:"
-    :title-position :top
     :visible-min-width '(character 5)
     :visible-max-width '(character 5))
-;;;;;;; Model ;;;;;;;
-   (model-file
-    capi:text-input-pane
-    :visible-min-width '(character 25)
-    :visible-max-width '(character 25)
-    :accessor model-file)
-   (title-model
-    capi:title-pane
-    :title "Model location:")
-   (button-model
-    capi:push-button
-    :callback 'button-model-push
-    :enabled t
-    :text "...")
-;;;;;;; Human ;;;;;;;;
-   (check-logging
-    capi:check-button
-    :title-position :top
-    :text "Data logging"
-    :accessor check-logging)
-   (check-debug
-    capi:check-button
-    :text "Debug mode"
-    :accessor check-debug)
-   (check-eyetracker
-    capi:check-button
-    :text "Eyetracker"
-    :selected nil
-    :enabled
-    #+MACOSX t
-    #-MACOSX nil
-    :accessor check-eyetracker)
-
-   (check-response-pad
-    capi:check-button
-    :text "Response Pad"
-    :selected nil
-    :enabled
-    #+MACOSX t
-    #-MACOSX nil
-    :accessor check-response-pad)
-
-   (check-eeg
-    capi:check-button
-    :text "EEG"
-    :selected nil
-    :enabled
-    #+MACOSX t
-    #-MACOSX nil
-    :accessor check-eeg)
-
-   (color-vision
-    capi:check-button
-    :text "Color Vision Test"
-    :selected nil
-    :enabled t
-    :accessor color-vision)
-   
-   (actr-environment
-    capi:check-button
-    :text "Environment"
-    :selected nil
-    :enabled t
-    :accessor actr-environment)
-
-
+   ;;;;;;; Tasks ;;;;;;;;
    (task-list
     capi:list-panel
     :internal-border 5
-    :interaction :multiple-selection 
-    :visible-min-width '(character 40)
-    :visible-min-height '(character 8)
+    :interaction :single-selection
+    :accepts-focus-p nil
+    :visible-min-width '(character 20)
     :print-function #'(lambda (item)
                         (format nil "~a.~a"
                                 (pathname-name item)
                                 (pathname-type item)))
-    :horizontal-scroll
-    #+MACOSX nil
-    #-MACOSX t
     :accessor task-list)
    (button-add-task
     capi:push-button
@@ -135,14 +65,70 @@
     :image *list-remove*)
    (button-up-task
     capi:push-button
-    ;:callback 'button-up-push
+    :callback 'button-up-push
     :image *go-up*)
    (button-down-task
     capi:push-button
-    ;:callback 'button-down-push
+    :callback 'button-down-push
     :image *go-down*)
-   
-;;;;
+   ;;;;;;; Debug ;;;;;;;;
+   (check-debug
+    capi:check-button
+    :text "Debug mode"
+    :accessor check-debug)
+   ;;;;;;; Logging ;;;;;;;;
+   (check-logging
+    capi:check-button
+    :text "Enable Logging"
+    :accessor check-logging)
+   (logging-folder
+    capi:text-input-pane
+    :title "Logging Folder:"
+    :accessor logging-folder
+    :visible-min-width '(character 30))
+    (choose-logging-folder
+     capi:push-button
+     :text "..."
+     :accessor choose-logging-folder 
+     :selection-callback 'logging-folder-callback)
+    (delayed-file-io
+     capi:check-button
+     :text "Write file when quit"
+     :accessor delayed-file-io)
+    (write-symbols-as-strings
+     capi:check-button
+     :text "Write symbols as strings"
+     :accessor write-symbols-as-strings)
+   ;;;;;;; Eye Tracker ;;;;;;;;
+   (check-eyetracker
+    capi:check-button
+    :text "Enable Eye Tracker"
+    :accessor check-eyetracker)
+   (eyetracker-addy
+    capi:text-input-pane
+    :title "EGServer IP:"
+    :accessor eyetracker-ip
+    :visible-min-width '(character 16)
+    :visible-max-width '(character 16)
+    :max-characters 15)
+   ;;;;;;; Response Pad ;;;;;;;;
+   (check-response-pad
+    capi:check-button
+    :text "Enable Response Pad"
+    :accessor check-response-pad)
+   ;;;;;;; EEG ;;;;;;;;
+   (check-eeg
+    capi:check-button
+    :text "Enable EEG"
+    :accessor check-eeg)
+   (eeg-addy
+    capi:text-input-pane
+    :title "NetStation IP:"
+    :accessor eeg-ip
+    :visible-min-width '(character 16)
+    :visible-max-width '(character 16)
+    :max-characters 15)
+   ;;;;;;; RUN ;;;;;;;;
    (button-start
     capi:push-button
     :callback 'button-start-push
@@ -151,40 +137,37 @@
     :visible-min-width 130
     :accessor button-start
     :text "Start")
-;;;;
-   (logging-folder capi:title-pane :title "Logging Folder: " :text " " :accessor logging-folder :visible-min-width 300)
-   (choose-logging-folder capi:push-button :title "Choose Logging Folder" :text "..." :accessor choose-logging-folder 
-                          :selection-callback 'logging-folder-callback)
-   (logging-fn capi:text-input-pane :title "Log File Name: " :text " " :accessor logging-fn :visible-max-width 100 :visible-min-width 100)
-   (fn-date capi:check-button :text "Append day-hr-min" :selected nil :accessor fn-date)
-   (delayed-file-io capi:check-button :text "Write file when quit" :selected nil :accessor delayed-file-io)
-   (write-symbols-as-strings capi:check-button :text "Write symbols as strings" :selected nil :accessor write-symbols-as-strings)
-;;;;
+   ;;;; OPTIONS ;;;;
+   (options-list
+    capi:list-panel
+    :internal-border 5
+    :interaction :single-selection
+    :visible-min-width '(character 20)
+    :print-function 'first
+    :selection-callback 'update-switchable
+    :accepts-focus-p nil
+    )
    )
   (:layouts
-   (exp-info capi:row-layout '(experiment-name experiment-version) :ratios '(1 1) :title "Experiment Info:" :title-position :frame)
-   (log-folder-info capi:column-layout '(logging-folder choose-logging-folder logging-fn))
-   (log-opts capi:column-layout '(fn-date delayed-file-io write-symbols-as-strings))
-   (log-layout capi:row-layout '(log-folder-info log-opts) :title "Logging Options:" :title-position :frame :adjust :left)
-   (file-buttons capi:column-layout '(nil button-up-task button-add-task button-remove-task button-down-task nil) :ratios '(1 nil nil nil nil 1) :adjust :center)
-   (tasks capi:row-layout'(task-list file-buttons)
-          :title "Tasks:"
-          :title-position :frame
-          :adjust :left
-          :ratios '(1 1))
-   (options capi:column-layout '(check-debug check-logging check-eyetracker check-response-pad check-eeg color-vision)
-            :title "Options:"
-            :title-position :frame
-            :adjust :left)
+   (exp-info capi:row-layout '(exp-name exp-ver))
+   (log-folder-row capi:row-layout '(logging-folder choose-logging-folder))
+   (log-info capi:column-layout '(check-logging delayed-file-io write-symbols-as-strings log-folder-row))
+   (eeg-info capi:column-layout '(check-eeg eeg-addy))
+   (eyetracker-info capi:column-layout '(check-eyetracker eyetracker-addy))
+   (task-buttons capi:column-layout '(nil button-up-task button-add-task button-remove-task button-down-task nil) :ratios '(1 nil nil nil nil 1) :adjust :center)
+   (tasks capi:row-layout '(task-list task-buttons) :ratios '(1 nil))
    (buttons capi:column-layout '(button-start))
-   (exp-opts capi:row-layout '(options tasks) :ratios '(1 1))
-   (main capi:column-layout '(exp-info exp-opts log-layout buttons ) :adjust :center :accessor main)
+   (switchable capi:switchable-layout '(tasks log-info eeg-info eyetracker-info check-response-pad) :visible-child 'tasks)
+   (options capi:row-layout '(options-list switchable) :gap 10 :ratios '(nil 1) :title "Options:" :title-position :frame :adjust :left :internal-border 10)
+   (main capi:column-layout '(exp-info options) :ratios '(nil 1))
    )
   (:default-initargs
    :title (format nil "CogWorld v~a" *version-string*)
    :destroy-callback 'shutdown-world
-   :initial-focus 'experiment-name
+   ;:initial-focus 'exp-name-field
    :layout 'main
+   :visible-min-width 700
+   :visible-min-height 300
    :toolbar-items (list 
                    (make-instance
                     'capi:toolbar-component
@@ -204,6 +187,15 @@
                                     :callback 'button-save-settings-push))))))
 
 (defmethod initialize-instance :after ((win control-window) &key)
+  (with-slots (options-list tasks log-info eeg-info eyetracker-info check-response-pad) win
+      (setf (capi:collection-items options-list)
+            (list
+             (list "Tasks" tasks)
+             (list "Logging" log-info)
+             (list "Eye Tracker" eyetracker-info)
+             (list "EEG" eeg-info)
+             (list "Response Pad" check-response-pad)
+             )))
   (if (not *delivered*)
       (dolist (interface (capi:screen-interfaces (capi:convert-to-screen)))
         (if (equal (type-of interface)
@@ -214,34 +206,40 @@
 ;; Event Handlers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun update-switchable (data interface)
+  (with-slots (switchable) interface
+    (setf (capi:switchable-layout-visible-child switchable) (second data))))
+
 (defun button-add-push (&rest args)
   (declare (ignore args))
   (let ( (choice (capi:prompt-for-file "Select a file:"
                                  :filter "*.*")))
     (aif choice (capi:append-items (task-list (control-window *mw*)) (list it)))))
         
-
 (defun button-remove-push (&rest args)
   (declare (ignore args))
-  (let ((choices (capi:choice-selected-items (task-list (control-window *mw*))))
-        (cur-vector (capi:collection-items (task-list (control-window *mw*))))
-        (cur-list nil))
-    (when choices
-      (dotimes (i (length cur-vector))
-        (push (aref cur-vector i) cur-list))
-      (dolist (choice choices)
-        (setf (capi:collection-items (task-list (control-window *mw*)))
-              (remove choice cur-list))))))
+  (let ((selected (capi:choice-selection (task-list (control-window *mw*))))
+        (tlist (capi:collection-items (task-list (control-window *mw*)))))
+    (when selected
+      (setf (capi:collection-items (task-list (control-window *mw*))) (delete-nth tlist selected)))))
 
-(defun button-model-push (&rest args)
+(defun button-up-push (&rest args)
   (declare (ignore args))
-  (let ((choice (capi:prompt-for-file "Select a file:"
-                                 :filter "*.*")))
-    (if choice
-        (setf (capi:text-input-pane-text (model-file (control-window *mw*)))
-              (format nil "~a" choice)))
-    )
-  )
+  (let ((selected (capi:choice-selection (task-list (control-window *mw*))))
+        (tlist (capi:collection-items (task-list (control-window *mw*)))))
+    (when (and selected (> (length tlist) 1) (> selected 0))
+      (rotatef (elt tlist selected) (elt tlist (1- selected)))
+      (setf (capi:collection-items (task-list (control-window *mw*))) tlist)
+      (setf (capi:choice-selection (task-list (control-window *mw*))) (1- selected)))))
+
+(defun button-down-push (&rest args)
+  (declare (ignore args))
+  (let ((selected (capi:choice-selection (task-list (control-window *mw*))))
+        (tlist (capi:collection-items (task-list (control-window *mw*)))))
+    (when (and selected (> (length tlist) 1) (< selected (- (length tlist) 1)))
+      (rotatef (elt tlist selected) (elt tlist (1+ selected)))
+      (setf (capi:collection-items (task-list (control-window *mw*))) tlist)
+      (setf (capi:choice-selection (task-list (control-window *mw*))) (1+ selected)))))
 
 (defun button-save-settings-push (data interface)
   (declare (ignore data)
@@ -293,24 +291,8 @@
   (let ((pn (capi:prompt-for-directory "Locate Directory")))
     (when pn
       (capi:apply-in-pane-process (logging-folder interface) 
-                                       #'(setf capi:title-pane-text)  (directory-namestring pn) (logging-folder interface)))))
+                                  #'(setf capi:text-input-pane-text) (directory-namestring pn) (logging-folder interface)))))
       
-
-#|
-(defun process-control-mode (data interface)
-  (capi:display-message (format nil "~S ~S" data interface))
-  (cond ((equal data "Eye Data Log")
-         (when (eye-only interface)
-           (capi:apply-in-pane-process (logging-folder interface) 
-                                       #'(setf capi:title-pane-text)  (directory-namestring (eye-only interface)) (logging-folder interface))
-           (capi:apply-in-pane-process (logging-fn interface) 
-                                       #'(setf capi:text-input-pane-text)  (file-namestring (eye-only interface)) (logging-fn interface)))
-         (capi:apply-in-pane-process (main interface) 
-                 (lambda (pane) (if (null (member 'log-layout (capi:layout-description pane)))
-                                    (setf (capi:layout-description pane)
-                                     (append (capi:layout-description pane) '(log-layout)))))
-                 (main interface)))))
-|#
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Functions

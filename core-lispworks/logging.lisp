@@ -143,43 +143,23 @@
       (log-info (list "CW-EVENT" "EID" (aes8:rin->id (get-rin)))))
       ))
 
-
-
 (defun logging-filename (&key (ftype "xls"))
-  (case (control-mode *mw*)
-    (:log-only
-     (let* ((win (control-window *mw*))
-            (dir (capi:title-pane-text (logging-folder win)))
-            (fn (capi:text-input-pane-text (logging-fn win)))
-            (ext-p (capi:item-selected (fn-date win))))
-       (cond ((or (null dir) (< (length dir) 1))
-              (capi:display-message "Invalid Director Name"))
-             ((or (null fn) (< (length fn) 1))
-              (capi:display-message "Invalid File Name"))
-             (t
-              (if ext-p
-                  (setf fn (concatenate 'string fn (get-uid) ))
-                (setf fn (concatenate 'string fn ".dat")))
-              (merge-pathnames fn dir)))))
-    ((:human :act-r :remote)
-     (let ((condition-string ""))
-    
-       (if (not (local-path *mw*))
-           (progn
-             (capi:display-message "Please select a folder to save logging data.~%To avoid this message in the future, add (define-logging-path PATHSTRING) to your task code.")
-             (setf (local-path *mw*) (capi:prompt-for-directory "Please select a logging folder:"))))
-       (if (task-list *mw*)
-           (dolist (task (task-list *mw*))
-             (setf condition-string
-                   (string-append (task-condition task) condition-string)))
-         (setf condition-string "A"))
-       
-       (merge-pathnames 
-          (make-pathname
-           :name (format nil "~a-~2,'0D_~a-~a"
-                         (experiment-name *mw*)
-                         (experiment-version *mw*)
-                         condition-string
-                         (get-uid))
-           :type ftype)
-          (local-path *mw*))))))
+  (let ((condition-string ""))
+    (if (not (local-path *mw*))
+        (progn
+          (capi:display-message "Please select a folder to save logging data.~%To avoid this message in the future, add (define-logging-path PATHSTRING) to your task code.")
+          (setf (local-path *mw*) (capi:prompt-for-directory "Please select a logging folder:"))))
+    (if (task-list *mw*)
+        (dolist (task (task-list *mw*))
+          (setf condition-string
+                (string-append (task-condition task) condition-string)))
+      (setf condition-string "A"))
+    (merge-pathnames 
+     (make-pathname
+      :name (format nil "~a-~2,'0D_~a-~a"
+                    (experiment-name *mw*)
+                    (experiment-version *mw*)
+                    condition-string
+                    (get-uid))
+      :type ftype)
+     (local-path *mw*))))
