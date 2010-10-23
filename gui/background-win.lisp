@@ -60,13 +60,13 @@
 
 (defun redraw-background-window (pane &optional &rest args)
   (declare (ignore args))
-  (if (and (eyetracker *mw*)
-           (draw-commands (eyetracker *mw*)))
+  (if (and (eyetracker *cw*)
+           (draw-commands (eyetracker *cw*)))
       (progn
         (dolist (command 
                  (subseq
-                  (draw-commands (eyetracker *mw*))
-                  0 (min (length (draw-commands (eyetracker *mw*))) 50)))
+                  (draw-commands (eyetracker *cw*))
+                  0 (min (length (draw-commands (eyetracker *cw*))) 50)))
           (case (car command)
             (:eg-draw-cross
              (let ((x (first (cdr command)))
@@ -127,39 +127,39 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun show-background-window ()
-  (if (and *mw* (background-window *mw*) (not (visible (background-window *mw*))))
+  (if (and *cw* (background-window *cw*) (not (visible (background-window *cw*))))
       (progn
        ; (hide-menu-bar)
-        (setf (visible (background-window *mw*)) t)
+        (setf (visible (background-window *cw*)) t)
         (capi:execute-with-interface
-         (background-window *mw*)
+         (background-window *cw*)
          #'(lambda ()                      
-             (capi:show-interface  (background-window *mw*)))))))
+             (capi:show-interface  (background-window *cw*)))))))
 
 (defun hide-background-window ()
-  (if (and *mw* (background-window *mw*))
+  (if (and *cw* (background-window *cw*))
       (progn 
       ;  (show-menu-bar)
-        (setf (visible (background-window *mw*)) nil)
+        (setf (visible (background-window *cw*)) nil)
         (capi:execute-with-interface
-         (background-window *mw*)
+         (background-window *cw*)
          #'(lambda ()                      
-             (capi:hide-interface (background-window *mw*) nil))))))
+             (capi:hide-interface (background-window *cw*) nil))))))
 
 
 (defun create-background-window ()
   
-  (if (background-window *mw*)
+  (if (background-window *cw*)
       (capi:execute-with-interface
-       (background-window *mw*)
+       (background-window *cw*)
        #'(lambda ()
-           (capi:destroy (background-window *mw*)))))
-  (setf (background-window *mw*) (make-instance 'background-win))
+           (capi:destroy (background-window *cw*)))))
+  (setf (background-window *cw*) (make-instance 'background-win))
   (capi:execute-with-interface
-   (background-window *mw*)
+   (background-window *cw*)
    #'(lambda ()
        (progn
-         (capi:display (background-window *mw*))
-         (capi:set-top-level-interface-geometry (background-window *mw*)
+         (capi:display (background-window *cw*))
+         (capi:set-top-level-interface-geometry (background-window *cw*)
                                            :x 0
                                            :y 0)))))

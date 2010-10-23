@@ -30,14 +30,14 @@
                                    :foreground :red)))
 
 (defun create-eyegaze-window ()
-  (if (eyegaze-window *mw*)
+  (if (eyegaze-window *cw*)
       (capi:apply-in-pane-process
-       (eyegaze-window *mw*) 'capi:destroy (eyegaze-window *mw*)))
-  (setf (eyegaze-window *mw*) (make-instance 'eyegaze-win))
-  (capi:display (eyegaze-window *mw*)))
+       (eyegaze-window *cw*) 'capi:destroy (eyegaze-window *cw*)))
+  (setf (eyegaze-window *cw*) (make-instance 'eyegaze-win))
+  (capi:display (eyegaze-window *cw*)))
 
 (defun move-eyegaze-window (x y)
-  (let ((win (eyegaze-window *mw*)))
+  (let ((win (eyegaze-window *cw*)))
     (capi:apply-in-pane-process
      (output win)
      #'(lambda ()
@@ -46,7 +46,7 @@
          (capi:raise-interface win)))))
 
 (defun hide-eyegaze-window ()
-  (let ((win (eyegaze-window *mw*))
+  (let ((win (eyegaze-window *cw*))
         (pane nil))
     (if win
         (progn (setf pane (output win))
@@ -54,7 +54,7 @@
            pane 'capi:hide-interface pane nil)))))
 
 (defun show-eyegaze-window ()
-  (let ((win (eyegaze-window *mw*))
+  (let ((win (eyegaze-window *cw*))
         (pane nil))
     (if win
         (progn (setf pane (output win))

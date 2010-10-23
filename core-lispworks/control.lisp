@@ -117,7 +117,7 @@
 
 ;; Provided for backward compatability: use CONFIGURATION-DONE
 (defun mw-configure-done (cond-string)
-  (configuration-done (nth (1- (dispatched-configs *mw*)) (task-list *mw*))
+  (configuration-done (nth (1- (dispatched-configs *cw*)) (task-list *cw*))
                       :condition cond-string))
 
 (defun task-conditions ()
@@ -146,11 +146,11 @@
 
 ;; Provided for backward compatability: use TASK-FINISHED.
 (defun mw-task-finished (name)
-    (setf (task-list *mw*)
-          (remove name (task-list *mw*) 
+    (setf (task-list *cw*)
+          (remove name (task-list *cw*) 
                   :test (lambda (string object) (equal string (name object)))))
     (cond 
-     ((null (task-list *mw*))
+     ((null (task-list *cw*))
       (stop-experiment *cw*))))
 
 #|
@@ -516,15 +516,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Program control
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun cw () *cw*)
 
-;; Initialize *cw* and create the control interface
 (defun cogworld ()
   (setf *screen-width* (capi:screen-width (capi:convert-to-screen)))
   (setf *screen-height* (capi:screen-height (capi:convert-to-screen)))
-  (setf *cw* (make-instance 'cogworld)) ;;; :color-task (make-instance 'color-task)))
-  (setf *mw* *cw*)
-
+  (setf *cw* (make-instance 'cogworld))
   #+MACOSX
   (setf (local-path *cw*) (probe-file (format nil "/Applications/MultiWorld ~a/Data" *version-string*)))
   #+WIN32

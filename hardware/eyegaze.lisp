@@ -105,23 +105,23 @@
 
 (defun start-eyetracking (&optional (reason ""))
   (when (eye-tracking-p)
-  (send-message (io-stream (eyetracker *mw*)) :command :eg-begin-data)
+  (send-message (io-stream (eyetracker *cw*)) :command :eg-begin-data)
   (log-info (list "EG-EVENT" "START-EYETRACKING" reason))
   (log-info (list "EG-EVENT" "EG-HEADER" "STATUS" "PUPIL DIAM"
                   "GAZE X" "GAZE Y" "FIELD COUNT" "EG-TIMESTAMP" "MOUSE X" "MOUSE Y" "BUTTON-STATE"))))
 
 (defun stop-eyetracking (&optional (reason ""))
   (when (eye-tracking-p)
-    (send-message (io-stream (eyetracker *mw*)) :command :eg-stop-data)
+    (send-message (io-stream (eyetracker *cw*)) :command :eg-stop-data)
     (log-info (list "EG-EVENT" "STOP-EYETRACKING" reason))))
 
 (defun turn-on-eyetracker-logging ()
-  (if (eyetracker *mw*)
-      (setf (logging (eyetracker *mw*)) t)))
+  (if (eyetracker *cw*)
+      (setf (logging (eyetracker *cw*)) t)))
 
 (defun turn-off-eyetracker-logging ()
-  (if (eyetracker *mw*)
-      (setf (logging (eyetracker *mw*)) nil)))
+  (if (eyetracker *cw*)
+      (setf (logging (eyetracker *cw*)) nil)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                                                         Message handling ;;
@@ -134,20 +134,20 @@
      ((not command-val)
       (stop-experiment *cw*)
       (error (format nil "EYETRACKER: SEND-MESSAGE: Unknown command: ~a.~%" command)))
-     ((not (and (eyetracker *mw*) (io-stream (eyetracker *mw*))
-                (streamp (io-stream (eyetracker *mw*)))
-                (open-stream-p (io-stream (eyetracker *mw*)))))
+     ((not (and (eyetracker *cw*) (io-stream (eyetracker *cw*))
+                (streamp (io-stream (eyetracker *cw*)))
+                (open-stream-p (io-stream (eyetracker *cw*)))))
       ;; Do nothing if stream is closed or doesn't exist
       )
      (t
       (setf command-val (cdr command-val))
       (format stream (format-message command-val body))
-      ;(push (cons command body) (data-out (eyetracker *mw*)))
+      ;(push (cons command body) (data-out (eyetracker *cw*)))
       (force-output stream)))))
 
 (defun eyetracker-read-message (stream)
   (unless (or
-           (eq (status (eyetracker *mw*)) :halted)
+           (eq (status (eyetracker *cw*)) :halted)
            (not stream)
            (not (open-stream-p stream))
            (not (ignore-errors (peek-char nil stream nil nil nil))))
@@ -192,18 +192,18 @@
 (defun read-loop ()
   (let ((eg-diameter 0)
         (eg-color nil)
-        (pane (draw-pane (background-window *mw*)))
-        (stream (io-stream (eyetracker *mw*))))
+        (pane (draw-pane (background-window *cw*)))
+        (stream (io-stream (eyetracker *cw*))))
     
     (loop
-     (when (or (null (io-stream (eyetracker *mw*)))
-               (not (open-stream-p (io-stream (eyetracker *mw*))))
-               (eq (status (eyetracker *mw*)) :calibration-aborted)
-               (eq (status (eyetracker *mw*)) :halted)
+     (when (or (null (io-stream (eyetracker *cw*)))
+               (not (open-stream-p (io-stream (eyetracker *cw*))))
+               (eq (status (eyetracker *cw*)) :calibration-aborted)
+               (eq (status (eyetracker *cw*)) :halted)
                ) (return))
 
      (multiple-value-bind (command body) (eyetracker-read-message stream)
-       ;(if command (push (cons command body) (data-in (eyetracker *mw*))))
+       ;(if command (push (cons command body) (data-in (eyetracker *cw*))))
        (capi:apply-in-pane-process pane #'(lambda () (gp:invalidate-rectangle pane)))
        (case command
          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -231,7 +231,7 @@
                                       0 0 )))
          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
          (:eg-clear-screen
-          (setf (draw-commands (eyetracker *mw*)) nil)
+          (setf (draw-commands (eyetracker *cw*)) nil)
           (gp:clear-graphics-port pane)
           )
          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -252,13 +252,13 @@
          (:eg-draw-cross
           (let ((x (+ (* (char-int (elt body 0)) 256) (char-int (elt body 1))))
                 (y (+ (* (char-int (elt body 2)) 256) (char-int (elt body 3)))))
-            (push (cons :eg-draw-cross (list x y eg-diameter eg-color)) (draw-commands (eyetracker *mw*)))
+            (push (cons :eg-draw-cross (list x y eg-diameter eg-color)) (draw-commands (eyetracker *cw*)))
             ))
          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
          (:eg-draw-circle
           (let ((x (+ (* (char-int (elt body 0)) 256) (char-int (elt body 1))))
                 (y (+ (* (char-int (elt body 2)) 256) (char-int (elt body 3)))))
-            (push (cons :eg-draw-circle (list x y eg-diameter eg-color)) (draw-commands (eyetracker *mw*)))
+            (push (cons :eg-draw-circle (list x y eg-diameter eg-color)) (draw-commands (eyetracker *cw*)))
             ))
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         (:eg-display-text
@@ -266,16 +266,16 @@
                (y (+ (* (char-int (elt body 2)) 256) (char-int (elt body 3))))
                (text (subseq body 4)))
            (push (cons :eg-display-text (list text x y eg-diameter eg-color))
-                 (draw-commands (eyetracker *mw*)))
+                 (draw-commands (eyetracker *cw*)))
            ))
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         (:eg-cal-complete
-         (setf (draw-commands (eyetracker *mw*)) nil)
-         (setf (status (eyetracker *mw*)) :calibration-complete)
+         (setf (draw-commands (eyetracker *cw*)) nil)
+         (setf (status (eyetracker *cw*)) :calibration-complete)
          )
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         (:eg-cal-aborted
-         (setf (status (eyetracker *mw*)) :calibration-aborted)
+         (setf (status (eyetracker *cw*)) :calibration-aborted)
          ))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

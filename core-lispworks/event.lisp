@@ -39,20 +39,20 @@
                        :callback callback
                        :callback-type callback-type
                        :entered nil)
-        (hot-regions *mw*)))
+        (hot-regions *cw*)))
 
 (defun monitor-regions ()
-  (setf (monitor-process *mw*)
+  (setf (monitor-process *cw*)
         (mp:process-run-function
          "Monitor regions"
          nil
          'monitor-regions-internal)))
 
 (defun kill-monitor ()
-  (if (and (monitor-process *mw*)
-           (mp:process-p (monitor-process *mw*)))
-      (progn (mp:process-kill (monitor-process *mw*))
-        (setf (hot-regions *mw*) nil))))
+  (if (and (monitor-process *cw*)
+           (mp:process-p (monitor-process *cw*)))
+      (progn (mp:process-kill (monitor-process *cw*))
+        (setf (hot-regions *cw*) nil))))
 
 (defun monitor-regions-internal ()
   (let ((pos nil)
@@ -62,7 +62,7 @@
         (button-down nil)
         (button-state nil))
     (loop
-     (when (not (eq (status *mw*) :running)) (return))
+     (when (not (eq (status *cw*) :running)) (return))
      (capi:process-pending-messages nil)
      (sleep 0.02)
      (setf button-state (get-button-state))
@@ -75,7 +75,7 @@
      (setf mouse-x (first pos))
      (setf mouse-y (second pos))
      
-     (dolist (region (hot-regions *mw*))
+     (dolist (region (hot-regions *cw*))
        (cond
         ((and
           (not (entered region))

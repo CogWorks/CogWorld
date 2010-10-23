@@ -2,7 +2,6 @@
 
 (defparameter *default-experiment-settings-file-directory* (concatenate 'string (format nil "~a" (sys:get-folder-path :documents)) "CogWorld/"))
 
-(defparameter *mw* nil) ;; Provided for backward compatability: use *cw*
 (defparameter *cw* nil)
 (defparameter *delivered*
   #+:delivered t

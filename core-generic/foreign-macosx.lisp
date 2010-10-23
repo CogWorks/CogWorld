@@ -559,7 +559,7 @@
             (speak-phrase str sc)
           (return nil))
         
-        (if (equal (control-mode *mw*) :ACT-R)
+        (if (equal (control-mode *cw*) :ACT-R)
             (new-digit-sound str))
         
         ;; Waits for current speech sythesis to finish

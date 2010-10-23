@@ -77,26 +77,26 @@
 
 
 (defun hide-listener-window ()
-  (if (and *mw* (listener-window *mw*))
-      (progn (setf (visible (listener-window *mw*)) nil)
+  (if (and *cw* (listener-window *cw*))
+      (progn (setf (visible (listener-window *cw*)) nil)
         (capi:apply-in-pane-process
-         (listener (listener-window *mw*))
+         (listener (listener-window *cw*))
          #'(lambda ()                      
-             (capi:hide-interface (listener (listener-window *mw*)) nil))))
+             (capi:hide-interface (listener (listener-window *cw*)) nil))))
     )
   )
 
 (defun show-listener-window ()
-  (if (and *mw* (listener-window *mw*))
-      (progn (setf (visible (listener-window *mw*)) t)
+  (if (and *cw* (listener-window *cw*))
+      (progn (setf (visible (listener-window *cw*)) t)
         (capi:apply-in-pane-process
-         (listener (listener-window *mw*))
+         (listener (listener-window *cw*))
          #'(lambda ()                      
-             (capi:show-interface (listener (listener-window *mw*)))))
+             (capi:show-interface (listener (listener-window *cw*)))))
         )
     )
   )
 
 (defun listener-window-visible ()
-  (visible (listener-window *mw*))
+  (visible (listener-window *cw*))
   )
