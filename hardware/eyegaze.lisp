@@ -83,7 +83,7 @@
           t)))
 
 (defun eye-tracking-p ()
-  (eyetracker (cw)))
+  (eyetracker *cw*))
 
 
 (defmethod disconnect-eyetracker ((cw cogworld))

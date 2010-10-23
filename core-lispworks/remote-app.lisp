@@ -113,7 +113,7 @@
         (Loginfo
          ;(push msg debuglog)
          (let ((lst (conv-to-list (first args))))
-           (log-info `(,(concatenate 'string (experiment-name (cw)) "-EVENT")  ,@lst ,(first (last args))))))
+           (log-info `(,(concatenate 'string (experiment-name *cw*) "-EVENT")  ,@lst ,(first (last args))))))
         (otherwise 
          (error-message (format nil "Remote Device received invalid message ~S ~S" msg args )))
         ))))

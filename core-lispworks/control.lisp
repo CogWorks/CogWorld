@@ -65,9 +65,8 @@
 ;; Experiment setup
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defmethod run-remote-app ()
-  (let* ((app (remote-app))
-         (cw (cw))
-         (tsk (nth (current-task cw) (task-list cw))))
+  (let ((app (remote-app))
+         (tsk (nth (current-task *cw*) (task-list *cw*))))
     (when tsk
       (setf (task-obj app) tsk)
       (mp:process-run-function "MATLAB" nil 'run-matlab-task (directory-namestring (path tsk)))
@@ -164,7 +163,7 @@
 (defmethod task-finished ((task task-class))
   (when (eql (app task) 'matlab)
     (capi:display-message "Press OK for next task"))
-  (with-slots (current-task run-proc task-list) (cw)
+  (with-slots (current-task run-proc task-list) *cw*
     (set-mouse-position 10 40)
      (incf current-task)
      (if (>= current-task (length task-list)) (setf current-task nil))
