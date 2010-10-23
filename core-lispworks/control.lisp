@@ -85,7 +85,7 @@
         (cond ((not (equal (subseq fn (- (length fn) 2) (length fn)) ".m"))
                (load tsk))
               ((equal (subseq fn (- (length fn) 2) (length fn)) ".m")
-               (if (null (local-path cw)) (define-logging-folder (capi:title-pane-text (logging-folder (control-window cw)))))
+               (if (null (local-path cw)) (define-logging-folder (capi:text-input-pane-text (logging-folder (control-window cw)))))
                (if (null (remote-app)) (make-remote-app))
                (register-task (subseq fn 0 (- (length fn) 2)) :run-function 'run-remote-app :app 'matlab :path tsk)
                (setf *use-matlab* (1+ *use-matlab*))
@@ -208,7 +208,7 @@
              listener-window 
              #'(lambda ()
                  (capi:hide-interface listener-window  nil)))))
-    (define-logging-folder (capi:title-pane-text (logging-folder control-window )))
+    (define-logging-folder (capi:text-input-pane-text (logging-folder control-window )))
     (open-logging-file cw)
     (mp:process-wait "idle" (lambda (win) 
                                   (multiple-value-bind (x y w h) (capi:top-level-interface-geometry win)
@@ -302,7 +302,7 @@
                status subject-info listener-window background-window) cw
     (setf task-list nil)
     (setf experiment-name  (capi:text-input-pane-text (experiment-name control-window)))
-    (define-logging-folder (capi:title-pane-text (logging-folder control-window)))
+    (define-logging-folder (capi:text-input-pane-text (logging-folder control-window)))
     (setf dispatched-configs 0)
      (create-background-window)
     (show-background-window)
@@ -590,7 +590,6 @@
         (eeg nil)
         (eeg-ip "192.168.1.3")
         (log-dir "")
-        (log-fn "")
         (append-day-hr-min nil)
         (file-io nil)
         (sym->str nil)
@@ -645,8 +644,7 @@
     (capi:apply-in-pane-process
      (task-list interface)
      #'(lambda () (setf (capi:collection-items (task-list interface))
-                        file-list)
-         (if file-list (setf (capi:choice-selection (task-list interface)) '(0)))  ))
+                        file-list)))
     (capi:apply-in-pane-process
      (delayed-file-io interface)
      #'(lambda () (setf (capi:button-selected (check-debug interface))
@@ -668,13 +666,12 @@
    :experiment-name \"~a\"
    :experiment-version ~a
    :eyetracking ~a
-   :eyetracker-ip ~a
+   :eyetracker-ip ~S
    :logging ~a
    :pad ~a
    :eeg ~a
-   :eeg-ip ~a
+   :eeg-ip ~S
    :log-dir ~S
-   :append-day-hr-min ~a
    :file-io ~a
    :sym->str ~a
    :file-list \'~a
@@ -687,7 +684,7 @@
 (capi:button-selected (check-response-pad interface))
 (capi:button-selected (check-eeg interface))
 (capi:text-input-pane-text (eeg-ip interface))
-(capi:title-pane-text (logging-folder interface))
+(capi:text-input-pane-text (logging-folder interface))
 (capi:button-selected (delayed-file-io interface))
 (capi:button-selected (write-symbols-as-strings interface))
 file-list
@@ -695,9 +692,6 @@ file-list
              :stream handle)
     (close handle)
     t)))
-
-(defun load-settings ()
-  (load (format nil "~~/Library/Preferences/CogWorld/cw-~a_init.lisp" *version-string*)))
 
 (defun eeg-p ()
   (capi:button-selected (check-eeg (control-window *cw*))))
