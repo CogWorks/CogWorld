@@ -175,16 +175,16 @@
                     (list
                      (make-instance 'capi:toolbar-button
                                     :text "New"
-                                    :image :std-file-new
-                                    :callback *filenew*)
+                                    :image *filenew*
+                                    :callback 'button-new-push)
                      (make-instance 'capi:toolbar-button
                                     :text "Open"
-                                    :image :std-file-open
-                                    :callback *fileopen*)
+                                    :image *fileopen*
+                                    :callback 'button-open-push)
                      (make-instance 'capi:toolbar-button
                                     :text "Save"
-                                    :image :std-file-save
-                                    :callback *filesave*))))))
+                                    :image *filesave*
+                                    :callback 'button-save-settings-push))))))
 
 (defmethod initialize-instance :after ((win control-window) &key)
   (with-slots (options-list tasks log-info eeg-info eyetracker-info check-response-pad) win
