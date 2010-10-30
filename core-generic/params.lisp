@@ -1,6 +1,9 @@
 (defparameter *version-string* "2.0")
 
+#-UNIX
 (defparameter *default-experiment-settings-file-directory* (concatenate 'string (format nil "~a" (sys:get-folder-path :documents)) "CogWorld/"))
+#+UNIX
+(defparameter *default-experiment-settings-file-directory* "~/.config/CogWorld")
 
 (defparameter *cw* nil)
 (defparameter *delivered*
@@ -23,10 +26,14 @@
   (defparameter *cogworks* (gp:read-external-image (merge-pathnames "images/CogWorks.bmp" base)))
   (defparameter *sponsors* (gp:read-external-image (merge-pathnames "images/Sponsors.bmp" base)))
   ;; Icon files
-  (defparameter *list-add* (gp:read-external-image (merge-pathnames "images/icons/edit_add.png" base)))
-  (defparameter *list-remove* (gp:read-external-image (merge-pathnames "images/icons/edit_remove.png" base)))
-  (defparameter *go-up* (gp:read-external-image (merge-pathnames "images/icons/1downarrow.png" base)))
-  (defparameter *go-down* (gp:read-external-image (merge-pathnames "images/icons/1uparrow.png" base))))
+  (defparameter *list-add* (gp:read-external-image (merge-pathnames "images/icons/add.png" base)))
+  (defparameter *list-remove* (gp:read-external-image (merge-pathnames "images/icons/remove.png" base)))
+  (defparameter *go-down* (gp:read-external-image (merge-pathnames "images/icons/go-down.png" base)))
+  (defparameter *go-up* (gp:read-external-image (merge-pathnames "images/icons/go-up.png" base)))
+  (defparameter *filenew* (gp:read-external-image (merge-pathnames "images/icons/filenew.png" base)))
+  (defparameter *fileopen* (gp:read-external-image (merge-pathnames "images/icons/fileopen.png" base)))
+  (defparameter *filesave* (gp:read-external-image (merge-pathnames "images/icons/filesave.png" base)))
+  (defparameter *filesaveas* (gp:read-external-image (merge-pathnames "images/icons/filesaveas.png" base))))
 
 (defparameter *screen-width* nil)
 (defparameter *screen-height* nil)

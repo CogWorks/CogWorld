@@ -556,7 +556,8 @@
 |#
   (capi:display (control-window *cw*))
   
-  (splash 1))
+  #+MACOSX(splash 1)
+  )
 
 ;; Cleanup on exit
 (defun shutdown-world (&rest args)

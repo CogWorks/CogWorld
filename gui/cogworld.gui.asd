@@ -14,6 +14,6 @@
                (:file "background-win")
                (:file "eyegaze-win")
                (:file "toolbar")
-               (:file "movie-view")
+               #+MACOSX(:file "movie-view")
                )
   )
