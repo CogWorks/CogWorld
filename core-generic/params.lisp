@@ -1,8 +1,8 @@
 (defparameter *version-string* "2.0")
 
-#-UNIX
+#-LINUX
 (defparameter *default-experiment-settings-file-directory* (concatenate 'string (format nil "~a" (sys:get-folder-path :documents)) "CogWorld/"))
-#+UNIX
+#+LINUX
 (defparameter *default-experiment-settings-file-directory* "~/.config/CogWorld")
 
 (defparameter *cw* nil)

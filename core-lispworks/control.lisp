@@ -84,7 +84,6 @@
         (cond ((not (equal (subseq fn (- (length fn) 2) (length fn)) ".m"))
                (load tsk))
               ((equal (subseq fn (- (length fn) 2) (length fn)) ".m")
-               (if (null (local-path cw)) (define-logging-folder (capi:text-input-pane-text (logging-folder (control-window cw)))))
                (if (null (remote-app)) (make-remote-app))
                (register-task (subseq fn 0 (- (length fn) 2)) :run-function 'run-remote-app :app 'matlab :path tsk)
                (setf *use-matlab* (1+ *use-matlab*))
@@ -178,6 +177,7 @@
   (with-slots (status task-condition-list control-window subject-info control-mode) cw
     (setf status  nil)
     (setf task-condition-list  nil)
+    (define-logging-folder (capi:text-input-pane-text (logging-folder (control-window cw))))
     (capi:apply-in-pane-process
      (button-start control-window )
      #'(lambda ()
