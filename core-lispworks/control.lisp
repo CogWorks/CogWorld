@@ -82,7 +82,7 @@
       (let* ((tsk (aref items i))
              (fn (file-namestring tsk)))
         (cond ((not (equal (subseq fn (- (length fn) 2) (length fn)) ".m"))
-               (load tsk))
+               (load tsk)(break))
               ((equal (subseq fn (- (length fn) 2) (length fn)) ".m")
                (if (null (remote-app)) (make-remote-app))
                (register-task (subseq fn 0 (- (length fn) 2)) :run-function 'run-remote-app :app 'matlab :path tsk)

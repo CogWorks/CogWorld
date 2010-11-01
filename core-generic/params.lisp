@@ -1,3 +1,5 @@
+(pushnew :cogworld *features*)
+
 (defparameter *version-string* "2.0")
 
 #-LINUX
