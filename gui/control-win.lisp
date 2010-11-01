@@ -156,10 +156,10 @@
    (eyetracker-info capi:column-layout '(check-eyetracker eyetracker-addy))
    (task-buttons capi:column-layout '(nil button-up-task button-add-task button-remove-task button-down-task nil) :ratios '(1 nil nil nil nil 1) :adjust :center)
    (tasks capi:row-layout '(task-list task-buttons) :ratios '(1 nil))
-   (buttons capi:column-layout '(button-start))
+   (buttons capi:row-layout '(nil button-start nil) :ratios '(1 nil 1))
    (switchable capi:switchable-layout '(tasks log-info eeg-info eyetracker-info check-response-pad) :visible-child 'tasks)
    (options capi:row-layout '(options-list switchable) :gap 10 :ratios '(nil 1) :title "Options:" :title-position :frame :adjust :left :internal-border 10)
-   (main capi:column-layout '(exp-info options) :ratios '(nil 1))
+   (main capi:column-layout '(exp-info options buttons) :ratios '(nil 1))
    )
   (:default-initargs
    :title (format nil "CogWorld v~a" *version-string*)
