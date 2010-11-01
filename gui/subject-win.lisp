@@ -95,24 +95,18 @@
     :visible-max-width '(character 10)
     :visible-min-width '(character 10)
     :accessor num-trials)
-   (button-cancel
-    capi:push-button
-    :text "Cancel"
-    :callback 'cancel-dialog
-    :default-p t)
    (button-done
     capi:push-button
     :text "Done"
     :callback 'registration-done
-    :default-p nil)
+    :default-p t)
    )
   (:layouts
-   (main capi:column-layout '(info-col button-row) :adjust :center)
+   (main capi:column-layout '(info-col button-done) :adjust :center)
    (info-col capi:column-layout '(row-1 row-2 row-3 exps) :adjust :left :accessor info-col)
    (row-1 capi:row-layout '(first-name last-name))
    (row-2 capi:row-layout '(rin major))
    (row-3 capi:row-layout '(age gender))
-   (button-row capi:row-layout '(button-cancel button-done))
    (debug-row capi:row-layout '(num-blocks num-trials) :accessor debug-row)
    )
   (:default-initargs
@@ -168,11 +162,6 @@
    win
    #'(lambda () (capi:destroy win)))))
 
-(defun cancel-dialog (data win)
-  (declare (ignore data))
-  (hide-background-window)
-  (capi:abort-dialog))
-
 (defmethod register-subject ((p cogworld))
   (setf (subject-window p) (make-instance 'subject-window))
   (case (cw-debug-mode)
@@ -185,9 +174,7 @@
      (setf (capi:layout-description (info-col (subject-window p))) 
                             (append  (capi:layout-description (info-col (subject-window p))) 
                                      (list (debug-row (subject-window p)))))))
-  
-  (capi:display-dialog (subject-window p))
- 
+  (capi:display (subject-window p)) 
   (setf (startup-process p) mp:*current-process*) 
   (mp:process-wait
    "Waiting for subject registration."
