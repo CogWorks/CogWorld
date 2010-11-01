@@ -590,7 +590,12 @@
         (file-io nil)
         (sym->str nil)
         (file-list nil)
-        (debug nil))
+        (debug nil)
+        ;; Deprecated
+        (color-vision-test nil)
+        (log-fn "")
+        (model-file nil)
+        )
 
   (let ((interface (control-window *cw*)))
 
