@@ -49,14 +49,13 @@
 (defparameter *eg-sample-x* 0)
 (defparameter *eg-sample-y* 0)
 
-(defparameter +tcp-address+ "192.168.2.2")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                                                      Connection handling ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-(defmethod connect-eyetracker ((cw cogworld))
+(defmethod connect-eyetracker ((cw cogworld) ip)
   (with-slots (eyetracker) cw
-    (setf eyetracker (make-instance 'eyetracker-class :tcp-address +tcp-address+))
+    (setf eyetracker (make-instance 'eyetracker-class :tcp-address ip))
     (setf (io-stream eyetracker)
           (comm:open-tcp-stream (tcp-address eyetracker) (tcp-port eyetracker)
            :direction :io :timeout 5))
