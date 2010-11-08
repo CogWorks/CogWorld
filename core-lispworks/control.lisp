@@ -572,6 +572,8 @@
        (listener (listener-window *cw*))
        #'(lambda ()
            (capi:destroy (listener-window *cw*)))))
+  (setf *cw* nil)
+  (setf *mw* nil)
   (if *delivered*
       (quit)))
 
