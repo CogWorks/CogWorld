@@ -184,7 +184,12 @@
                      (make-instance 'capi:toolbar-button
                                     :text "Save"
                                     :image *filesave*
-                                    :callback 'button-save-settings-push))))))
+                                    :callback 'button-save-settings-push)
+                     (make-instance 'capi:toolbar-button
+                                    :text "Save As"
+                                    :image *filesaveas*
+                                    :callback 'button-saveas-settings-push)
+                     )))))
 
 (defmethod initialize-instance :after ((win control-window) &key)
   (with-slots (options-list tasks log-info eeg-info eyetracker-info check-response-pad) win
@@ -246,6 +251,23 @@
            (ignore interface))
   (if (null *experiment-settings-file*)
       (setf *experiment-settings-file* (capi:prompt-for-file
+                                        nil
+                                        :pathname *default-experiment-settings-file-directory*
+                                        :operation :save)))
+  (if (not (null *experiment-settings-file*))
+      (progn
+        (save-settings)
+        (capi:display-message "Settings saved."))))
+
+(defun button-saveas-settings-push (data interface)
+  (declare (ignore data)
+           (ignore interface))
+  (if (not (null *experiment-settings-file*))
+      (setf *experiment-settings-file* (capi:prompt-for-file
+                                        nil
+                                        :pathname *experiment-settings-file*
+                                        :operation :save))
+    (setf *experiment-settings-file* (capi:prompt-for-file
                                         nil
                                         :pathname *default-experiment-settings-file-directory*
                                         :operation :save)))
