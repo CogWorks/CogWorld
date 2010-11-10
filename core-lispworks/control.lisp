@@ -520,7 +520,9 @@
 ;; Program control
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun cogworld ()
+(defun cogworld (&key recompile)
+  (when recompile
+    (asdf:load-system 'cogworld))
   (setf *screen-width* (capi:screen-width (capi:convert-to-screen)))
   (setf *screen-height* (capi:screen-height (capi:convert-to-screen)))
   (setf *cw* (make-instance 'cogworld))
@@ -699,6 +701,9 @@ file-list
              :stream handle)
     (close handle)
     t)))
+
+(defun debug-p ()
+  (capi:button-selected (check-debug (control-window *cw*))))
 
 (defun eeg-p ()
   (capi:button-selected (check-eeg (control-window *cw*))))

@@ -74,7 +74,7 @@
    ;;;;;;; Debug ;;;;;;;;
    (check-debug
     capi:check-button
-    :text "Debug mode"
+    :text "Enable Debugging"
     :accessor check-debug)
    ;;;;;;; Logging ;;;;;;;;
    (check-logging
@@ -154,10 +154,11 @@
    (log-info capi:column-layout '(check-logging delayed-file-io write-symbols-as-strings log-folder-row))
    (eeg-info capi:column-layout '(check-eeg eeg-addy))
    (eyetracker-info capi:column-layout '(check-eyetracker eyetracker-addy))
+   (debug-info capi:column-layout '(check-debug))
    (task-buttons capi:column-layout '(nil button-up-task button-add-task button-remove-task button-down-task nil) :ratios '(1 nil nil nil nil 1) :adjust :center)
    (tasks capi:row-layout '(task-list task-buttons) :ratios '(1 nil))
    (buttons capi:row-layout '(nil button-start nil) :ratios '(1 nil 1))
-   (switchable capi:switchable-layout '(tasks log-info eeg-info eyetracker-info check-response-pad) :visible-child 'tasks)
+   (switchable capi:switchable-layout '(tasks log-info eeg-info eyetracker-info check-response-pad debug-info) :visible-child 'tasks)
    (options capi:row-layout '(options-list switchable) :gap 10 :ratios '(nil 1) :title "Options:" :title-position :frame :adjust :left :internal-border 10)
    (main capi:column-layout '(exp-info options buttons) :ratios '(nil 1))
    )
@@ -192,7 +193,7 @@
                      )))))
 
 (defmethod initialize-instance :after ((win control-window) &key)
-  (with-slots (options-list tasks log-info eeg-info eyetracker-info check-response-pad) win
+  (with-slots (options-list tasks log-info eeg-info eyetracker-info check-response-pad debug-info) win
       (setf (capi:collection-items options-list)
             (list
              (list "Tasks" tasks)
@@ -200,6 +201,7 @@
              (list "Eye Tracker" eyetracker-info)
              (list "EEG" eeg-info)
              (list "Response Pad" check-response-pad)
+             (list "Debugging" debug-info)
              )))
   (if (not *delivered*)
       (dolist (interface (capi:screen-interfaces (capi:convert-to-screen)))
