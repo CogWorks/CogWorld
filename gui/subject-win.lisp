@@ -159,7 +159,7 @@
     
   (capi:execute-with-interface
    win
-   #'(lambda () (capi:destroy win)))))
+   #'(lambda () (capi:quit-interface win)))))
 
 (defmethod register-subject ((p cogworld))
   (setf (subject-window p) (make-instance 'subject-window))
@@ -173,7 +173,7 @@
      (setf (capi:layout-description (info-col (subject-window p))) 
                             (append  (capi:layout-description (info-col (subject-window p))) 
                                      (list (debug-row (subject-window p)))))))
-  (capi:display (subject-window p)) 
+  (capi:display-dialog (subject-window p)) 
   (setf (startup-process p) mp:*current-process*) 
   (mp:process-wait
    "Waiting for subject registration."
