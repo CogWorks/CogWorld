@@ -25,10 +25,6 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(let ((cw-debug-mode nil))
-  (defun cw-debug-mode (&optional v)
-    (if v (setq cw-debug-mode v) cw-debug-mode)))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Task communication
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -201,7 +197,7 @@
     (setf dispatched-configs 0)
     (create-background-window)
     (show-background-window)
-    (when (not (cw-debug-mode))
+    (when (not (debug-p))
         (capi:execute-with-interface
          control-window
          #'(lambda ()
@@ -249,7 +245,7 @@
 
     (create-background-window)
     (show-background-window)
-    (when (not (cw-debug-mode))
+    (when (not (debug-p))
       (capi:execute-with-interface control-window
          #'(lambda () (capi:hide-interface control-window nil)))
       (if listener-window
@@ -261,7 +257,7 @@
       (create-history-file cw)
       (open-logging-file cw))
     (when (not (eql status :halted))
-      (if (cw-debug-mode) (hide-background-window))
+      (if (debug-p) (hide-background-window))
       (log-header)
       (with-slots (first-name  last-name age major gender exp-history) (subject-info cw)
         (let ((header (list  "FIRST" "LAST" "AGE" "MAJOR" "GENDER" "RIN" "EXP-HISTORY"))
@@ -275,7 +271,7 @@
         (if (null (connect-eyetracker cw (capi:text-input-pane-text (eyetracker-ip (control-window cw))))) (setf (status cw) :halted)))
       (when (not (eql status :halted))
         (capi:display-message "Press OK to start the experiment.")
-        (if (not (cw-debug-mode)) (capi:apply-in-pane-process  background-window #'capi:raise-interface background-window))
+        (if (not (debug-p)) (capi:apply-in-pane-process  background-window #'capi:raise-interface background-window))
         (raise-tasks)
         (if (capi:item-selected (check-eyetracker control-window)) (start-eyetracking "BEGINNING-OF-TASK")))
       (if (not (eql status :halted)) 
@@ -310,7 +306,7 @@
      (create-background-window)
     (show-background-window)
     (make-remote-app)
-    (when (not (cw-debug-mode))
+    (when (not (debug-p))
       (capi:execute-with-interface control-window
          #'(lambda () (capi:hide-interface control-window nil)))
       (if listener-window
@@ -487,7 +483,7 @@
     (setf status :halted)
     (kill-monitor)                       ;; Kill the hot-regions event monitor
     (disconnect-eyetracker cw)
-    (if (not (cw-debug-mode)) (hide-background-window))
+    (if (not (debug-p)) (hide-background-window))
     ;(show-menu-bar)
     (dolist (task task-list)      ;; Close each task in the task-list
       (if (break-function task) (apply (break-function task) nil)))
@@ -704,6 +700,9 @@ file-list
 
 (defun debug-p ()
   (capi:button-selected (check-debug (control-window *cw*))))
+
+(defmacro cw-debug-mode ()
+  '(debug-p))
 
 (defun eeg-p ()
   (capi:button-selected (check-eeg (control-window *cw*))))

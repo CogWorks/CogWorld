@@ -297,7 +297,6 @@
   (declare (ignore data))
   (cond
    ((equal (capi:item-text (button-start interface )) "Start")
-    (if (capi:button-selected (check-debug interface)) (cw-debug-mode t))
     (setf (experiment-version *cw*) (read-from-string (capi:text-input-pane-text (experiment-version interface))))
     (setf (capi:item-text (button-start interface )) "Stop")
     (mp:process-run-function
