@@ -220,7 +220,8 @@
 (defun button-add-push (&rest args)
   (declare (ignore args))
   (let ( (choice (capi:prompt-for-file "Select a file:"
-                                 :filter "*.*")))
+                                 :filter "*.*"
+                                 :file-package-is-directory t)))
     (aif choice (capi:append-items (task-list (control-window *cw*)) (list it)))))
         
 (defun button-remove-push (&rest args)

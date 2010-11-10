@@ -65,10 +65,16 @@
          (tsk (nth (current-task *cw*) (task-list *cw*))))
     (when tsk
       (setf (task-obj app) tsk)
-      (mp:process-run-function "MATLAB" nil 'run-matlab-task (directory-namestring (path tsk)))
-      (mp:process-wait-with-timeout "matlab" 60 (lambda() (write-stream (comm app))))
-      (when (write-stream (comm app))
-        (send-to app :run (path tsk))))))
+      (cond
+       ((equal (app tsk) 'matlab)
+        (mp:process-run-function "MATLAB" nil 'run-matlab-task (directory-namestring (path tsk)))
+        (mp:process-wait-with-timeout "matlab" 60 (lambda() (write-stream (comm app))))
+        (when (write-stream (comm app))
+        (send-to app :run (path tsk))))
+       ((equal (app tsk) 'unix)
+        (capi:display-message "~S" (namestring (path tsk)))
+        (mp:process-run-function (name tsk) nil 'asdf:run-shell-command (namestring (path tsk))))
+       ))))
            
 
 (defmethod load-tasks ((cw cogworld))
@@ -86,6 +92,9 @@
                (if (null (remote-app)) (make-remote-app))
                (register-task (subseq fn 0 (- (length fn) 2)) :run-function 'run-remote-app :app 'matlab :path tsk)
                (setf *use-matlab* (1+ *use-matlab*)))
+              (t ; If there is no file extension then assume its a unix application
+               (if (null (remote-app)) (make-remote-app))
+               (register-task fn :run-function 'run-remote-app :app 'unix :path tsk))
                )))
     (setf (task-list cw) (reverse (task-list cw)))
     (if (plusp *use-matlab*)
