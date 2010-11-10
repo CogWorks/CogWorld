@@ -32,53 +32,48 @@
   (:panes
    (first-name
     capi:text-input-pane
-    :title "First name:"
     :title-position :top
     :visible-max-width '(character 16)
     :visible-min-width '(character 16)
     :accessor text-first-name)
    (last-name
     capi:text-input-pane
-    :title "Last name:"
     :title-position :top
     :visible-max-width '(character 16)
     :visible-min-width '(character 16)
     :accessor text-last-name)
    (rin
     capi:text-input-pane
-    :title "RIN:"
     :title-position :top
-    :visible-max-width '(character 16)
-    :visible-min-width '(character 16)
+    :visible-max-width '(character 11)
+    :visible-min-width '(character 11)
+    :max-characters 9
     :accessor text-rin)
    (age
     capi:text-input-pane
-    :title "Age:"
     :title-position :top
     :visible-max-width '(character 10)
     :visible-min-width '(character 10)
     :accessor text-age)
    (gender
     capi:text-input-pane
-    :title "Gender:"
     :title-position :top
     :visible-max-width '(character 10)
     :visible-min-width '(character 10)
     :accessor text-gender)
    (major
     capi:text-input-pane
-    :title "Major:"
     :title-position :top
     :visible-max-width '(character 16)
     :visible-min-width '(character 16)
     :accessor text-major)
    (exps capi:popup-menu-button 
-         :text "exps" 
+         :text "Previous Experiments" 
          :accessor exps
          :menu (make-instance 'capi:menu  
                               :items (list (make-instance 'capi:menu-component 
                                      :items '(
-                                              "Vogel" "Argus" "NavBack" "RVS" "Obvis"
+                                              "Vogel" "Argus" "NavBack" "RVS" "Obvis" "SpaceFortress" "DMAP" "Cluster"
                                                   ) 
                                      :interaction :multiple-selection))))
    (num-blocks
@@ -102,11 +97,15 @@
     :default-p t)
    )
   (:layouts
-   (main capi:column-layout '(info-col button-done) :adjust :center)
-   (info-col capi:column-layout '(row-1 row-2 row-3 exps) :adjust :left :accessor info-col)
-   (row-1 capi:row-layout '(first-name last-name))
-   (row-2 capi:row-layout '(rin major))
-   (row-3 capi:row-layout '(age gender))
+   (main capi:column-layout '(info-col exps button-done) :adjust :center)
+   (info-col capi:grid-layout '(
+                                "First name:" first-name
+                                "Last name:" last-name
+                                "RIN:" rin
+                                "Age:" age
+                                "Gender:" gender
+                                "Major:" major
+                                ) :accessor info-col)
    (debug-row capi:row-layout '(num-blocks num-trials) :accessor debug-row)
    )
   (:default-initargs
