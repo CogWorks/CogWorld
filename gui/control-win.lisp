@@ -76,6 +76,28 @@
     capi:check-button
     :text "Enable Debugging"
     :accessor check-debug)
+   ;;;;;;; MATLAB ;;;;;;;;
+   (matlab-folder
+    capi:text-input-pane
+    :title "MATLAB Folder:"
+    :accessor matlab-folder
+    :visible-min-width '(character 30))
+    (choose-matlab-folder
+     capi:push-button
+     :text "..."
+     :accessor choose-matlab-folder 
+     :selection-callback 'matlab-folder-callback)
+   ;;;;;;; PYTHON ;;;;;;;;
+   (python-binary
+    capi:text-input-pane
+    :title "Python Binary:"
+    :accessor python-binary
+    :visible-min-width '(character 30))
+    (choose-python-binary
+     capi:push-button
+     :text "..."
+     :accessor choose-python-binary 
+     :selection-callback 'python-file-callback)
    ;;;;;;; Logging ;;;;;;;;
    (check-logging
     capi:check-button
@@ -154,11 +176,15 @@
    (log-info capi:column-layout '(check-logging delayed-file-io write-symbols-as-strings log-folder-row))
    (eeg-info capi:column-layout '(check-eeg eeg-addy))
    (eyetracker-info capi:column-layout '(check-eyetracker eyetracker-addy))
+   (matlab-folder-row capi:row-layout '(matlab-folder choose-matlab-folder))
+   (matlab-info capi:column-layout '(matlab-folder-row))
+   (python-binary-row capi:row-layout '(python-binary choose-python-binary))
+   (python-info capi:column-layout '(python-binary-row))
    (debug-info capi:column-layout '(check-debug))
    (task-buttons capi:column-layout '(nil button-up-task button-add-task button-remove-task button-down-task nil) :ratios '(1 nil nil nil nil 1) :adjust :center)
    (tasks capi:row-layout '(task-list task-buttons) :ratios '(1 nil))
    (buttons capi:row-layout '(nil button-start nil) :ratios '(1 nil 1))
-   (switchable capi:switchable-layout '(tasks log-info eeg-info eyetracker-info check-response-pad debug-info) :visible-child 'tasks)
+   (switchable capi:switchable-layout '(tasks log-info eeg-info eyetracker-info check-response-pad matlab-info python-info debug-info) :visible-child 'tasks)
    (options capi:row-layout '(options-list switchable) :gap 10 :ratios '(nil 1) :title "Options:" :title-position :frame :adjust :left :internal-border 10)
    (main capi:column-layout '(exp-info options buttons) :ratios '(nil 1))
    )
@@ -193,7 +219,7 @@
                      )))))
 
 (defmethod initialize-instance :after ((win control-window) &key)
-  (with-slots (options-list tasks log-info eeg-info eyetracker-info check-response-pad debug-info) win
+  (with-slots (options-list tasks log-info eeg-info eyetracker-info check-response-pad matlab-info python-info debug-info) win
       (setf (capi:collection-items options-list)
             (list
              (list "Tasks" tasks)
@@ -201,6 +227,8 @@
              (list "Eye Tracker" eyetracker-info)
              (list "EEG" eeg-info)
              (list "Response Pad" check-response-pad)
+             (list "MATLAB" matlab-info)
+             (list "Python" python-info)
              (list "Debugging" debug-info)
              )))
   (if (not *delivered*)
@@ -312,10 +340,25 @@
 
 (defun logging-folder-callback (data interface)
   (declare (ignore data))
-  (let ((pn (capi:prompt-for-directory "Locate Directory")))
+  (let ((pn (capi:prompt-for-directory "Locate Log Directory")))
     (when pn
       (capi:apply-in-pane-process (logging-folder interface) 
                                   #'(setf capi:text-input-pane-text) (directory-namestring pn) (logging-folder interface)))))
+
+(defun matlab-folder-callback (data interface)
+  (declare (ignore data))
+  (let ((pn (capi:prompt-for-directory "Locate MATLAB Directory"
+                                       :file-package-is-directory t)))
+    (when pn
+      (capi:apply-in-pane-process (matlab-folder interface) 
+                                  #'(setf capi:text-input-pane-text) (directory-namestring pn) (matlab-folder interface)))))
+
+(defun python-file-callback (data interface)
+  (declare (ignore data))
+  (let ((pn (capi:prompt-for-file "Locate Python Binary")))
+    (when pn
+      (capi:apply-in-pane-process (python-binary interface) 
+                                  #'(setf capi:text-input-pane-text) (directory-namestring pn) (python-binary interface)))))
       
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

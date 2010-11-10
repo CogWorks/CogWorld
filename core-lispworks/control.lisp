@@ -606,6 +606,8 @@
         (color-vision-test nil)
         (log-fn "")
         (model-file nil)
+        (matlab-dir #+MAC"/Applications/MATLAB_R2010a.app" #-MAC"")
+        (python-bin "/usr/bin/python")
         )
 
   (let ((interface (control-window *cw*)))
@@ -661,6 +663,12 @@
      (delayed-file-io interface)
      #'(lambda () (setf (capi:button-selected (check-debug interface))
                         debug )))
+    (capi:apply-in-pane-process
+     (matlab-folder interface)
+       (lambda () (setf (capi:text-input-pane-text (matlab-folder interface)) matlab-dir)))
+    (capi:apply-in-pane-process
+     (python-binary interface)
+       (lambda () (setf (capi:text-input-pane-text (python-binary interface)) python-bin)))
     t))
 
 (defun save-settings ()
@@ -672,7 +680,7 @@
       (dotimes (i (length (capi:collection-items (task-list interface))))
         (push (format nil "~s" (aref (capi:collection-items (task-list interface)) i))
               file-list))
-        (setf file-list (reverse file-list))
+      (setf file-list (reverse file-list))
       (write (read-from-string (format nil
 "(define-settings
    :experiment-name \"~a\"
@@ -687,7 +695,9 @@
    :file-io ~a
    :sym->str ~a
    :file-list \'~a
-   :debug ~a)"
+   :debug ~a
+   :matlab-dir ~S
+   :python-bin ~S)"
 (capi:text-input-pane-text (experiment-name interface))
 (capi:text-input-pane-text (experiment-version interface))
 (capi:button-selected (check-eyetracker interface))
@@ -700,7 +710,10 @@
 (capi:button-selected (delayed-file-io interface))
 (capi:button-selected (write-symbols-as-strings interface))
 file-list
-(capi:button-selected (check-debug interface))))
+(capi:button-selected (check-debug interface))
+(capi:text-input-pane-text (matlab-folder interface))
+(capi:text-input-pane-text (python-binary interface))
+))
              :stream handle)
     (close handle)
     t)))
@@ -731,13 +744,10 @@ file-list
       (uid (subject-info *cw*))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun start-matlab ()
-  (let (dir)
-    (cond
-     ((probe-file "/Applications/MATLAB_R2010a.app")
-      (setf dir "/Applications/MATLAB_R2010a.app")))
-    (cond
-     ((matlab:init dir)
-      (setf *matlab-engine* (matlab:eng-open "matlab -maci"))))))
+  (let ((dir (capi:text-input-pane-text (matlab-folder (control-window *cw*)))))
+    (when (probe-file dir)
+      (when (matlab:init dir)
+       (setf *matlab-engine* (matlab:eng-open "matlab -maci"))))))
 
 (defun run-matlab-task (path)
   (let ((cmd (concatenate 'string "cd('" path "'); Cogworld('Connect'); Cogworld('Socket'); Cogworld('Disconnect');")))
