@@ -607,7 +607,7 @@
         (log-fn "")
         (model-file nil)
         (matlab-dir #+MAC"/Applications/MATLAB_R2010a.app" #-MAC"")
-        (python-bin "/usr/bin/python")
+        (python-bin #+MAC"/Library/Frameworks/Python.framework/Versions/Current/bin/python" #-MAC"/usr/bin/python")
         )
 
   (let ((interface (control-window *cw*)))
