@@ -10,6 +10,7 @@
                (:file "classes")
                (:file "aes8")
                (:file "string-utils")
+	       (:file "send-mail")
 	       #+MACOSX (:file "foreign-macosx")
 	       #+WIN32 (:file "foreign-win32")
                )
