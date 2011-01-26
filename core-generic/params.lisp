@@ -35,7 +35,8 @@
   (defparameter *filenew* (gp:read-external-image (merge-pathnames "images/icons/filenew.png" base)))
   (defparameter *fileopen* (gp:read-external-image (merge-pathnames "images/icons/fileopen.png" base)))
   (defparameter *filesave* (gp:read-external-image (merge-pathnames "images/icons/filesave.png" base)))
-  (defparameter *filesaveas* (gp:read-external-image (merge-pathnames "images/icons/filesaveas.png" base))))
+  (defparameter *filesaveas* (gp:read-external-image (merge-pathnames "images/icons/filesaveas.png" base)))
+  (defparameter *email* (gp:read-external-image (merge-pathnames "images/icons/mail-forward.png" base))))
 
 (defparameter *screen-width* nil)
 (defparameter *screen-height* nil)

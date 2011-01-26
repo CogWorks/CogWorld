@@ -216,6 +216,14 @@
                                     :text "Save As"
                                     :image *filesaveas*
                                     :callback 'button-saveas-settings-push)
+                     (make-instance 'capi:toolbar-component
+                                    :separator-item :separator)
+                     (make-instance 'capi:toolbar-button
+                                    :text "Email RINs"
+                                    :image *email*
+                                    :callback 'button-email-push)
+                     (make-instance 'capi:toolbar-component
+                                    :separator-item :separator)
                      )))))
 
 (defmethod initialize-instance :after ((win control-window) &key)
@@ -337,6 +345,14 @@
      "Stop experiment"
      nil 'stop-experiment *cw*)))
   )
+
+(defun button-email-push (data interface)
+  (declare (ignore data)
+           (ignore interface))
+  (finish-experiment 
+   (capi:text-input-pane-text (experiment-name interface))
+   nil
+   (capi:text-input-pane-text (logging-folder interface))))
 
 (defun logging-folder-callback (data interface)
   (declare (ignore data))
