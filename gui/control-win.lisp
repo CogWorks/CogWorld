@@ -43,6 +43,11 @@
     :title "Version:"
     :visible-min-width '(character 5)
     :visible-max-width '(character 5))
+   (pi-email
+    capi:text-input-pane
+    :accessor pi-email
+    :title "Primary Investigator Email:"
+    :visible-min-width '(character 32))
    ;;;;;;; Tasks ;;;;;;;;
    (task-list
     capi:list-panel
@@ -173,7 +178,7 @@
   (:layouts
    (exp-info capi:row-layout '(exp-name exp-ver))
    (log-folder-row capi:row-layout '(logging-folder choose-logging-folder))
-   (log-info capi:column-layout '(check-logging delayed-file-io write-symbols-as-strings log-folder-row))
+   (log-info capi:column-layout '(check-logging delayed-file-io write-symbols-as-strings log-folder-row pi-email))
    (eeg-info capi:column-layout '(check-eeg eeg-addy))
    (eyetracker-info capi:column-layout '(check-eyetracker eyetracker-addy))
    (matlab-folder-row capi:row-layout '(matlab-folder choose-matlab-folder))
@@ -351,7 +356,7 @@
            (ignore interface))
   (finish-experiment 
    (capi:text-input-pane-text (experiment-name interface))
-   nil
+   (capi:text-input-pane-text (pi-email interface))
    (capi:text-input-pane-text (logging-folder interface))))
 
 (defun logging-folder-callback (data interface)

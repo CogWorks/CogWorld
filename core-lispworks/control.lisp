@@ -602,6 +602,7 @@
         (sym->str nil)
         (file-list nil)
         (debug nil)
+        (pi-email "grayw@rpi.edu")
         ;; Deprecated
         (color-vision-test nil)
         (log-fn "")
@@ -612,6 +613,10 @@
 
   (let ((interface (control-window *cw*)))
 
+    (capi:apply-in-pane-process
+     (pi-email interface)
+     #'(lambda () (setf (capi:text-input-pane-text (pi-email interface))
+                        pi-email)))
     (capi:apply-in-pane-process
      (experiment-name interface)
      #'(lambda () (setf (capi:text-input-pane-text (experiment-name interface))
@@ -697,7 +702,8 @@
    :file-list \'~a
    :debug ~a
    :matlab-dir ~S
-   :python-bin ~S)"
+   :python-bin ~S
+   :pi-email ~S)"
 (capi:text-input-pane-text (experiment-name interface))
 (capi:text-input-pane-text (experiment-version interface))
 (capi:button-selected (check-eyetracker interface))
@@ -713,6 +719,7 @@ file-list
 (capi:button-selected (check-debug interface))
 (capi:text-input-pane-text (matlab-folder interface))
 (capi:text-input-pane-text (python-binary interface))
+(capi:text-input-pane-text (pi-email interface))
 ))
              :stream handle)
     (close handle)
