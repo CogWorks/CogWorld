@@ -222,13 +222,15 @@
                                     :image *filesaveas*
                                     :callback 'button-saveas-settings-push)
                      (make-instance 'capi:toolbar-component
-                                    :separator-item :separator)
+                                 ;   :separator-item :separator
+)
                      (make-instance 'capi:toolbar-button
                                     :text "Email RINs"
                                     :image *email*
                                     :callback 'button-email-push)
                      (make-instance 'capi:toolbar-component
-                                    :separator-item :separator)
+                                    ;:separator-item :separator
+)
                      )))))
 
 (defmethod initialize-instance :after ((win control-window) &key)
