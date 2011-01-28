@@ -588,7 +588,7 @@
 
 (defun define-settings
        (&key
-        (experiment-name "UNTITLED")
+        (experiment-name "")
         (experiment-version 1)
         (eyetracking nil)
         (eyetracker-ip "1.0.0.3")
