@@ -354,12 +354,14 @@
   )
 
 (defun button-email-push (data interface)
-  (declare (ignore data)
-           (ignore interface))
-  (finish-experiment 
-   (capi:text-input-pane-text (experiment-name interface))
-   (capi:text-input-pane-text (pi-email interface))
-   (capi:text-input-pane-text (logging-folder interface))))
+  (declare (ignore data))
+  (cond ((equal "" (capi:text-input-pane-text  (experiment-name interface)))
+         (capi:display-message "Please enter an experiment name"))
+        (t
+         (finish-experiment 
+          (capi:text-input-pane-text (experiment-name interface))
+          (capi:text-input-pane-text (pi-email interface))
+          (capi:text-input-pane-text (logging-folder interface))))))
 
 (defun logging-folder-callback (data interface)
   (declare (ignore data))
