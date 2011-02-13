@@ -1,6 +1,6 @@
 (pushnew :cogworld *features*)
 
-(defparameter *version-string* "2.0")
+(defparameter *version-string* "2.1")
 
 #-LINUX
 (defparameter *default-experiment-settings-file-directory* (concatenate 'string (format nil "~a" (sys:get-folder-path :documents)) "CogWorld/"))
