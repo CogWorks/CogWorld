@@ -221,9 +221,7 @@
                                     :text "Save As"
                                     :image *filesaveas*
                                     :callback 'button-saveas-settings-push)
-                     (make-instance 'capi:toolbar-component
-                                 ;   :separator-item :separator
-)
+                     (make-instance 'capi:toolbar-component)
                      (make-instance 'capi:toolbar-button
                                     :text "Save IDs"
                                     :image *email*
