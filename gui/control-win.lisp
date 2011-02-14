@@ -225,7 +225,7 @@
                                  ;   :separator-item :separator
 )
                      (make-instance 'capi:toolbar-button
-                                    :text "Save Ids"
+                                    :text "Save IDs"
                                     :image *email*
                                     :callback 'button-email-push)
                      (make-instance 'capi:toolbar-component
