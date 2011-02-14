@@ -85,7 +85,7 @@
 (defun json-rpc-server-get-port ()
   (if (and *cw* (json-rpc-server-socket *cw*))
       (multiple-value-bind (address port)
-          (comm:get-socket-address *json-rpc-server-socket*)
+          (comm:get-socket-address (json-rpc-server-socket *cw*))
         port)
     nil))
 
