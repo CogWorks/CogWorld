@@ -226,9 +226,7 @@
                                     :text "Save IDs"
                                     :image *email*
                                     :callback 'button-email-push)
-                     (make-instance 'capi:toolbar-component
-                                    ;:separator-item :separator
-)
+                     (make-instance 'capi:toolbar-component)
                      )))))
 
 (defmethod initialize-instance :after ((win control-window) &key)
