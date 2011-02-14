@@ -529,6 +529,8 @@
   (setf *screen-width* (capi:screen-width (capi:convert-to-screen)))
   (setf *screen-height* (capi:screen-height (capi:convert-to-screen)))
   (setf *cw* (make-instance 'cogworld))
+  (when (probe-file (merge-pathnames "defaults.lisp" *default-experiment-settings-file-directory*))
+    (load (merge-pathnames "defaults.lisp" *default-experiment-settings-file-directory*)))
   (json-rpc-server-start)
   #+MACOSX
   (setf (local-path *cw*) (probe-file (format nil "/Applications/MultiWorld ~a/Data" *version-string*)))
@@ -588,16 +590,20 @@
 ;; Settings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun define-defaults (&key default-eyetracker-ip default-eeg-ip)
+  (setf (default-eyetracker-ip *cw*) default-eyetracker-ip)
+  (setf (default-eeg-ip *cw*) default-eeg-ip))
+
 (defun define-settings
        (&key
         (experiment-name "")
         (experiment-version 1)
         (eyetracking nil)
-        (eyetracker-ip "1.0.0.3")
+        (eyetracker-ip (default-eyetracker-ip *cw*))
         (logging t)
         (pad nil)
         (eeg nil)
-        (eeg-ip "1.0.0.4")
+        (eeg-ip (default-eeg-ip *cw*))
         (log-dir "")
         (append-day-hr-min nil)
         (file-io nil)
@@ -605,12 +611,12 @@
         (file-list nil)
         (debug nil)
         (pi-email "grayw@rpi.edu")
+        (matlab-dir #+MAC"/Applications/MATLAB_R2010a.app" #-MAC"")
+        (python-bin #+MAC"/Library/Frameworks/Python.framework/Versions/Current/bin/python" #-MAC"/usr/bin/python")
         ;; Deprecated
         (color-vision-test nil)
         (log-fn "")
         (model-file nil)
-        (matlab-dir #+MAC"/Applications/MATLAB_R2010a.app" #-MAC"")
-        (python-bin #+MAC"/Library/Frameworks/Python.framework/Versions/Current/bin/python" #-MAC"/usr/bin/python")
         )
 
   (let ((interface (control-window *cw*)))

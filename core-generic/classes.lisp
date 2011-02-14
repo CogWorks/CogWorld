@@ -23,7 +23,9 @@
    (color-task :initform nil :initarg :color-task :accessor color-task)
    (run-proc :initform nil :initarg :run-proc :accessor run-proc)
    (json-rpc-server-process :initform nil :initarg :json-rpc-server-process :accessor json-rpc-server-process)
-   (json-rpc-server-socket :initform nil :initarg :json-rpc-server-socket :accessor json-rpc-server-socket)))
+   (json-rpc-server-socket :initform nil :initarg :json-rpc-server-socket :accessor json-rpc-server-socket)
+   (default-eyetracker-ip :initform "1.0.0.3" :initarg :default-eyetracker-ip :accessor default-eyetracker-ip)
+   (default-eeg-ip :initform "1.0.0.4" :initarg :default-eeg-ip :accessor default-eeg-ip)))
 
 (defclass task-class ()
   ((name :initform nil :initarg :name :accessor name)
