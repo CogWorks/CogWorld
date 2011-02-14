@@ -15,9 +15,9 @@
 
 (json-rpc:defun-json-rpc cw-log-info :streaming (list)
   (if (listp list)
-    (progn
-      (log-info list)
-      0)
+      (progn
+        (log-info list)
+        0)
     1))
 
 (defun make-stream-and-talk (handle)
@@ -52,7 +52,26 @@
                 t)))
     (close stream)))
 
-(defun json-rpc-server (port)
-  (setf json-rpc:*json-rpc-version* json-rpc:+json-rpc-2.0+)
-  (comm:start-up-server :function 'make-stream-and-talk
-                        :service port))
+(defun json-rpc-server-announce (socket condition)
+  (when socket
+    (setf (json-rpc-server-socket *cw*) socket)))
+
+(defun json-rpc-server-get-port ()
+  (if (and *cw* (json-rpc-server-socket *cw*))
+      (multiple-value-bind (address port)
+          (comm:get-socket-address *json-rpc-server-socket*)
+        port)
+    nil))
+
+(defun json-rpc-server-start ()
+  (when *cw*
+    (setf json-rpc:*json-rpc-version* json-rpc:+json-rpc-2.0+)
+    (setf (json-rpc-server-process *cw*)
+          (comm:start-up-server :process-name "cw-json-rpc-server"
+                                :function 'make-stream-and-talk
+                                :announce 'json-rpc-server-announce
+                                :service 0))))
+  
+(defun json-rpc-server-stop ()
+  (when (and *cw* (json-rpc-server-process *cw*))
+    (mp:process-kill (json-rpc-server-process *cw*))))

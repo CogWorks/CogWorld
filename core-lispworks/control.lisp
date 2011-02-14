@@ -529,6 +529,7 @@
   (setf *screen-width* (capi:screen-width (capi:convert-to-screen)))
   (setf *screen-height* (capi:screen-height (capi:convert-to-screen)))
   (setf *cw* (make-instance 'cogworld))
+  (json-rpc-server-start)
   #+MACOSX
   (setf (local-path *cw*) (probe-file (format nil "/Applications/MultiWorld ~a/Data" *version-string*)))
   #+WIN32
@@ -572,6 +573,7 @@
 (defun shutdown-world (&rest args)
   (declare (ignore args))
   (kill-monitor)
+  (json-rpc-server-stop)
   (if (and *cw* (listener-window *cw*))
       (capi:apply-in-pane-process
        (listener (listener-window *cw*))

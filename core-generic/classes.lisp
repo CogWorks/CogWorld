@@ -21,7 +21,9 @@
    (background-window :initform nil :initarg :background-window :accessor background-window)
    (eyegaze-window :initform nil :initarg :eyegaze-window :accessor eyegaze-window)
    (color-task :initform nil :initarg :color-task :accessor color-task)
-   (run-proc :initform nil :initarg :run-proc :accessor run-proc)))
+   (run-proc :initform nil :initarg :run-proc :accessor run-proc)
+   (json-rpc-server-process :initform nil :initarg :json-rpc-server-process :accessor json-rpc-server-process)
+   (json-rpc-server-socket :initform nil :initarg :json-rpc-server-socket :accessor json-rpc-server-socket)))
 
 (defclass task-class ()
   ((name :initform nil :initarg :name :accessor name)
