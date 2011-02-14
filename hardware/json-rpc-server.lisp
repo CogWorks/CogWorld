@@ -1,3 +1,25 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  CogWorld JSON RPC Server v1.0
+;;  Maintained by: Ryan Hope <rmh3093@gmail.com>
+;;
+;;  Notes:
+;;   1) All lisp rpc methods are converted to camel-case notation
+;;      (ex. 'cw-get-version' = 'cwGetVersion')
+;;   2) All rpc calls must include a 'method' key and an 'id' key,
+;;      the 'params' key is optional.
+;;
+;;  Client Example Calls:
+;;   1) {"method":"cwGetVersion","id":"SpaceFortress"}
+;;   2) {"method":"cwLogInfo","params":[["foo","bar","baz"]],"id":"williams67"}
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;  RPC Methods
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (json-rpc:defun-json-rpc cw-get-version :streaming ()
   (format nil "\"~A\"" *version-string*))
 
@@ -19,6 +41,10 @@
         (log-info list)
         0)
     1))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;  Helper Functions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun make-stream-and-talk (handle)
   (let ((stream (make-instance 'comm:socket-stream
