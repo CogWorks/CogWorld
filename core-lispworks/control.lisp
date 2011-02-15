@@ -73,10 +73,10 @@
         (send-to app :run (path tsk))))
        ((equal (app tsk) 'python)
         (change-directory (directory-namestring (namestring (path tsk))))
-        (let ((cmd (format nil "~A ~A"
+        (let ((cmd (format nil "~A ~A ~A"
                            (capi:text-input-pane-text (python-binary (control-window *cw*)))
                            (namestring (path tsk))
-                           ;(json-rpc-server-get-port)
+                           (json-rpc-server-get-port)
                            )))
           (mp:process-run-function (name tsk) nil 'asdf:run-shell-command cmd)))
        ((equal (app tsk) 'unix)
