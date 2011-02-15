@@ -90,14 +90,8 @@
     nil))
 
 (defun json-rpc-server-start ()
-  (when *cw*
-    (setf json-rpc:*json-rpc-version* json-rpc:+json-rpc-2.0+)
-    (setf (json-rpc-server-process *cw*)
-          (comm:start-up-server :process-name "cw-json-rpc-server"
-                                :function 'make-stream-and-talk
-                                :announce 'json-rpc-server-announce
-                                :service 0))))
-  
-(defun json-rpc-server-stop ()
-  (when (and *cw* (json-rpc-server-process *cw*))
-    (mp:process-kill (json-rpc-server-process *cw*))))
+  (setf json-rpc:*json-rpc-version* json-rpc:+json-rpc-2.0+)
+  (comm:start-up-server :process-name "cw-json-rpc-server"
+                          :function 'make-stream-and-talk
+                          :announce 'json-rpc-server-announce
+                          :service 0))

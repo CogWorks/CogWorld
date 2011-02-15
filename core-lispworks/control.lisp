@@ -535,6 +535,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun cogworld (&key recompile)
+  (when (and *cw* (control-window *cw*))
+    (capi:destroy (control-window *cw*)))
   (when recompile
     (asdf:load-system 'cogworld))
   (setf *screen-width* (capi:screen-width (capi:convert-to-screen)))
@@ -542,7 +544,7 @@
   (setf *cw* (make-instance 'cogworld))
   (when (probe-file (merge-pathnames "defaults.lisp" *default-experiment-settings-file-directory*))
     (load (merge-pathnames "defaults.lisp" *default-experiment-settings-file-directory*)))
-  (json-rpc-server-start)
+  (setf (json-rpc-server-process *cw*) (json-rpc-server-start))
   #+MACOSX
   (setf (local-path *cw*) (probe-file (format nil "/Applications/MultiWorld ~a/Data" *version-string*)))
   #+WIN32
@@ -586,12 +588,13 @@
 (defun shutdown-world (&rest args)
   (declare (ignore args))
   (kill-monitor)
-  (json-rpc-server-stop)
-  (if (and *cw* (listener-window *cw*))
-      (capi:apply-in-pane-process
-       (listener (listener-window *cw*))
-       #'(lambda ()
-           (capi:destroy (listener-window *cw*)))))
+  (when (json-rpc-server-process *cw*)
+    (mp:process-kill (json-rpc-server-process *cw*)))
+  ;(if (and *cw* (listener-window *cw*))
+  ;    (capi:apply-in-pane-process
+  ;     (listener (listener-window *cw*))
+  ;     #'(lambda ()
+  ;         (capi:destroy (listener-window *cw*)))))
   (setf *cw* nil)
   (setf *mw* nil)
   (if *delivered*
