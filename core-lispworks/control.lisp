@@ -588,17 +588,11 @@
 (defun shutdown-world (&rest args)
   (declare (ignore args))
   (kill-monitor)
-  (when (json-rpc-server-process *cw*)
-    (mp:process-kill (json-rpc-server-process *cw*)))
-  ;(if (and *cw* (listener-window *cw*))
-  ;    (capi:apply-in-pane-process
-  ;     (listener (listener-window *cw*))
-  ;     #'(lambda ()
-  ;         (capi:destroy (listener-window *cw*)))))
+  (json-rpc-server-stop)
   (setf *cw* nil)
   (setf *mw* nil)
-  (if *delivered*
-      (quit)))
+  (when *delivered*
+    (quit)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Settings

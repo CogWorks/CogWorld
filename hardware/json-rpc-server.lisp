@@ -92,6 +92,10 @@
 (defun json-rpc-server-start ()
   (setf json-rpc:*json-rpc-version* json-rpc:+json-rpc-2.0+)
   (comm:start-up-server :process-name "cw-json-rpc-server"
-                          :function 'make-stream-and-talk
-                          :announce 'json-rpc-server-announce
-                          :service 0))
+                        :function 'make-stream-and-talk
+                        :announce 'json-rpc-server-announce
+                        :service 0))
+
+(defun json-rpc-server-stop ()
+  (when (json-rpc-server-process *cw*)
+    (mp:process-kill (json-rpc-server-process *cw*))))
