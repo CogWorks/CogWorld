@@ -20,27 +20,22 @@
 ;;  RPC Methods
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(json-rpc:defun-json-rpc cw-get-version :streaming ()
-  (format nil "\"~A\"" *version-string*))
+(json-rpc:defun-json-rpc cw-get-version :guessing ()
+  *version-string*)
 
-(json-rpc:defun-json-rpc cw-eeg-begin-record :streaming ()
-  (eeg-proc 'begin-record)
-  0)
+(json-rpc:defun-json-rpc cw-eeg-begin-record :guessing ()
+  (eeg-proc 'begin-record))
 
-(json-rpc:defun-json-rpc cw-eeg-end-record :streaming ()
-  (eeg-proc 'end-record)
-  0)
+(json-rpc:defun-json-rpc cw-eeg-end-record :guessing ()
+  (eeg-proc 'end-record))
 
-(json-rpc:defun-json-rpc cw-eeg-event-notify :streaming (duration type-code label data)
-  (eeg-proc 'event-notify 1 :duration duration :type-code type-code :label label :data data)
-  0)
+(json-rpc:defun-json-rpc cw-eeg-event-notify :guessing (duration type-code label data)
+  (eeg-proc 'event-notify 1 :duration duration :type-code type-code :label label :data data))
 
-(json-rpc:defun-json-rpc cw-log-info :streaming (list)
+(json-rpc:defun-json-rpc cw-log-info :guessing (list)
   (if (listp list)
-      (progn
-        (log-info list)
-        0)
-    1))
+      (log-info list)
+    nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;  Helper Functions

@@ -78,10 +78,11 @@
                            (namestring (path tsk))
                            (json-rpc-server-get-port)
                            )))
-          (mp:process-run-function (name tsk) nil 'asdf:run-shell-command cmd)))
+          (asdf:run-shell-command cmd)
+          (task-finished tsk)))
        ((equal (app tsk) 'unix)
-        (capi:display-message "~S" (namestring (path tsk)))
-        (mp:process-run-function (name tsk) nil 'asdf:run-shell-command (namestring (path tsk))))
+        (asdf:run-shell-command (namestring (path tsk)))
+        (task-finished tsk))
        ))))
            
 
