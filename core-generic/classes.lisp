@@ -25,7 +25,8 @@
    (json-rpc-server-process :initform nil :initarg :json-rpc-server-process :accessor json-rpc-server-process)
    (json-rpc-server-socket :initform nil :initarg :json-rpc-server-socket :accessor json-rpc-server-socket)
    (default-eyetracker-ip :initform "1.0.0.3" :initarg :default-eyetracker-ip :accessor default-eyetracker-ip)
-   (default-eeg-ip :initform "1.0.0.4" :initarg :default-eeg-ip :accessor default-eeg-ip)))
+   (default-eeg-ip :initform "1.0.0.4" :initarg :default-eeg-ip :accessor default-eeg-ip)
+   (task-condition :initform nil :initarg :task-condition :accessor task-condition)))
 
 (defclass task-class ()
   ((name :initform nil :initarg :name :accessor name)

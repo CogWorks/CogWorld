@@ -138,6 +138,13 @@
     :visible-min-width '(character 16)
     :visible-max-width '(character 16)
     :max-characters 15)
+   ;;;;;;;: Conditions ;;;;;;;;;
+   (conditions
+    capi:multi-line-text-input-pane
+    :title "Comma separated list of task conditions:"
+    :title-position :above
+    :text ""
+    :accessor conditions)
    ;;;;;;; Response Pad ;;;;;;;;
    (check-response-pad
     capi:check-button
@@ -188,6 +195,7 @@
    (debug-info capi:column-layout '(check-debug))
    (task-buttons capi:column-layout '(nil button-up-task button-add-task button-remove-task button-down-task nil) :ratios '(1 nil nil nil nil 1) :adjust :center)
    (tasks capi:row-layout '(task-list task-buttons) :ratios '(1 nil))
+   (condition-info capi:column-layout '(nil conditions nil))
    (buttons capi:row-layout '(nil button-start nil) :ratios '(1 nil 1))
    (switchable capi:switchable-layout '(tasks log-info eeg-info eyetracker-info check-response-pad matlab-info python-info debug-info) :visible-child 'tasks)
    (options capi:row-layout '(options-list switchable) :gap 10 :ratios '(nil 1) :title "Options:" :title-position :frame :adjust :left :internal-border 10)
@@ -199,7 +207,7 @@
    ;:initial-focus 'exp-name-field
    :layout 'main
    :visible-min-width 700
-   :visible-min-height 300
+   :visible-min-height 320
    :toolbar-items (list 
                    (make-instance
                     'capi:toolbar-component
@@ -230,10 +238,11 @@
                      )))))
 
 (defmethod initialize-instance :after ((win control-window) &key)
-  (with-slots (options-list tasks log-info eeg-info eyetracker-info check-response-pad matlab-info python-info debug-info) win
+  (with-slots (options-list tasks condition-info log-info eeg-info eyetracker-info check-response-pad matlab-info python-info debug-info) win
       (setf (capi:collection-items options-list)
             (list
              (list "Tasks" tasks)
+             (list "Task Conditons" condition-info)
              (list "Logging" log-info)
              (list "Eye Tracker" eyetracker-info)
              (list "EEG" eeg-info)
@@ -335,18 +344,24 @@
 
 (defun button-start-push (data interface)
   (declare (ignore data))
-  (cond
-   ((equal (capi:item-text (button-start interface )) "Start")
-    (setf (experiment-version *cw*) (read-from-string (capi:text-input-pane-text (experiment-version interface))))
-    (setf (capi:item-text (button-start interface )) "Stop")
-    (mp:process-run-function
-     "Start experiment"
-     nil 'start-experiment *cw*))
-   (t
-    (setf (capi:item-text (button-start interface)) "Start")
-    (mp:process-run-function
-     "Stop experiment"
-     nil 'stop-experiment *cw*)))
+  (if (string-equal (capi:item-text (button-start interface )) "Start")
+      (multiple-value-bind (value ret)
+          (capi:popup-confirmer
+           (make-instance 'capi:option-pane
+                          :selection-callback :redisplay-interface
+                          :items (append '("") (remove nil (split-sequence "," (capi:text-input-pane-text (conditions interface))))))
+           "Choose a condition:"
+           :value-function 'capi:choice-selected-item
+           :ok-check #'(lambda (x) (not (string-equal x ""))))
+        (when ret
+          (progn
+            (setf (task-condition *cw*) value)
+            (setf (experiment-version *cw*) (read-from-string (capi:text-input-pane-text (experiment-version interface))))
+            (setf (capi:item-text (button-start interface )) "Stop")
+            (mp:process-run-function "Start experiment" nil 'start-experiment *cw*))))
+    (progn
+      (setf (capi:item-text (button-start interface)) "Start")
+      (mp:process-run-function "Stop experiment" nil 'stop-experiment *cw*)))
   )
 
 (defun button-email-push (data interface)

@@ -73,10 +73,11 @@
         (send-to app :run (path tsk))))
        ((equal (app tsk) 'python)
         (change-directory (directory-namestring (namestring (path tsk))))
-        (let ((cmd (format nil "~A ~A ~A"
+        (let ((cmd (format nil "~A ~A ~A~@[ ~A~]"
                            (capi:text-input-pane-text (python-binary (control-window *cw*)))
                            (namestring (path tsk))
                            (json-rpc-server-get-port)
+                           (task-condition *cw*)
                            )))
           (asdf:run-shell-command cmd)
           (task-finished tsk)))
@@ -622,6 +623,7 @@
         (pi-email "grayw@rpi.edu")
         (matlab-dir #+MAC"/Applications/MATLAB_R2010a.app" #-MAC"")
         (python-bin #+MAC"/Library/Frameworks/Python.framework/Versions/Current/bin/python" #-MAC"/usr/bin/python")
+        (conditions "")
         ;; Deprecated
         (color-vision-test nil)
         (log-fn "")
@@ -630,6 +632,9 @@
 
   (let ((interface (control-window *cw*)))
 
+    (capi:apply-in-pane-process
+     (conditions interface)
+     (lambda () (setf (capi:text-input-pane-text (conditions interface)) conditions)))
     (capi:apply-in-pane-process
      (pi-email interface)
      #'(lambda () (setf (capi:text-input-pane-text (pi-email interface))
@@ -720,7 +725,8 @@
    :debug ~a
    :matlab-dir ~S
    :python-bin ~S
-   :pi-email ~S)"
+   :pi-email ~S
+   :conditions ~S)"
 (capi:text-input-pane-text (experiment-name interface))
 (capi:text-input-pane-text (experiment-version interface))
 (capi:button-selected (check-eyetracker interface))
@@ -737,6 +743,7 @@ file-list
 (capi:text-input-pane-text (matlab-folder interface))
 (capi:text-input-pane-text (python-binary interface))
 (capi:text-input-pane-text (pi-email interface))
+(capi:text-input-pane-text (conditions interface))
 ))
              :stream handle)
     (close handle)
