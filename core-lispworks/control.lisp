@@ -172,8 +172,7 @@
   (with-slots (current-task run-proc task-list) *cw*
     (set-mouse-position 10 40)
      (incf current-task)
-     (if (>= current-task (length task-list)) (setf current-task nil))
-     (mp:process-poke run-proc )))
+     (if (>= current-task (length task-list)) (setf current-task nil))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Experiment control
