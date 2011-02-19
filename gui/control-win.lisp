@@ -345,20 +345,25 @@
 (defun button-start-push (data interface)
   (declare (ignore data))
   (if (string-equal (capi:item-text (button-start interface )) "Start")
-      (multiple-value-bind (value ret)
-          (capi:popup-confirmer
-           (make-instance 'capi:option-pane
-                          :selection-callback :redisplay-interface
-                          :items (append '("") (remove nil (split-sequence "," (capi:text-input-pane-text (conditions interface))))))
-           "Choose a condition:"
-           :value-function 'capi:choice-selected-item
-           :ok-check #'(lambda (x) (not (string-equal x ""))))
-        (when ret
-          (progn
-            (setf (task-condition *cw*) value)
-            (setf (experiment-version *cw*) (read-from-string (capi:text-input-pane-text (experiment-version interface))))
-            (setf (capi:item-text (button-start interface )) "Stop")
-            (mp:process-run-function "Start experiment" nil 'start-experiment *cw*))))
+      (let ((cont t)
+            (condition (remove-if (lambda (x) (string-equal x ""))
+                                  (split-sequence "," (capi:text-input-pane-text (conditions interface))))))
+        (when condition
+          (multiple-value-bind (value ret)
+              (capi:popup-confirmer
+               (make-instance 'capi:option-pane
+                              :selection-callback :redisplay-interface
+                              :items (append '("") condition))
+               "Choose a condition:"
+               :value-function 'capi:choice-selected-item
+               :ok-check #'(lambda (x) (not (string-equal x ""))))
+            (if ret
+                (setf (task-condition *cw*) value)
+              (setf cont nil))))
+        (when cont
+          (setf (experiment-version *cw*) (read-from-string (capi:text-input-pane-text (experiment-version interface))))
+          (setf (capi:item-text (button-start interface )) "Stop")
+          (mp:process-run-function "Start experiment" nil 'start-experiment *cw*)))
     (progn
       (setf (capi:item-text (button-start interface)) "Start")
       (mp:process-run-function "Stop experiment" nil 'stop-experiment *cw*)))
