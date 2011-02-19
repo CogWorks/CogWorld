@@ -146,8 +146,13 @@
 (defmethod run-tasks ((cw cogworld))
   (with-slots (current-task task-list) cw
     (while current-task
-      (apply (run-function (nth (current-task cw) task-list)) nil)))
-  (stop-experiment cw))
+      (let ((task (nth (current-task cw) task-list))
+            (save-idx current-task))
+        (if (plusp *use-matlab*)
+            (mp:process-wait-local "matlab-engine" (lambda () (not (null *matlab-engine*)))))
+        (mp:process-run-function (name task) nil #'(lambda (task) (apply (run-function task) nil)) task)
+        (mp:process-wait-local "task" (lambda (obj) (or (null (current-task obj)) (> (current-task obj) save-idx))) cw)))
+    (stop-experiment cw)))
 
 ;; Provided for backward compatability: use TASK-FINISHED.
 (defun mw-task-finished (name)
