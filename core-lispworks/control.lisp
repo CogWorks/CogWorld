@@ -61,16 +61,9 @@
 ;; Experiment setup
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defmethod run-remote-app ()
-  (let ((app (remote-app))
-         (tsk (nth (current-task *cw*) (task-list *cw*))))
+  (let ((tsk (nth (current-task *cw*) (task-list *cw*))))
     (when tsk
-      (setf (task-obj app) tsk)
       (cond
-       ((equal (app tsk) 'matlab)
-        (mp:process-run-function "MATLAB" nil 'run-matlab-task (directory-namestring (path tsk)))
-        (mp:process-wait-with-timeout "matlab" 60 (lambda() (write-stream (comm app))))
-        (when (write-stream (comm app))
-        (send-to app :run (path tsk))))
        ((equal (app tsk) 'python)
         (change-directory (directory-namestring (namestring (path tsk))))
         (let ((cmd (format nil "~A ~A ~A~@[ ~A~]"
@@ -103,7 +96,6 @@
                (register-task (subseq fn 0 (- (length fn) 2)) :run-function 'run-remote-app :app 'matlab :path tsk)
                (setf *use-matlab* (1+ *use-matlab*)))
               ((equal ftype "py")
-               (if (null (remote-app)) (make-remote-app))
                (register-task fn :run-function 'run-remote-app :app 'python :path tsk))
               (t ; If there is no file extension then assume its a unix application
                (if (null (remote-app)) (make-remote-app))
@@ -154,14 +146,8 @@
 (defmethod run-tasks ((cw cogworld))
   (with-slots (current-task task-list) cw
     (while current-task
-      (let ((task (nth (current-task cw) task-list))
-            (save-idx current-task))
-        (if (plusp *use-matlab*)
-           (mp:process-wait-local "matlab-engine" (lambda () (not (null *matlab-engine*)))))
-        (mp:process-run-function (name task) nil #'(lambda (task) (apply (run-function task) nil)) task)
-        (mp:process-wait-local "task" (lambda (obj) (or (null (current-task obj)) (> (current-task obj) save-idx))) cw)))
-    (stop-experiment cw))
-  )
+      (apply (run-function (nth (current-task cw) task-list)) nil)))
+  (stop-experiment cw))
 
 ;; Provided for backward compatability: use TASK-FINISHED.
 (defun mw-task-finished (name)
@@ -194,9 +180,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod start-experiment ((cw cogworld))
-  (with-slots (status task-condition-list control-window subject-info control-mode) cw
-    (setf status  nil)
-    (setf task-condition-list  nil)
+  (with-slots (status task-condition-list control-window subject-info control-mode current-task) cw
+    (setf current-task 0)
+    (setf status nil)
+    (setf task-condition-list nil)
     (define-logging-folder (capi:text-input-pane-text (logging-folder (control-window cw))))
     (capi:apply-in-pane-process
      (button-start control-window )
@@ -316,47 +303,6 @@
     (capi:display (listener-window *cw*)))
   (setq *act-r-stream* (capi:interactive-pane-stream (listener (listener-window *cw*)))))
 
-(defmethod start-experiment-remote ((cw cogworld))
-  (with-slots (control-window task-list experiment-name dispatched-configs 
-               status subject-info listener-window background-window) cw
-    (setf task-list nil)
-    (setf experiment-name  (capi:text-input-pane-text (experiment-name control-window)))
-    (define-logging-folder (capi:text-input-pane-text (logging-folder control-window)))
-    (setf dispatched-configs 0)
-     (create-background-window)
-    (show-background-window)
-    (make-remote-app)
-    (when (not (debug-p))
-      (capi:execute-with-interface control-window
-         #'(lambda () (capi:hide-interface control-window nil)))
-      (if listener-window
-          (capi:execute-with-interface listener-window
-             #'(lambda () (capi:hide-interface listener-window nil)))))
-    (when (not (capi:item-selected (check-debug control-window)))
-      (register-subject cw)) 
-    (when (capi:item-selected (check-logging control-window)) 
-      (create-history-file cw)
-      (open-logging-file cw))  
-    (cond ((not (eq status :halted))
-           (when (not (capi:item-selected (check-debug control-window)))
-             (log-header)
-             (with-slots (first-name  last-name age major gender exp-history) (subject-info cw)
-               (let ((header (list  "FIRST" "LAST" "AGE" "MAJOR" "GENDER" "RIN" "EXP-HISTORY"))
-                     (values (list first-name last-name age major gender (get-rin) exp-history)))                    
-                 (write-history-file cw header values))))
-           (when (capi:item-selected (check-eyetracker control-window))     
-             (mp:process-wait "idle" (lambda (win) 
-                                       (multiple-value-bind (x y w h) (capi:top-level-interface-geometry win)
-                                         (and x y w h))) background-window)
-             (capi:apply-in-pane-process background-window #'capi:raise-interface background-window)
-             (if (null (connect-eyetracker cw (capi:text-input-pane-text (eyetracker-ip (control-window cw))))) 
-                 (setf status :halted)))
-           (hide-background-window)
-           (if (not (eq status :halted)) 
-               (run-remote-app cw)
-             (stop-experiment cw)))
-        (t
-         (stop-experiment cw)))))
 
 (defun explode-tab (string)
   (let ((items nil)
