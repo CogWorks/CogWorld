@@ -20,7 +20,7 @@ Setup For Developers
 Compiling and Loading CogWorld
 ===============================
 
-1.	(asdf:load-system 'cogworld)
+1.	(ql:quickload "cogworld")
 
 
 Running CogWorld

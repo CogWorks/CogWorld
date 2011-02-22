@@ -1,2 +1,2 @@
-(asdf:load-system 'cogworld)
+(ql:quickload "cogworld")
 (cogworld)
