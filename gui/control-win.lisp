@@ -62,20 +62,32 @@
     :accessor task-list)
    (button-add-task
     capi:push-button
-    :callback 'button-add-push
-    :image *list-add*)
+    :image 
+    #+LINUX nil
+    #-LINUX 'img-list-add
+    :text "+"
+    :callback 'button-add-push)
    (button-remove-task
     capi:push-button
-    :callback 'button-remove-push
-    :image *list-remove*)
+    :image
+    #+LINUX nil
+    #-LINUX 'img-list-remove
+    :text "-"
+    :callback 'button-remove-push)
    (button-up-task
     capi:push-button
-    :callback 'button-up-push
-    :image *go-up*)
+    :image 
+    #+LINUX nil
+    #-LINUX 'img-go-up
+    :text "Up"
+    :callback 'button-up-push)
    (button-down-task
     capi:push-button
-    :callback 'button-down-push
-    :image *go-down*)
+    :image
+    #+LINUX nil
+    #-LINUX 'img-go-down
+    :text "Dn"
+    :callback 'button-down-push)
    ;;;;;;; Debug ;;;;;;;;
    (check-debug
     capi:check-button
@@ -207,7 +219,11 @@
    ;:initial-focus 'exp-name-field
    :layout 'main
    :visible-min-width 700
-   :visible-min-height 320
+   :visible-min-height
+   #-LINUX
+   320
+   #+LINUX
+   420
    :toolbar-items (list 
                    (make-instance
                     'capi:toolbar-component
@@ -215,24 +231,24 @@
                     (list
                      (make-instance 'capi:toolbar-button
                                     :text "New"
-                                    :image *filenew*
+                                    :image 'img-filenew
                                     :callback 'button-new-push)
                      (make-instance 'capi:toolbar-button
                                     :text "Open"
-                                    :image *fileopen*
+                                    :image 'img-fileopen
                                     :callback 'button-open-push)
                      (make-instance 'capi:toolbar-button
                                     :text "Save"
-                                    :image *filesave*
+                                    :image 'img-filesave
                                     :callback 'button-save-settings-push)
                      (make-instance 'capi:toolbar-button
                                     :text "Save As"
-                                    :image *filesaveas*
+                                    :image 'img-filesaveas
                                     :callback 'button-saveas-settings-push)
                      (make-instance 'capi:toolbar-component)
                      (make-instance 'capi:toolbar-button
                                     :text "Save IDs"
-                                    :image *email*
+                                    :image 'img-email
                                     :callback 'button-email-push)
                      (make-instance 'capi:toolbar-component)
                      )))))

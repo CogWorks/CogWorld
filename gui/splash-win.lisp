@@ -23,7 +23,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (capi:define-interface splash-win ()
-  ((cogworks-logo :initform *splash*
+  ((cogworks-logo :initform 'img-splash
                   :accessor cogworks-logo))
   (:panes
    (cogworks-pane capi:output-pane
