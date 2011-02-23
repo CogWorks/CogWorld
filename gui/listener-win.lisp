@@ -63,13 +63,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun edit-cut (interface)
-  (call-editor (listener interface) "Kill Region"))
+  #+MACOSX(call-editor (listener interface) "Kill Region")
+  )
 
 (defun edit-copy (interface)
-  (call-editor (listener interface) "Save Region"))
+  #+MACOSX(call-editor (listener interface) "Save Region")
+  )
 
 (defun edit-paste (interface)
-  (call-editor (listener interface) "Un-Kill"))
+  #+MACOSX(call-editor (listener interface) "Un-Kill")
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Functions

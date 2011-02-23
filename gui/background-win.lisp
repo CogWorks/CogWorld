@@ -129,7 +129,7 @@
 (defun show-background-window ()
   (if (and *cw* (background-window *cw*) (not (visible (background-window *cw*))))
       (progn
-        (kiosk-mode t)
+        #+MACOSX(kiosk-mode t)
         (setf (visible (background-window *cw*)) t)
         (capi:execute-with-interface
          (background-window *cw*)
@@ -139,7 +139,7 @@
 (defun hide-background-window ()
   (if (and *cw* (background-window *cw*))
       (progn 
-        (kiosk-mode nil)
+        #+MACOSX(kiosk-mode nil)
         (setf (visible (background-window *cw*)) nil)
         (capi:execute-with-interface
          (background-window *cw*)
@@ -155,7 +155,7 @@
        #'(lambda ()
            (capi:destroy (background-window *cw*)))))
   (setf (background-window *cw*) (make-instance 'background-win))
-  (kiosk-mode t)
+  #+MACOSX(kiosk-mode t)
   (capi:execute-with-interface
    (background-window *cw*)
    #'(lambda ()
