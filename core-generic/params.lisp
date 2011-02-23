@@ -28,8 +28,7 @@
   (gp:register-image-translation 'img-cogworks (gp:read-external-image (merge-pathnames "images/CogWorks.bmp" base)))
   (gp:register-image-translation 'img-sponsors (gp:read-external-image (merge-pathnames "images/Sponsors.bmp" base)))
   ;; Icon files
-  ;(gp:register-image-translation 'img-list-add (gp:read-external-image (merge-pathnames "images/icons/add.png" base)))
-  (defparameter *img-list-add* (gp:read-external-image (merge-pathnames "images/icons/add.png" base)))
+  (gp:register-image-translation 'img-list-add (gp:read-external-image (merge-pathnames "images/icons/add.png" base)))
   (gp:register-image-translation 'img-list-remove (gp:read-external-image (merge-pathnames "images/icons/remove.png" base)))
   (gp:register-image-translation 'img-go-down (gp:read-external-image (merge-pathnames "images/icons/go-down.png" base)))
   (gp:register-image-translation 'img-go-up (gp:read-external-image (merge-pathnames "images/icons/go-up.png" base)))
