@@ -66,7 +66,7 @@
       (cond
        ((equal (app tsk) 'python)
         (change-directory (directory-namestring (namestring (path tsk))))
-        (let ((cmd (format nil "~A ~A ~A~@[ ~A~]"
+        (let ((cmd (format nil "~A ~A --port ~A~@[ --condition ~A~]"
                            (capi:text-input-pane-text (python-binary (control-window *cw*)))
                            (namestring (path tsk))
                            (json-rpc-server-get-port)
