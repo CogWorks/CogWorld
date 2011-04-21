@@ -374,7 +374,7 @@
                :value-function 'capi:choice-selected-item
                :ok-check #'(lambda (x) (not (string-equal x ""))))
             (if ret
-                (setf (task-condition *cw*) value)
+                (progn (setf (task-condition *cw*) value)  (push value (task-condition-list *cw*)))
               (setf cont nil))))
         (when cont
           (setf (experiment-version *cw*) (read-from-string (capi:text-input-pane-text (experiment-version interface))))

@@ -112,7 +112,8 @@
   (dolist (task (task-list cw))
     (if (configure-function task)
         (progn (incf (dispatched-configs cw))
-          (apply (configure-function task) nil))))
+          (apply (configure-function task) nil))
+      (setf (task-condition task) (task-condition *cw*)))) ;;4/20 mjs won't work with multiple tasks
   (setf (startup-process cw)  mp:*current-process*)
   (mp:process-wait
    "Waiting for task configs to return"
@@ -188,7 +189,7 @@
   (with-slots (status task-condition-list control-window subject-info control-mode current-task) cw
     (setf current-task 0)
     (setf status nil)
-    (setf task-condition-list nil)
+    ;(setf task-condition-list nil) ;;4/20 mjs
     (define-logging-folder (capi:text-input-pane-text (logging-folder (control-window cw))))
     (capi:apply-in-pane-process
      (button-start control-window )
@@ -282,7 +283,8 @@
         (capi:apply-in-pane-process background-window #'capi:raise-interface background-window)
         (if (null (connect-eyetracker cw (capi:text-input-pane-text (eyetracker-ip (control-window cw))))) (setf (status cw) :halted)))
       (when (not (eql status :halted))
-        (capi:display-message "Press OK to start the experiment.")
+        (if (null (debug-p))
+        (capi:display-message "Press OK to start the experiment."))
         (if (not (debug-p)) (capi:apply-in-pane-process  background-window #'capi:raise-interface background-window))
         (raise-tasks)
         (if (capi:item-selected (check-eyetracker control-window)) (start-eyetracking "BEGINNING-OF-TASK")))
