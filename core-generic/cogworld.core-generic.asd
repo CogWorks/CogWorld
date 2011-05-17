@@ -4,11 +4,13 @@
   :version "2.0"
   :licence "LGPL-2.1"
   :serial t
+  :depends-on (:ironclad)
   :components (
                (:file "misc")
                (:file "params")
                (:file "classes")
                (:file "aes8")
+	       (:file "crypto")
                (:file "string-utils")
 	       (:file "send-mail")
 	       #+MACOSX (:file "foreign-macosx")
