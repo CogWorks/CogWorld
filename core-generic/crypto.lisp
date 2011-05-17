@@ -5,9 +5,9 @@
 (in-package :crypt)
 
 (defun get-cipher (key) 
-  (ironclad:make-cipher :blowfish 
+  (ironclad:make-cipher :aes 
                         :mode :cbc
-                        :initialization-vector (ironclad:ascii-string-to-byte-array "00000000")
+                        :initialization-vector (ironclad:ascii-string-to-byte-array "0000000000000000")
                         :key (ironclad:ascii-string-to-byte-array key)))
 
 (defun encrypt (plaintext key)
